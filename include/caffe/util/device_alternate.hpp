@@ -68,7 +68,7 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 #define HIP_KERNEL_LOOP(i, n) \
   for (int i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x; \
        i < (n); \
-       i += hipBlockDim_x * hipGridDim.x)
+       i += hipBlockDim_x * hipGridDim_x)
 
 // HIP: check for error after kernel execution and exit loudly if there is one.
 //TODO: Get HIP equivalent

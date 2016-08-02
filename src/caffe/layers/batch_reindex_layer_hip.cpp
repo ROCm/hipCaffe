@@ -8,9 +8,9 @@
 namespace caffe {
 
 template<typename Dtype>
-__global__ void BRForward(const int count, const int inner_dim, const Dtype* in,
+__global__ void BRForward(hipLaunchParm lp, const int count, const int inner_dim, const Dtype* in,
                           const Dtype* permut, Dtype* out) {
-  CUDA_KERNEL_LOOP(index, count) {
+  HIP_KERNEL_LOOP(index, count) {
     int n = index / (inner_dim);
     int in_n = static_cast<int>(permut[n]);
     out[index] = in[in_n * (inner_dim) + index % (inner_dim)];
@@ -27,18 +27,16 @@ void BatchReindexLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   }
   int threads = top[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  BRForward<Dtype> <<<CAFFE_GET_BLOCKS(threads), CAFFE_CUDA_NUM_THREADS>>>(
-      top[0]->count(), bottom[0]->count() / bottom[0]->shape(0),
-      bottom[0]->gpu_data(), bottom[1]->gpu_data(), top[0]->mutable_gpu_data());
-  CUDA_POST_KERNEL_CHECK;
+  hipLaunchKernel(HIP_KERNEL_NAME(BRForward), dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, top[0]->count(), bottom[0]->count() / bottom[0]->shape(0), bottom[0]->gpu_data(), bottom[1]->gpu_data(), top[0]->mutable_gpu_data());
+  //HIP_POST_KERNEL_CHECK;
 }
 
 template<typename Dtype>
-__global__ void BRBackward(const int count, const int inner_dim,
+__global__ void BRBackward(hipLaunchParm lp, const int count, const int inner_dim,
                            const Dtype* in, const Dtype* top_indexes,
                            const Dtype* begins, const Dtype* counts,
                            Dtype* out) {
-  CUDA_KERNEL_LOOP(index, count) {
+  HIP_KERNEL_LOOP(index, count) {
     int n = index / (inner_dim);
     out[index] = 0;
     int lower = static_cast<int>(begins[n]);
@@ -67,7 +65,7 @@ void BatchReindexLayer<Dtype>::Backward_gpu(
   std::sort(mapping.begin(), mapping.end(), pair_sort_first());
 
   // Each element of the bottom diff is potentially the sum of many top diffs.
-  // However, we'd like each CUDA thread to handle exactly one output.  Hence,
+  // However, we'd like each HIP thread to handle exactly one output.  Hence,
   // we first pre-compute a list of lists of indices that need to be summed for
   // each output. `top_indexes` holds the data of this list of lists.  The
   // k'th element of `begins` points to the location in `top_indexes` where the
@@ -94,11 +92,11 @@ void BatchReindexLayer<Dtype>::Backward_gpu(
 
   int threads = bottom[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  BRBackward<Dtype> <<<CAFFE_GET_BLOCKS(threads), CAFFE_CUDA_NUM_THREADS>>>(
+  hipLaunchKernel(HIP_KERNEL_NAME(BRBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       bottom[0]->count(), bottom[0]->count() / bottom[0]->shape(0),
       top[0]->gpu_diff(), top_indexes.gpu_data(), begins.gpu_data(),
       counts.gpu_data(), bottom[0]->mutable_gpu_diff());
-  CUDA_POST_KERNEL_CHECK;
+  //HIP_POST_KERNEL_CHECK;
 }
 
 INSTANTIATE_LAYER_GPU_FUNCS(BatchReindexLayer);
