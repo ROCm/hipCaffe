@@ -46,13 +46,13 @@ COMMON_FLAGS += -DCAFFE_VERSION=$(DYNAMIC_VERSION_MAJOR).$(DYNAMIC_VERSION_MINOR
 ##############################
 # CXX_SRCS are the source files excluding the test ones.
 CXX_SRCS := $(shell find src/$(PROJECT) ! -name "test_*.cpp" -name "*.cpp")
-# CU_SRCS are the cuda source files
-CU_SRCS := $(shell find src/$(PROJECT) ! -name "test_*.cu" -name "*.cu")
+# HIP_SRCS are the HIP source files
+HIP_SRCS := $(shell find src/$(PROJECT) ! -name "test_*.cxx" -name "*.cxx")
 # TEST_SRCS are the test source files
 TEST_MAIN_SRC := src/$(PROJECT)/test/test_caffe_main.cpp
 TEST_SRCS := $(shell find src/$(PROJECT) -name "test_*.cpp")
 TEST_SRCS := $(filter-out $(TEST_MAIN_SRC), $(TEST_SRCS))
-TEST_CU_SRCS := $(shell find src/$(PROJECT) -name "test_*.cu")
+TEST_HIP_SRCS := $(shell find src/$(PROJECT) -name "test_*.cxx")
 GTEST_SRC := src/gtest/gtest-all.cpp
 # TOOL_SRCS are the source files for the tool binaries
 TOOL_SRCS := $(shell find tools -name "*.cpp")
@@ -76,7 +76,8 @@ NONGEN_CXX_SRCS := $(shell find \
 	matlab/+$(PROJECT)/private \
 	examples \
 	tools \
-	-name "*.cpp" -or -name "*.hpp" -or -name "*.cu" -or -name "*.cuh")
+	-name "*.cpp" -or -name "*.hpp")
+
 LINT_SCRIPT := scripts/cpp_lint.py
 LINT_OUTPUT_DIR := $(BUILD_DIR)/.lint
 LINT_EXT := lint.txt
@@ -111,22 +112,22 @@ PROTO_GEN_PY := $(foreach file,${PROTO_SRCS:.proto=_pb2.py}, \
 # These objects will be linked into the final shared library, so we
 # exclude the tool, example, and test objects.
 CXX_OBJS := $(addprefix $(BUILD_DIR)/, ${CXX_SRCS:.cpp=.o})
-CU_OBJS := $(addprefix $(BUILD_DIR)/cuda/, ${CU_SRCS:.cu=.o})
+HIP_OBJS := $(addprefix $(BUILD_DIR)/hip/, ${HIP_SRCS:.cxx=.o})
 PROTO_OBJS := ${PROTO_GEN_CC:.cc=.o}
-OBJS := $(PROTO_OBJS) $(CXX_OBJS) $(CU_OBJS)
+OBJS := $(PROTO_OBJS) $(CXX_OBJS) $(HIP_OBJS)
 # tool, example, and test objects
 TOOL_OBJS := $(addprefix $(BUILD_DIR)/, ${TOOL_SRCS:.cpp=.o})
 TOOL_BUILD_DIR := $(BUILD_DIR)/tools
 TEST_CXX_BUILD_DIR := $(BUILD_DIR)/src/$(PROJECT)/test
-TEST_CU_BUILD_DIR := $(BUILD_DIR)/cuda/src/$(PROJECT)/test
+TEST_HIP_BUILD_DIR := $(BUILD_DIR)/hip/src/$(PROJECT)/test
 TEST_CXX_OBJS := $(addprefix $(BUILD_DIR)/, ${TEST_SRCS:.cpp=.o})
-TEST_CU_OBJS := $(addprefix $(BUILD_DIR)/cuda/, ${TEST_CU_SRCS:.cu=.o})
-TEST_OBJS := $(TEST_CXX_OBJS) $(TEST_CU_OBJS)
+TEST_HIP_OBJS := $(addprefix $(BUILD_DIR)/hip/, ${TEST_HIP_SRCS:.cxx=.o})
+TEST_OBJS := $(TEST_CXX_OBJS) $(TEST_HIP_OBJS)
 GTEST_OBJ := $(addprefix $(BUILD_DIR)/, ${GTEST_SRC:.cpp=.o})
 EXAMPLE_OBJS := $(addprefix $(BUILD_DIR)/, ${EXAMPLE_SRCS:.cpp=.o})
 # Output files for automatic dependency generation
-DEPS := ${CXX_OBJS:.o=.d} ${CU_OBJS:.o=.d} ${TEST_CXX_OBJS:.o=.d} \
-	${TEST_CU_OBJS:.o=.d} $(BUILD_DIR)/${MAT$(PROJECT)_SO:.$(MAT_SO_EXT)=.d}
+DEPS := ${CXX_OBJS:.o=.d} ${HIP_OBJS:.o=.d} ${TEST_CXX_OBJS:.o=.d} \
+	${TEST_HIP_OBJS:.o=.d} $(BUILD_DIR)/${MAT$(PROJECT)_SO:.$(MAT_SO_EXT)=.d}
 # tool, example, and test bins
 TOOL_BINS := ${TOOL_OBJS:.o=.bin}
 EXAMPLE_BINS := ${EXAMPLE_OBJS:.o=.bin}
@@ -134,11 +135,11 @@ EXAMPLE_BINS := ${EXAMPLE_OBJS:.o=.bin}
 TOOL_BIN_LINKS := ${TOOL_BINS:.bin=}
 # Put the test binaries in build/test for convenience.
 TEST_BIN_DIR := $(BUILD_DIR)/test
-TEST_CU_BINS := $(addsuffix .testbin,$(addprefix $(TEST_BIN_DIR)/, \
-		$(foreach obj,$(TEST_CU_OBJS),$(basename $(notdir $(obj))))))
+TEST_HIP_BINS := $(addsuffix .testbin,$(addprefix $(TEST_BIN_DIR)/, \
+		$(foreach obj,$(TEST_HIP_OBJS),$(basename $(notdir $(obj))))))
 TEST_CXX_BINS := $(addsuffix .testbin,$(addprefix $(TEST_BIN_DIR)/, \
 		$(foreach obj,$(TEST_CXX_OBJS),$(basename $(notdir $(obj))))))
-TEST_BINS := $(TEST_CXX_BINS) $(TEST_CU_BINS)
+TEST_BINS := $(TEST_CXX_BINS) $(TEST_HIP_BINS)
 # TEST_ALL_BIN is the test binary that links caffe dynamically.
 TEST_ALL_BIN := $(TEST_BIN_DIR)/test_all.testbin
 
@@ -147,14 +148,14 @@ TEST_ALL_BIN := $(TEST_BIN_DIR)/test_all.testbin
 ##############################
 WARNS_EXT := warnings.txt
 CXX_WARNS := $(addprefix $(BUILD_DIR)/, ${CXX_SRCS:.cpp=.o.$(WARNS_EXT)})
-CU_WARNS := $(addprefix $(BUILD_DIR)/cuda/, ${CU_SRCS:.cu=.o.$(WARNS_EXT)})
+HIP_WARNS := $(addprefix $(BUILD_DIR)/hip/, ${HIP_SRCS:.cxx=.o.$(WARNS_EXT)})
 TOOL_WARNS := $(addprefix $(BUILD_DIR)/, ${TOOL_SRCS:.cpp=.o.$(WARNS_EXT)})
 EXAMPLE_WARNS := $(addprefix $(BUILD_DIR)/, ${EXAMPLE_SRCS:.cpp=.o.$(WARNS_EXT)})
 TEST_WARNS := $(addprefix $(BUILD_DIR)/, ${TEST_SRCS:.cpp=.o.$(WARNS_EXT)})
-TEST_CU_WARNS := $(addprefix $(BUILD_DIR)/cuda/, ${TEST_CU_SRCS:.cu=.o.$(WARNS_EXT)})
+TEST_HIP_WARNS := $(addprefix $(BUILD_DIR)/hip/, ${TEST_HIP_SRCS:.cxx=.o.$(WARNS_EXT)})
 ALL_CXX_WARNS := $(CXX_WARNS) $(TOOL_WARNS) $(EXAMPLE_WARNS) $(TEST_WARNS)
-ALL_CU_WARNS := $(CU_WARNS) $(TEST_CU_WARNS)
-ALL_WARNS := $(ALL_CXX_WARNS) $(ALL_CU_WARNS)
+ALL_HIP_WARNS := $(HIP_WARNS) $(TEST_HIP_WARNS)
+ALL_WARNS := $(ALL_CXX_WARNS) $(ALL_HIP_WARNS)
 
 EMPTY_WARN_REPORT := $(BUILD_DIR)/.$(WARNS_EXT)
 NONEMPTY_WARN_REPORT := $(BUILD_DIR)/$(WARNS_EXT)
@@ -162,20 +163,16 @@ NONEMPTY_WARN_REPORT := $(BUILD_DIR)/$(WARNS_EXT)
 ##############################
 # Derive include and lib directories
 ##############################
-CUDA_INCLUDE_DIR := $(CUDA_DIR)/include
+HIP_INCLUDE_DIR := $(HIP_DIR)/include
 
-CUDA_LIB_DIR :=
-# add <cuda>/lib64 only if it exists
-ifneq ("$(wildcard $(CUDA_DIR)/lib64)","")
-	CUDA_LIB_DIR += $(CUDA_DIR)/lib64
-endif
-CUDA_LIB_DIR += $(CUDA_DIR)/lib
+HIP_LIB_DIR += $(HIP_DIR)/lib
 
 INCLUDE_DIRS += $(BUILD_INCLUDE_DIR) ./src ./include
+
 ifneq ($(CPU_ONLY), 1)
-	INCLUDE_DIRS += $(CUDA_INCLUDE_DIR)
-	LIBRARY_DIRS += $(CUDA_LIB_DIR)
-	LIBRARIES := cudart cublas curand
+	INCLUDE_DIRS += $(HIP_INCLUDE_DIR)
+	LIBRARY_DIRS += $(HIP_LIB_DIR)
+	LIBRARIES := hcblas 
 endif
 
 LIBRARIES += glog gflags protobuf boost_system boost_filesystem m hdf5_hl hdf5
@@ -214,7 +211,7 @@ ifneq ($(strip $(DISTRIBUTE_DIR)),distribute)
 endif
 
 ALL_BUILD_DIRS := $(sort $(BUILD_DIR) $(addprefix $(BUILD_DIR)/, $(SRC_DIRS)) \
-	$(addprefix $(BUILD_DIR)/cuda/, $(SRC_DIRS)) \
+	$(addprefix $(BUILD_DIR)/hip/, $(SRC_DIRS)) \
 	$(LIB_BUILD_DIR) $(TEST_BIN_DIR) $(PY_PROTO_BUILD_DIR) $(LINT_OUTPUT_DIR) \
 	$(DISTRIBUTE_SUBDIRS) $(PROTO_BUILD_INCLUDE_DIR))
 
@@ -233,7 +230,7 @@ DOXYGEN_SOURCES := $(shell find \
 	matlab/ \
 	examples \
 	tools \
-	-name "*.cpp" -or -name "*.hpp" -or -name "*.cu" -or -name "*.cuh" -or \
+	-name "*.cpp" -or -name "*.hpp"\
         -name "*.py" -or -name "*.m")
 DOXYGEN_SOURCES += $(DOXYGEN_CONFIG_FILE)
 
@@ -246,55 +243,15 @@ DOXYGEN_SOURCES += $(DOXYGEN_CONFIG_FILE)
 UNAME := $(shell uname -s)
 ifeq ($(UNAME), Linux)
 	LINUX := 1
-else ifeq ($(UNAME), Darwin)
-	OSX := 1
-	OSX_MAJOR_VERSION := $(shell sw_vers -productVersion | cut -f 1 -d .)
-	OSX_MINOR_VERSION := $(shell sw_vers -productVersion | cut -f 2 -d .)
 endif
 
 # Linux
 ifeq ($(LINUX), 1)
-	CXX ?= /usr/bin/g++
-	GCCVERSION := $(shell $(CXX) -dumpversion | cut -f1,2 -d.)
-	# older versions of gcc are too dumb to build boost with -Wuninitalized
-	ifeq ($(shell echo | awk '{exit $(GCCVERSION) < 4.6;}'), 1)
-		WARNINGS += -Wno-uninitialized
-	endif
+	CXX ?= /opt/rocm/hcc-hsail/bin/clang++
 	# boost::thread is reasonably called boost_thread (compare OS X)
 	# We will also explicitly add stdc++ to the link target.
 	LIBRARIES += boost_thread stdc++
 	VERSIONFLAGS += -Wl,-soname,$(DYNAMIC_VERSIONED_NAME_SHORT) -Wl,-rpath,$(ORIGIN)/../lib
-endif
-
-# OS X:
-# clang++ instead of g++
-# libstdc++ for NVCC compatibility on OS X >= 10.9 with CUDA < 7.0
-ifeq ($(OSX), 1)
-	CXX := /usr/bin/clang++
-	ifneq ($(CPU_ONLY), 1)
-		CUDA_VERSION := $(shell $(CUDA_DIR)/bin/nvcc -V | grep -o 'release [0-9.]*' | tr -d '[a-z ]')
-		ifeq ($(shell echo | awk '{exit $(CUDA_VERSION) < 7.0;}'), 1)
-			CXXFLAGS += -stdlib=libstdc++
-			LINKFLAGS += -stdlib=libstdc++
-		endif
-		# clang throws this warning for cuda headers
-		WARNINGS += -Wno-unneeded-internal-declaration
-		# 10.11 strips DYLD_* env vars so link CUDA (rpath is available on 10.5+)
-		OSX_10_OR_LATER   := $(shell [ $(OSX_MAJOR_VERSION) -ge 10 ] && echo true)
-		OSX_10_5_OR_LATER := $(shell [ $(OSX_MINOR_VERSION) -ge 5 ] && echo true)
-		ifeq ($(OSX_10_OR_LATER),true)
-			ifeq ($(OSX_10_5_OR_LATER),true)
-				LDFLAGS += -Wl,-rpath,$(CUDA_LIB_DIR)
-			endif
-		endif
-	endif
-	# gtest needs to use its own tuple to not conflict with clang
-	COMMON_FLAGS += -DGTEST_USE_OWN_TR1_TUPLE=1
-	# boost::thread is called boost_thread-mt to mark multithreading on OS X
-	LIBRARIES += boost_thread-mt
-	# we need to explicitly ask for the rpath to be obeyed
-	ORIGIN := @loader_path
-	VERSIONFLAGS += -Wl,-install_name,@rpath/$(DYNAMIC_VERSIONED_NAME_SHORT) -Wl,-rpath,$(ORIGIN)/../../build/lib
 else
 	ORIGIN := \$$ORIGIN
 endif
@@ -305,7 +262,7 @@ ifdef CUSTOM_CXX
 endif
 
 # Static linking
-ifneq (,$(findstring clang++,$(CXX)))
+ifneq (,$(findstring hipcc,$(CXX)))
 	STATIC_LINK_COMMAND := -Wl,-force_load $(STATIC_NAME)
 else ifneq (,$(findstring g++,$(CXX)))
 	STATIC_LINK_COMMAND := -Wl,--whole-archive $(STATIC_NAME) -Wl,--no-whole-archive
@@ -317,7 +274,7 @@ endif
 # Debugging
 ifeq ($(DEBUG), 1)
 	COMMON_FLAGS += -DDEBUG -g -O0
-	NVCCFLAGS += -G
+	HIPFLAGS += -G
 else
 	COMMON_FLAGS += -DNDEBUG -O2
 endif
@@ -393,20 +350,31 @@ else
 	endif
 endif
 INCLUDE_DIRS += $(BLAS_INCLUDE)
+#Include HC and HCblas libraries
+INCLUDE_DIRS += "/opt/rocm/hcblas/include"
+INCLUDE_DIRS += "/opt/rocm/hcc-hsail/include"
 LIBRARY_DIRS += $(BLAS_LIB)
 
 LIBRARY_DIRS += $(LIB_BUILD_DIR)
 
-# Automatic dependency generation (nvcc is handled separately)
+# Automatic dependency generation (hipcc is handled separately)
 CXXFLAGS += -MMD -MP
+
+HCC_PREFIX=/opt/rocm/hcc-hsail
 
 # Complete build flags.
 COMMON_FLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
+COMMON_FLAGS += $(shell $(HCC_PREFIX)/bin/hcc-config --install --cxxflags)
+COMMON_FLAGS += "-I/usr/include/c++/4.8"
+COMMON_FLAGS += "-I/usr/include/x86_64-linux-gnu/c++/4.8/"
+COMMON_FLAGS += -fPIC
 CXXFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
-NVCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS)
+HIPFLAGS += $(shell $(HCC_PREFIX)/bin/hcc-config --install --ldflags --shared)
+HIPFLAGS += $(COMMON_FLAGS)
 # mex may invoke an older gcc that is too liberal with -Wuninitalized
 MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
 LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
+LINKFLAGS += $(shell $(HCC_PREFIX)/bin/hcc-config --install --ldflags --shared)
 
 USE_PKG_CONFIG ?= 0
 ifeq ($(USE_PKG_CONFIG), 1)
@@ -581,11 +549,11 @@ $(PROTO_BUILD_DIR)/%.pb.o: $(PROTO_BUILD_DIR)/%.pb.cc $(PROTO_GEN_HEADER) \
 		|| (cat $@.$(WARNS_EXT); exit 1)
 	@ cat $@.$(WARNS_EXT)
 
-$(BUILD_DIR)/cuda/%.o: %.cu | $(ALL_BUILD_DIRS)
-	@ echo NVCC $<
-	$(Q)$(CUDA_DIR)/bin/nvcc $(NVCCFLAGS) $(CUDA_ARCH) -M $< -o ${@:.o=.d} \
+$(BUILD_DIR)/hip/%.o: %.cu | $(ALL_BUILD_DIRS)
+	@ echo HIP $<
+	$(Q)$(HIP_DIR)/bin/hipcc $(HIPFLAGS) $(HIP_ARCH) -M $< -o ${@:.o=.d} \
 		-odir $(@D)
-	$(Q)$(CUDA_DIR)/bin/nvcc $(NVCCFLAGS) $(CUDA_ARCH) -c $< -o $@ 2> $@.$(WARNS_EXT) \
+	$(Q)$(HIP_DIR)/bin/hipcc $(HIPFLAGS) $(HIP_ARCH) -c $< -o $@ 2> $@.$(WARNS_EXT) \
 		|| (cat $@.$(WARNS_EXT); exit 1)
 	@ cat $@.$(WARNS_EXT)
 
@@ -595,7 +563,7 @@ $(TEST_ALL_BIN): $(TEST_MAIN_SRC) $(TEST_OBJS) $(GTEST_OBJ) \
 	$(Q)$(CXX) $(TEST_MAIN_SRC) $(TEST_OBJS) $(GTEST_OBJ) \
 		-o $@ $(LINKFLAGS) $(LDFLAGS) -l$(LIBRARY_NAME) -Wl,-rpath,$(ORIGIN)/../lib
 
-$(TEST_CU_BINS): $(TEST_BIN_DIR)/%.testbin: $(TEST_CU_BUILD_DIR)/%.o \
+$(TEST_HIP_BINS): $(TEST_BIN_DIR)/%.testbin: $(TEST_HIP_BUILD_DIR)/%.o \
 	$(GTEST_OBJ) | $(DYNAMIC_NAME) $(TEST_BIN_DIR)
 	@ echo LD $<
 	$(Q)$(CXX) $(TEST_MAIN_SRC) $< $(GTEST_OBJ) \

@@ -31,28 +31,25 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 
 #else  // Normal GPU + CPU Caffe.
 
-#include <cublas_v2.h>
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <curand.h>
-#include <driver_types.h>  // cuda driver types
-#ifdef USE_CUDNN  // cuDNN acceleration library.
-#include "caffe/util/cudnn.hpp"
-#endif
+#include <hip_runtime.h>
 
 //
-// CUDA macros
+// HIP macros
 //
 
-// CUDA: various checks for different function calls.
-#define CUDA_CHECK(condition) \
+// HIP: various checks for different function calls.
+#define HIP_CHECK(condition) \
   /* Code block avoids redefinition of cudaError_t error */ \
   do { \
-    cudaError_t error = condition; \
-    CHECK_EQ(error, cudaSuccess) << " " << cudaGetErrorString(error); \
-  } while (0)
+       hipError_t error  = condition;\
+       if (error != hipSuccess) { \
+          fprintf(stderr, "error: '%s'(%d) at %s:%d\n", hipGetErrorString(error), error,__FILE__, __LINE__); \
+          exit(EXIT_FAILURE);\
+       }\
+     }while (0)
 
-#define CUBLAS_CHECK(condition) \
+// TODO: Get HIP equivalent
+/*#define CUBLAS_CHECK(condition) \
   do { \
     cublasStatus_t status = condition; \
     CHECK_EQ(status, CUBLAS_STATUS_SUCCESS) << " " \
@@ -65,28 +62,26 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
     CHECK_EQ(status, CURAND_STATUS_SUCCESS) << " " \
       << caffe::curandGetErrorString(status); \
   } while (0)
+*/
 
-// CUDA: grid stride looping
-#define CUDA_KERNEL_LOOP(i, n) \
-  for (int i = blockIdx.x * blockDim.x + threadIdx.x; \
+// HIP: grid stride looping
+#define HIP_KERNEL_LOOP(i, n) \
+  for (int i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x; \
        i < (n); \
-       i += blockDim.x * gridDim.x)
+       i += hipBlockDim_x * hipGridDim.x)
 
-// CUDA: check for error after kernel execution and exit loudly if there is one.
-#define CUDA_POST_KERNEL_CHECK CUDA_CHECK(cudaPeekAtLastError())
+// HIP: check for error after kernel execution and exit loudly if there is one.
+//TODO: Get HIP equivalent
+//#define HIP_POST_KERNEL_CHECK HIP_CHECK(cudaPeekAtLastError())
 
 namespace caffe {
 
-// CUDA: library error reporting.
-const char* cublasGetErrorString(cublasStatus_t error);
-const char* curandGetErrorString(curandStatus_t error);
+// HIP: use 512 threads per block
+const int CAFFE_HIP_NUM_THREADS = 512;
 
-// CUDA: use 512 threads per block
-const int CAFFE_CUDA_NUM_THREADS = 512;
-
-// CUDA: number of blocks for threads.
+// HIP: number of blocks for threads.
 inline int CAFFE_GET_BLOCKS(const int N) {
-  return (N + CAFFE_CUDA_NUM_THREADS - 1) / CAFFE_CUDA_NUM_THREADS;
+  return (N + CAFFE_HIP_NUM_THREADS - 1) / CAFFE_HIP_NUM_THREADS;
 }
 
 }  // namespace caffe

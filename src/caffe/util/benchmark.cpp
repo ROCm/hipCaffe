@@ -15,8 +15,8 @@ Timer::Timer()
 Timer::~Timer() {
   if (Caffe::mode() == Caffe::GPU) {
 #ifndef CPU_ONLY
-    CUDA_CHECK(cudaEventDestroy(start_gpu_));
-    CUDA_CHECK(cudaEventDestroy(stop_gpu_));
+    HIP_CHECK(hipEventDestroy(start_gpu_));
+    HIP_CHECK(hipEventDestroy(stop_gpu_));
 #else
     NO_GPU;
 #endif
@@ -27,7 +27,7 @@ void Timer::Start() {
   if (!running()) {
     if (Caffe::mode() == Caffe::GPU) {
 #ifndef CPU_ONLY
-      CUDA_CHECK(cudaEventRecord(start_gpu_, 0));
+      HIP_CHECK(hipEventRecord(start_gpu_, 0));
 #else
       NO_GPU;
 #endif
@@ -43,8 +43,8 @@ void Timer::Stop() {
   if (running()) {
     if (Caffe::mode() == Caffe::GPU) {
 #ifndef CPU_ONLY
-      CUDA_CHECK(cudaEventRecord(stop_gpu_, 0));
-      CUDA_CHECK(cudaEventSynchronize(stop_gpu_));
+      HIP_CHECK(hipEventRecord(stop_gpu_, 0));
+      HIP_CHECK(hipEventSynchronize(stop_gpu_));
 #else
       NO_GPU;
 #endif
@@ -66,7 +66,7 @@ float Timer::MicroSeconds() {
   }
   if (Caffe::mode() == Caffe::GPU) {
 #ifndef CPU_ONLY
-    CUDA_CHECK(cudaEventElapsedTime(&elapsed_milliseconds_, start_gpu_,
+    HIP_CHECK(hipEventElapsedTime(&elapsed_milliseconds_, start_gpu_,
                                     stop_gpu_));
     // Cuda only measure milliseconds
     elapsed_microseconds_ = elapsed_milliseconds_ * 1000;
@@ -89,7 +89,7 @@ float Timer::MilliSeconds() {
   }
   if (Caffe::mode() == Caffe::GPU) {
 #ifndef CPU_ONLY
-    CUDA_CHECK(cudaEventElapsedTime(&elapsed_milliseconds_, start_gpu_,
+    HIP_CHECK(hipEventElapsedTime(&elapsed_milliseconds_, start_gpu_,
                                     stop_gpu_));
 #else
       NO_GPU;
@@ -108,8 +108,8 @@ void Timer::Init() {
   if (!initted()) {
     if (Caffe::mode() == Caffe::GPU) {
 #ifndef CPU_ONLY
-      CUDA_CHECK(cudaEventCreate(&start_gpu_));
-      CUDA_CHECK(cudaEventCreate(&stop_gpu_));
+      HIP_CHECK(hipEventCreate(&start_gpu_));
+      HIP_CHECK(hipEventCreate(&stop_gpu_));
 #else
       NO_GPU;
 #endif

@@ -7,28 +7,28 @@
 
 namespace caffe {
 
-// If CUDA is available and in GPU mode, host memory will be allocated pinned,
-// using cudaMallocHost. It avoids dynamic pinning for transfers (DMA).
+// If HIP is available and in GPU mode, host memory will be allocated pinned,
+// using hipHostMalloc. It avoids dynamic pinning for transfers (DMA).
 // The improvement in performance seems negligible in the single GPU case,
 // but might be more significant for parallel training. Most importantly,
 // it improved stability for large models on many GPUs.
-inline void CaffeMallocHost(void** ptr, size_t size, bool* use_cuda) {
+inline void CaffeMallocHost(void** ptr, size_t size, bool* use_hip) {
 #ifndef CPU_ONLY
   if (Caffe::mode() == Caffe::GPU) {
-    CUDA_CHECK(cudaMallocHost(ptr, size));
-    *use_cuda = true;
+    HIP_CHECK(hipHostMalloc(ptr, size));
+    *use_hip = true;
     return;
   }
 #endif
   *ptr = malloc(size);
-  *use_cuda = false;
+  *use_hip = false;
   CHECK(*ptr) << "host allocation of size " << size << " failed";
 }
 
-inline void CaffeFreeHost(void* ptr, bool use_cuda) {
+inline void CaffeFreeHost(void* ptr, bool use_hip) {
 #ifndef CPU_ONLY
-  if (use_cuda) {
-    CUDA_CHECK(cudaFreeHost(ptr));
+  if (use_hip) {
+    HIP_CHECK(hipHostFree(ptr));
     return;
   }
 #endif
@@ -46,11 +46,11 @@ class SyncedMemory {
  public:
   SyncedMemory()
       : cpu_ptr_(NULL), gpu_ptr_(NULL), size_(0), head_(UNINITIALIZED),
-        own_cpu_data_(false), cpu_malloc_use_cuda_(false), own_gpu_data_(false),
+        own_cpu_data_(false), cpu_malloc_use_hip_(false), own_gpu_data_(false),
         gpu_device_(-1) {}
   explicit SyncedMemory(size_t size)
       : cpu_ptr_(NULL), gpu_ptr_(NULL), size_(size), head_(UNINITIALIZED),
-        own_cpu_data_(false), cpu_malloc_use_cuda_(false), own_gpu_data_(false),
+        own_cpu_data_(false), cpu_malloc_use_hip_(false), own_gpu_data_(false),
         gpu_device_(-1) {}
   ~SyncedMemory();
   const void* cpu_data();
@@ -64,7 +64,7 @@ class SyncedMemory {
   size_t size() { return size_; }
 
 #ifndef CPU_ONLY
-  void async_gpu_push(const cudaStream_t& stream);
+  void async_gpu_push(const hipStream_t& stream);
 #endif
 
  private:
@@ -75,7 +75,7 @@ class SyncedMemory {
   size_t size_;
   SyncedHead head_;
   bool own_cpu_data_;
-  bool cpu_malloc_use_cuda_;
+  bool cpu_malloc_use_hip_;
   bool own_gpu_data_;
   int gpu_device_;
 
