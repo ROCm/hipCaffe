@@ -7,10 +7,10 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void BiasForward(const int n, const Dtype* in,
+__global__ void BiasForward(hipLaunchParm lp, const int n, const Dtype* in,
     const Dtype* bias, const int bias_dim, const int inner_dim,
     Dtype* out) {
-  CUDA_KERNEL_LOOP(index, n) {
+  HIP_KERNEL_LOOP(index, n) {
     const int bias_index = (index / inner_dim) % bias_dim;
     out[index] = in[index] + bias[bias_index];
   }
@@ -24,8 +24,8 @@ void BiasLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* bias_data =
       ((bottom.size() > 1) ? bottom[1] : this->blobs_[0].get())->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
-  BiasForward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+  hipLaunchKernel(HIP_KERNEL_NAME(BiasForward<Dtype>), 
+      dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       count, bottom_data, bias_data, bias_dim_, inner_dim_, top_data);
 }
 
