@@ -6,9 +6,9 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void ELUForward(const int n, const Dtype* in, Dtype* out,
+__global__ void ELUForward(hipLaunchParm lp, const int n, const Dtype* in, Dtype* out,
     Dtype alpha) {
-  CUDA_KERNEL_LOOP(index, n) {
+  HIP_KERNEL_LOOP(index, n) {
     out[index] = in[index] > 0 ? in[index] :
         alpha * (exp(in[index]) - 1);
   }
@@ -22,16 +22,16 @@ void ELULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const int count = bottom[0]->count();
   Dtype alpha = this->layer_param_.elu_param().alpha();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  ELUForward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+  hipLaunchKernel(HIP_KERNEL_NAME(ELUForward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       count, bottom_data, top_data, alpha);
-  CUDA_POST_KERNEL_CHECK;
+  //HIP_POST_KERNEL_CHECK;
 }
 
 template <typename Dtype>
-__global__ void ELUBackward(const int n, const Dtype* in_diff,
+__global__ void ELUBackward(hipLaunchParm lp, const int n, const Dtype* in_diff,
     const Dtype* out_data, const Dtype* in_data,
     Dtype* out_diff, Dtype alpha) {
-  CUDA_KERNEL_LOOP(index, n) {
+  HIP_KERNEL_LOOP(index, n) {
     out_diff[index] = in_data[index] > 0 ? in_diff[index] :
         in_diff[index] * (out_data[index] + alpha);
   }
@@ -49,9 +49,9 @@ void ELULayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const int count = bottom[0]->count();
     Dtype alpha = this->layer_param_.elu_param().alpha();
     // NOLINT_NEXT_LINE(whitespace/operators)
-    ELUBackward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+    hipLaunchKernel(HIP_KERNEL_NAME(ELUBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, top_data, bottom_data, bottom_diff, alpha);
-    CUDA_POST_KERNEL_CHECK;
+    //HIP_POST_KERNEL_CHECK;
   }
 }
 
