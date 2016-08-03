@@ -6,11 +6,11 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void Concat(const int nthreads, const Dtype* in_data,
+__global__ void Concat(hipLaunchParm lp, const int nthreads, const Dtype* in_data,
     const bool forward, const int num_concats, const int concat_size,
     const int top_concat_axis, const int bottom_concat_axis,
     const int offset_concat_axis, Dtype* out_data) {
-  CUDA_KERNEL_LOOP(index, nthreads) {
+  HIP_KERNEL_LOOP(index, nthreads) {
     const int total_concat_size = concat_size * bottom_concat_axis;
     const int concat_num = index / total_concat_size;
     const int concat_index = index % total_concat_size;
@@ -37,8 +37,8 @@ void ConcatLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     const int bottom_concat_axis = bottom[i]->shape(concat_axis_);
     const int bottom_concat_size = bottom_concat_axis * concat_input_size_;
     const int nthreads = bottom_concat_size * num_concats_;
-    Concat<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
+    hipLaunchKernel(HIP_KERNEL_NAME(Concat<Dtype>),  
+        dim3(CAFFE_GET_BLOCKS(nthreads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
         nthreads, bottom_data, kForward, num_concats_, concat_input_size_,
         top_concat_axis, bottom_concat_axis, offset_concat_axis, top_data);
     offset_concat_axis += bottom_concat_axis;
@@ -59,8 +59,8 @@ void ConcatLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
       Dtype* bottom_diff = bottom[i]->mutable_gpu_diff();
       const int bottom_concat_size = bottom_concat_axis * concat_input_size_;
       const int nthreads = bottom_concat_size * num_concats_;
-      Concat<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-          <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
+      hipLaunchKernel(HIP_KERNEL_NAME(Concat<Dtype>),  
+          dim3(CAFFE_GET_BLOCKS(nthreads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
           nthreads, top_diff, kForward, num_concats_, concat_input_size_,
           top_concat_axis, bottom_concat_axis, offset_concat_axis, bottom_diff);
     }
