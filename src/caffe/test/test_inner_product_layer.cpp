@@ -13,7 +13,7 @@
 namespace caffe {
 
 #ifndef CPU_ONLY
-extern cudaDeviceProp CAFFE_TEST_CUDA_PROP;
+extern hipDeviceProp_t CAFFE_TEST_HIP_PROP;
 #endif
 
 template <typename TypeParam>
@@ -107,12 +107,12 @@ TYPED_TEST(InnerProductLayerTest, TestSetUpTranposeTrue) {
 TYPED_TEST(InnerProductLayerTest, TestForward) {
   typedef typename TypeParam::Dtype Dtype;
   this->blob_bottom_vec_.push_back(this->blob_bottom_);
-  bool IS_VALID_CUDA = false;
+  bool IS_VALID_HIP = false;
 #ifndef CPU_ONLY
-  IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
+  IS_VALID_HIP = CAFFE_TEST_HIP_PROP.major >= 2;
 #endif
   if (Caffe::mode() == Caffe::CPU ||
-      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+      sizeof(Dtype) == 4 || IS_VALID_HIP) {
     LayerParameter layer_param;
     InnerProductParameter* inner_product_param =
         layer_param.mutable_inner_product_param();
@@ -145,12 +145,12 @@ TYPED_TEST(InnerProductLayerTest, TestForward) {
 TYPED_TEST(InnerProductLayerTest, TestForwardTranspose) {
   typedef typename TypeParam::Dtype Dtype;
   this->blob_bottom_vec_.push_back(this->blob_bottom_);
-  bool IS_VALID_CUDA = false;
+  bool IS_VALID_HIP = false;
 #ifndef CPU_ONLY
-  IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
+  IS_VALID_HIP = CAFFE_TEST_HIP_PROP.major >= 2;
 #endif
   if (Caffe::mode() == Caffe::CPU ||
-      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+      sizeof(Dtype) == 4 || IS_VALID_HIP) {
     LayerParameter layer_param;
     InnerProductParameter* inner_product_param =
         layer_param.mutable_inner_product_param();
@@ -211,12 +211,12 @@ TYPED_TEST(InnerProductLayerTest, TestForwardTranspose) {
 TYPED_TEST(InnerProductLayerTest, TestForwardNoBatch) {
   typedef typename TypeParam::Dtype Dtype;
   this->blob_bottom_vec_.push_back(this->blob_bottom_nobatch_);
-  bool IS_VALID_CUDA = false;
+  bool IS_VALID_HIP = false;
 #ifndef CPU_ONLY
-  IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
+  IS_VALID_HIP = CAFFE_TEST_HIP_PROP.major >= 2;
 #endif
   if (Caffe::mode() == Caffe::CPU ||
-      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+      sizeof(Dtype) == 4 || IS_VALID_HIP) {
     LayerParameter layer_param;
     InnerProductParameter* inner_product_param =
         layer_param.mutable_inner_product_param();
@@ -242,12 +242,12 @@ TYPED_TEST(InnerProductLayerTest, TestForwardNoBatch) {
 TYPED_TEST(InnerProductLayerTest, TestGradient) {
   typedef typename TypeParam::Dtype Dtype;
   this->blob_bottom_vec_.push_back(this->blob_bottom_);
-  bool IS_VALID_CUDA = false;
+  bool IS_VALID_HIP = false;
 #ifndef CPU_ONLY
-  IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
+  IS_VALID_HIP = CAFFE_TEST_HIP_PROP.major >= 2;
 #endif
   if (Caffe::mode() == Caffe::CPU ||
-      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+      sizeof(Dtype) == 4 || IS_VALID_HIP) {
     LayerParameter layer_param;
     InnerProductParameter* inner_product_param =
         layer_param.mutable_inner_product_param();
@@ -268,12 +268,12 @@ TYPED_TEST(InnerProductLayerTest, TestGradient) {
 TYPED_TEST(InnerProductLayerTest, TestGradientTranspose) {
   typedef typename TypeParam::Dtype Dtype;
   this->blob_bottom_vec_.push_back(this->blob_bottom_);
-  bool IS_VALID_CUDA = false;
+  bool IS_VALID_HIP = false;
 #ifndef CPU_ONLY
-  IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
+  IS_VALID_HIP = CAFFE_TEST_HIP_PROP.major >= 2;
 #endif
   if (Caffe::mode() == Caffe::CPU ||
-      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+      sizeof(Dtype) == 4 || IS_VALID_HIP) {
     LayerParameter layer_param;
     InnerProductParameter* inner_product_param =
         layer_param.mutable_inner_product_param();
@@ -295,12 +295,12 @@ TYPED_TEST(InnerProductLayerTest, TestGradientTranspose) {
 TYPED_TEST(InnerProductLayerTest, TestBackwardTranspose) {
   typedef typename TypeParam::Dtype Dtype;
   this->blob_bottom_vec_.push_back(this->blob_bottom_);
-  bool IS_VALID_CUDA = false;
+  bool IS_VALID_HIP = false;
 #ifndef CPU_ONLY
-  IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
+  IS_VALID_HIP = CAFFE_TEST_HIP_PROP.major >= 2;
 #endif
   if (Caffe::mode() == Caffe::CPU ||
-      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+      sizeof(Dtype) == 4 || IS_VALID_HIP) {
     LayerParameter layer_param;
     InnerProductParameter* inner_product_param =
         layer_param.mutable_inner_product_param();
