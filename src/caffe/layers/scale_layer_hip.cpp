@@ -7,20 +7,20 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void ScaleForward(const int n, const Dtype* in,
+__global__ void ScaleForward(hipLaunchParm lp, const int n, const Dtype* in,
     const Dtype* scale, const int scale_dim, const int inner_dim,
     Dtype* out) {
-  CUDA_KERNEL_LOOP(index, n) {
+  HIP_KERNEL_LOOP(index, n) {
     const int scale_index = (index / inner_dim) % scale_dim;
     out[index] = in[index] * scale[scale_index];
   }
 }
 
 template <typename Dtype>
-__global__ void ScaleBiasForward(const int n, const Dtype* in,
+__global__ void ScaleBiasForward(hipLaunchParm lp, const int n, const Dtype* in,
     const Dtype* scale, const Dtype* bias,
     const int scale_dim, const int inner_dim, Dtype* out) {
-  CUDA_KERNEL_LOOP(index, n) {
+  HIP_KERNEL_LOOP(index, n) {
     const int scale_index = (index / inner_dim) % scale_dim;
     out[index] = in[index] * scale[scale_index] + bias[scale_index];
   }
@@ -44,13 +44,13 @@ void ScaleLayer<Dtype>::Forward_gpu(
   Dtype* top_data = top[0]->mutable_gpu_data();
   if (bias_layer_) {
     const Dtype* bias_data = this->blobs_[bias_param_id_]->gpu_data();
-    ScaleBiasForward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+    hipLaunchKernel(HIP_KERNEL_NAME(ScaleBiasForward<Dtype>),  // NOLINT_NEXT_LINE(whitespace/operators)
+        dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, scale_data, bias_data, scale_dim_, inner_dim_,
         top_data);
   } else {
-    ScaleForward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+    hipLaunchKernel(HIP_KERNEL_NAME(ScaleForward<Dtype>),  // NOLINT_NEXT_LINE(whitespace/operators)
+        dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, scale_data, scale_dim_, inner_dim_, top_data);
   }
 }
@@ -124,8 +124,8 @@ void ScaleLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const Dtype* top_diff = top[0]->gpu_diff();
     const Dtype* scale_data = scale->gpu_data();
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
-    ScaleForward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+    hipLaunchKernel(HIP_KERNEL_NAME(ScaleForward<Dtype>),  // NOLINT_NEXT_LINE(whitespace/operators)
+        dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, scale_data, scale_dim_, inner_dim_, bottom_diff);
   }
 }
