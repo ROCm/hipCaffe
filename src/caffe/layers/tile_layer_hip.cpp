@@ -6,10 +6,10 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void Tile(const int nthreads, const Dtype* bottom_data,
+__global__ void Tile(hipLaunchParm lp, const int nthreads, const Dtype* bottom_data,
     const int tile_size, const int num_tiles, const int bottom_tile_axis,
     Dtype* top_data) {
-  CUDA_KERNEL_LOOP(index, nthreads) {
+  HIP_KERNEL_LOOP(index, nthreads) {
     const int d = index % tile_size;
     const int b = (index / tile_size / num_tiles) % bottom_tile_axis;
     const int n = index / tile_size / num_tiles / bottom_tile_axis;
@@ -25,16 +25,16 @@ void TileLayer<Dtype>::Forward_gpu(
   Dtype* top_data = top[0]->mutable_gpu_data();
   const int bottom_tile_axis = bottom[0]->shape(axis_);
   const int nthreads = top[0]->count();
-  Tile<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
+  hipLaunchKernel(HIP_KERNEL_NAME(Tile<Dtype>),   //) NOLINT_NEXT_LINE(whitespace/operators)
+      dim3(CAFFE_GET_BLOCKS(nthreads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       nthreads, bottom_data, inner_dim_, tiles_, bottom_tile_axis, top_data);
 }
 
 template <typename Dtype>
-__global__ void TileBackward(const int nthreads, const Dtype* top_diff,
+__global__ void TileBackward(hipLaunchParm lp, const int nthreads, const Dtype* top_diff,
     const int tile_size, const int num_tiles, const int bottom_tile_axis,
     Dtype* bottom_diff) {
-  CUDA_KERNEL_LOOP(index, nthreads) {
+  HIP_KERNEL_LOOP(index, nthreads) {
     const int d = index % tile_size;
     const int b = (index / tile_size) % bottom_tile_axis;
     const int n = index / tile_size / bottom_tile_axis;
@@ -56,8 +56,8 @@ void TileLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   const int bottom_tile_axis = bottom[0]->shape(axis_);
   const int tile_size = inner_dim_ / bottom_tile_axis;
   const int nthreads = bottom[0]->count();
-  TileBackward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
+  hipLaunchKernel(HIP_KERNEL_NAME(TileBackward<Dtype>),  // NOLINT_NEXT_LINE(whitespace/operators)
+      dim3(CAFFE_GET_BLOCKS(nthreads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       nthreads, top_diff, tile_size, tiles_, bottom_tile_axis, bottom_diff);
 }
 
