@@ -2,16 +2,16 @@
 
 #include "caffe/filler.hpp"
 #include "caffe/layers/embed_layer.hpp"
-#include "caffe/util/gpu_util.cuh"
+#include "caffe/util/gpu_util.h"
 #include "caffe/util/math_functions.hpp"
 
 namespace caffe {
 
 template <typename Dtype>
-__global__ void EmbedForward(const int nthreads, const Dtype* bottom_data,
+__global__ void EmbedForward(hipLaunchParm lp, const int nthreads, const Dtype* bottom_data,
     const Dtype* weight, const int M, const int N, const int K,
     Dtype* top_data) {
-  CUDA_KERNEL_LOOP(top_index, nthreads) {
+  HIP_KERNEL_LOOP(top_index, nthreads) {
     const int n = top_index / N;
     const int d = top_index % N;
     const int index = static_cast<int>(bottom_data[n]);
@@ -21,15 +21,15 @@ __global__ void EmbedForward(const int nthreads, const Dtype* bottom_data,
 }
 
 template <typename Dtype>
-__global__ void EmbedBackward(const int nthreads, const Dtype* bottom_data,
+__global__ void EmbedBackward(hipLaunchParm lp, const int nthreads, const Dtype* bottom_data,
     const Dtype* top_diff, const int M, const int N, const int K,
     Dtype* weight_diff);
 
 template <typename Dtype>
-__global__ void EmbedBackward(const int nthreads, const Dtype* bottom_data,
+__global__ void EmbedBackward(hipLaunchParm lp, const int nthreads, const Dtype* bottom_data,
     const Dtype* top_diff, const int M, const int N, const int K,
     Dtype* weight_diff) {
-  CUDA_KERNEL_LOOP(top_index, nthreads) {
+  HIP_KERNEL_LOOP(top_index, nthreads) {
     const int n = top_index / N;
     const int d = top_index % N;
     const int index = static_cast<int>(bottom_data[n]);
@@ -45,8 +45,8 @@ void EmbedLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_data = top[0]->mutable_gpu_data();
   const Dtype* weight = this->blobs_[0]->gpu_data();
   const int count = top[0]->count();
-  EmbedForward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+  hipLaunchKernel(HIP_KERNEL_NAME(EmbedForward<Dtype>),  // NOLINT_NEXT_LINE(whitespace/operators)
+      dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       count, bottom_data, weight, M_, N_, K_, top_data);
   if (bias_term_) {
     caffe_gpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, M_, N_, 1, Dtype(1),
@@ -64,8 +64,8 @@ void EmbedLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const Dtype* top_diff = top[0]->gpu_diff();
     const Dtype* bottom_data = bottom[0]->gpu_data();
     Dtype* weight_diff = this->blobs_[0]->mutable_gpu_diff();
-    EmbedBackward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(top_count), CAFFE_CUDA_NUM_THREADS>>>(
+    hipLaunchKernel(HIP_KERNEL_NAME(EmbedBackward<Dtype>),  
+        dim3(CAFFE_GET_BLOCKS(top_count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         top_count, bottom_data, top_diff, M_, N_, K_, weight_diff);
   }
   if (bias_term_ && this->param_propagate_down_[1]) {

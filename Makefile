@@ -354,6 +354,7 @@ INCLUDE_DIRS += $(BLAS_INCLUDE)
 INCLUDE_DIRS += "/opt/rocm/hcblas/include"
 INCLUDE_DIRS += "/opt/rocm/hcc-hsail/include"
 LIBRARY_DIRS += $(BLAS_LIB)
+LIBRARY_DIRS += "/opt/rocm/hcblas/lib"
 
 LIBRARY_DIRS += $(LIB_BUILD_DIR)
 
