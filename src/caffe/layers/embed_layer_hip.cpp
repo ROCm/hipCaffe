@@ -20,10 +20,6 @@ __global__ void EmbedForward(hipLaunchParm lp, const int nthreads, const Dtype* 
   }
 }
 
-template <typename Dtype>
-__global__ void EmbedBackward(hipLaunchParm lp, const int nthreads, const Dtype* bottom_data,
-    const Dtype* top_diff, const int M, const int N, const int K,
-    Dtype* weight_diff);
 
 template <typename Dtype>
 __global__ void EmbedBackward(hipLaunchParm lp, const int nthreads, const Dtype* bottom_data,
@@ -34,7 +30,8 @@ __global__ void EmbedBackward(hipLaunchParm lp, const int nthreads, const Dtype*
     const int d = top_index % N;
     const int index = static_cast<int>(bottom_data[n]);
     const int weight_index = index * N + d;
-    caffe_gpu_atomic_add(top_diff[top_index], weight_diff + weight_index);
+   // TODO HIP Equivalent 
+   // caffe_gpu_atomic_add(top_diff[top_index], weight_diff + weight_index);
   }
 }
 

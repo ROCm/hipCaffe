@@ -132,8 +132,8 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(sign, y[i] = caffe_sign<Dtype>(x[i]));
 
 // This returns a nonzero value if the input has its sign bit set.
 // The name sngbit is meant to avoid conflicts with std::signbit in the macro.
-// The extra parens are needed because CUDA < 6.5 defines signbit as a macro,
-// and we don't want that to expand here when CUDA headers are also included.
+// The extra parens are needed because HIP < 6.5 defines signbit as a macro,
+// and we don't want that to expand here when HIP headers are also included.
 DEFINE_CAFFE_CPU_UNARY_FUNC(sgnbit, \
     y[i] = static_cast<bool>((std::signbit)(x[i])));
 
@@ -248,21 +248,21 @@ void caffe_gpu_scale(const int n, const Dtype alpha, const Dtype *x, Dtype* y);
 
 #define DEFINE_AND_INSTANTIATE_GPU_UNARY_FUNC(name, operation) \
 template<typename Dtype> \
-__global__ void name##_kernel(const int n, const Dtype* x, Dtype* y) { \
-  CUDA_KERNEL_LOOP(index, n) { \
+__global__ void name##_kernel(hipLaunchParm lp, const int n, const Dtype* x, Dtype* y) { \
+  HIP_KERNEL_LOOP(index, n) { \
     operation; \
   } \
 } \
 template <> \
 void caffe_gpu_##name<float>(const int n, const float* x, float* y) { \
   /* NOLINT_NEXT_LINE(whitespace/operators) */ \
-  name##_kernel<float><<<CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS>>>( \
+  hipLaunchKernel(HIP_KERNEL_NAME(name##_kernel<float>), dim3(CAFFE_GET_BLOCKS(n)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, \
       n, x, y); \
 } \
 template <> \
 void caffe_gpu_##name<double>(const int n, const double* x, double* y) { \
   /* NOLINT_NEXT_LINE(whitespace/operators) */ \
-  name##_kernel<double><<<CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS>>>( \
+  hipLaunchKernel(HIP_KERNEL_NAME(name##_kernel<double>), dim3(CAFFE_GET_BLOCKS(n)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, \
       n, x, y); \
 }
 

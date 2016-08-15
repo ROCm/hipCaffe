@@ -104,17 +104,19 @@ void* Caffe::RNG::generator() {
 
 #else  // Normal GPU + CPU Caffe.
 
-Caffe::Caffe() {
+Caffe::Caffe() 
   // TODO: HIP Equivalent
-  /*  : cublas_handle_(NULL), curand_generator_(NULL), random_generator_(),
+    //: cublas_handle_(NULL), curand_generator_(NULL), random_generator_(),
+    //mode_(Caffe::CPU), solver_count_(1), root_solver_(true) {
+    : random_generator_(),
     mode_(Caffe::CPU), solver_count_(1), root_solver_(true) {
   // Try to create a cublas handler, and report an error if failed (but we will
   // keep the program running as one might just want to run CPU code).
-  if (cublasCreate(&cublas_handle_) != CUBLAS_STATUS_SUCCESS) {
-    LOG(ERROR) << "Cannot create Cublas handle. Cublas won't be available.";
-  }
+  //if (cublasCreate(&cublas_handle_) != CUBLAS_STATUS_SUCCESS) {
+   // LOG(ERROR) << "Cannot create Cublas handle. Cublas won't be available.";
+  //}
   // Try to create a curand handler.
-  if (curandCreateGenerator(&curand_generator_, CURAND_RNG_PSEUDO_DEFAULT)
+  /*if (curandCreateGenerator(&curand_generator_, CURAND_RNG_PSEUDO_DEFAULT)
       != CURAND_STATUS_SUCCESS ||
       curandSetPseudoRandomGeneratorSeed(curand_generator_, cluster_seedgen())
       != CURAND_STATUS_SUCCESS) {

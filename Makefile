@@ -247,7 +247,7 @@ endif
 
 # Linux
 ifeq ($(LINUX), 1)
-	CXX ?= /opt/rocm/hcc-hsail/bin/clang++
+	CXX ?= /opt/rocm/bin/hipcc
 	# boost::thread is reasonably called boost_thread (compare OS X)
 	# We will also explicitly add stdc++ to the link target.
 	LIBRARIES += boost_thread stdc++
@@ -352,30 +352,23 @@ endif
 INCLUDE_DIRS += $(BLAS_INCLUDE)
 #Include HC and HCblas libraries
 INCLUDE_DIRS += "/opt/rocm/hcblas/include"
-INCLUDE_DIRS += "/opt/rocm/hcc-hsail/include"
 LIBRARY_DIRS += $(BLAS_LIB)
 LIBRARY_DIRS += "/opt/rocm/hcblas/lib"
 
 LIBRARY_DIRS += $(LIB_BUILD_DIR)
 
-# Automatic dependency generation (hipcc is handled separately)
-CXXFLAGS += -MMD -MP
 
-HCC_PREFIX=/opt/rocm/hcc-hsail
 
 # Complete build flags.
 COMMON_FLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
-COMMON_FLAGS += $(shell $(HCC_PREFIX)/bin/hcc-config --install --cxxflags)
 COMMON_FLAGS += "-I/usr/include/c++/4.8"
 COMMON_FLAGS += "-I/usr/include/x86_64-linux-gnu/c++/4.8/"
 COMMON_FLAGS += -fPIC
 CXXFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
-HIPFLAGS += $(shell $(HCC_PREFIX)/bin/hcc-config --install --ldflags --shared)
 HIPFLAGS += $(COMMON_FLAGS)
 # mex may invoke an older gcc that is too liberal with -Wuninitalized
 MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
 LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
-LINKFLAGS += $(shell $(HCC_PREFIX)/bin/hcc-config --install --ldflags --shared)
 
 USE_PKG_CONFIG ?= 0
 ifeq ($(USE_PKG_CONFIG), 1)

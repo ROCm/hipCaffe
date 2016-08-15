@@ -4,9 +4,9 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void AdamUpdate(int N, Dtype* g, Dtype* m, Dtype* v,
+__global__ void AdamUpdate(hipLaunchParm lp, int N, Dtype* g, Dtype* m, Dtype* v,
     Dtype beta1, Dtype beta2, Dtype eps_hat, Dtype corrected_local_rate) {
-  CUDA_KERNEL_LOOP(i, N) {
+  HIP_KERNEL_LOOP(i, N) {
     float gi = g[i];
     float mi = m[i] = m[i]*beta1 + gi*(1-beta1);
     float vi = v[i] = v[i]*beta2 + gi*gi*(1-beta2);
@@ -16,10 +16,9 @@ __global__ void AdamUpdate(int N, Dtype* g, Dtype* m, Dtype* v,
 template <typename Dtype>
 void adam_update_gpu(int N, Dtype* g, Dtype* m, Dtype* v, Dtype beta1,
     Dtype beta2, Dtype eps_hat, Dtype corrected_local_rate) {
-  AdamUpdate<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(
+  hipLaunchKernel(HIP_KERNEL_NAME(AdamUpdate<Dtype>),  // NOLINT_NEXT_LINE(whitespace/operators)
+      dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, g, m, v, beta1, beta2, eps_hat, corrected_local_rate);
-  CUDA_POST_KERNEL_CHECK;
 }
 template void adam_update_gpu<float>(int, float*, float*, float*,
     float, float, float, float);

@@ -4,9 +4,9 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void AdaDeltaUpdate(int N, Dtype* g, Dtype* h, Dtype* h2,
+__global__ void AdaDeltaUpdate(hipLaunchParm lp, int N, Dtype* g, Dtype* h, Dtype* h2,
     Dtype momentum, Dtype delta, Dtype local_rate) {
-  CUDA_KERNEL_LOOP(i, N) {
+  HIP_KERNEL_LOOP(i, N) {
     float gi = g[i];
     float hi = h[i] = momentum * h[i] + (1-momentum) * gi * gi;
     gi = gi * sqrt((h2[i] + delta) / (hi + delta));
@@ -17,10 +17,9 @@ __global__ void AdaDeltaUpdate(int N, Dtype* g, Dtype* h, Dtype* h2,
 template <typename Dtype>
 void adadelta_update_gpu(int N, Dtype* g, Dtype* h, Dtype* h2, Dtype momentum,
     Dtype delta, Dtype local_rate) {
-  AdaDeltaUpdate<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(
+  hipLaunchKernel(HIP_KERNEL_NAME(AdaDeltaUpdate<Dtype>),   // NOLINT_NEXT_LINE(whitespace/operators)
+      dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       N, g, h, h2, momentum, delta, local_rate);
-  CUDA_POST_KERNEL_CHECK;
 }
 template void adadelta_update_gpu<float>(int , float*, float*, float*,
     float, float, float);
