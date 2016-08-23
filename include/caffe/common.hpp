@@ -98,7 +98,7 @@ using std::vector;
 void GlobalInit(int* pargc, char*** pargv);
 
 // A singleton class to hold common caffe stuff, such as the handler that
-// caffe is going to use for cublas, curand, etc.
+// caffe is going to use for hipblas, curand, etc.
 class Caffe {
  public:
   ~Caffe();
@@ -124,7 +124,7 @@ class Caffe {
     shared_ptr<Generator> generator_;
   };
 
-  // Getters for boost rng, curand, and cublas handles
+  // Getters for boost rng, curand, and hipblas handles
   inline static RNG& rng_stream() {
     if (!Get().random_generator_) {
       Get().random_generator_.reset(new RNG());
@@ -132,9 +132,9 @@ class Caffe {
     return *(Get().random_generator_);
   }
 #ifndef CPU_ONLY
-  // TODO: HIP Equivalent
-  /*inline static cublasHandle_t cublas_handle() { return Get().cublas_handle_; }
-  inline static curandGenerator_t curand_generator() {
+  inline static hipblasHandle_t hipblas_handle() { return Get().hipblas_handle_; }
+  // TODO HIP Equivalent
+  /*inline static curandGenerator_t curand_generator() {
     return Get().curand_generator_;
   }*/
 #endif
@@ -149,7 +149,7 @@ class Caffe {
   inline static void set_mode(Brew mode) { Get().mode_ = mode; }
   // Sets the random seed of both boost and curand
   static void set_random_seed(const unsigned int seed);
-  // Sets the device. Since we have cublas and curand stuff, set device also
+  // Sets the device. Since we have hipblas and curand stuff, set device also
   // requires us to reset those values.
   static void SetDevice(const int device_id);
   // Prints the current GPU status.
@@ -167,9 +167,9 @@ class Caffe {
 
  protected:
 #ifndef CPU_ONLY
+  hipblasHandle_t hipblas_handle_;
   //TODO: HIP Equivalent
-  /*cublasHandle_t cublas_handle_;
-  curandGenerator_t curand_generator_;*/
+  //curandGenerator_t curand_generator_;
 #endif
   shared_ptr<RNG> random_generator_;
 

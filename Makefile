@@ -247,7 +247,7 @@ endif
 
 # Linux
 ifeq ($(LINUX), 1)
-	CXX ?= /opt/rocm/bin/hipcc
+	CXX ?= /opt/rocm/hip/bin/hipcc
 	# boost::thread is reasonably called boost_thread (compare OS X)
 	# We will also explicitly add stdc++ to the link target.
 	LIBRARIES += boost_thread stdc++
@@ -357,18 +357,20 @@ LIBRARY_DIRS += "/opt/rocm/hcblas/lib"
 
 LIBRARY_DIRS += $(LIB_BUILD_DIR)
 
+# Automatic dependency generation (hipcc is handled separately)
+#CXXFLAGS += -MMD -MP
 
 
 # Complete build flags.
 COMMON_FLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
-COMMON_FLAGS += "-I/usr/include/c++/4.8"
-COMMON_FLAGS += "-I/usr/include/x86_64-linux-gnu/c++/4.8/"
-COMMON_FLAGS += -fPIC
+COMMON_FLAGS += -fPIC 
+COMMON_FLAGS += -stdlib=libc++ 
+COMMON_FLAGS += -DGTEST_USE_OWN_TR1_TUPLE=1
 CXXFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
 HIPFLAGS += $(COMMON_FLAGS)
 # mex may invoke an older gcc that is too liberal with -Wuninitalized
 MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
-LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
+LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS) 
 
 USE_PKG_CONFIG ?= 0
 ifeq ($(USE_PKG_CONFIG), 1)

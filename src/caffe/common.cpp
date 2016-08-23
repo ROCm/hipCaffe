@@ -106,15 +106,13 @@ void* Caffe::RNG::generator() {
 
 Caffe::Caffe() 
   // TODO: HIP Equivalent
-    //: cublas_handle_(NULL), curand_generator_(NULL), random_generator_(),
-    //mode_(Caffe::CPU), solver_count_(1), root_solver_(true) {
-    : random_generator_(),
+   : hipblas_handle_(NULL), random_generator_(),
     mode_(Caffe::CPU), solver_count_(1), root_solver_(true) {
-  // Try to create a cublas handler, and report an error if failed (but we will
+  // Try to create a hipblas handler, and report an error if failed (but we will
   // keep the program running as one might just want to run CPU code).
-  //if (cublasCreate(&cublas_handle_) != CUBLAS_STATUS_SUCCESS) {
-   // LOG(ERROR) << "Cannot create Cublas handle. Cublas won't be available.";
-  //}
+  if (hipblasCreate(&hipblas_handle_) != HIPBLAS_STATUS_SUCCESS) {
+    LOG(ERROR) << "Cannot create Cublas handle. Cublas won't be available.";
+  }
   // Try to create a curand handler.
   /*if (curandCreateGenerator(&curand_generator_, CURAND_RNG_PSEUDO_DEFAULT)
       != CURAND_STATUS_SUCCESS ||
@@ -126,8 +124,8 @@ Caffe::Caffe()
 
 Caffe::~Caffe() {
   // TODO: HIP Equivalent
-  /*if (cublas_handle_) CUBLAS_CHECK(cublasDestroy(cublas_handle_));
-  if (curand_generator_) {
+  if (hipblas_handle_) HIPBLAS_CHECK(hipblasDestroy(hipblas_handle_));
+  /*if (curand_generator_) {
     CURAND_CHECK(curandDestroyGenerator(curand_generator_));
   }*/
 }
@@ -161,12 +159,12 @@ void Caffe::SetDevice(const int device_id) {
   // may perform initialization using the GPU.
   HIP_CHECK(hipSetDevice(device_id));
   //TODO HIP equivalent
-  /*if (Get().cublas_handle_) CUBLAS_CHECK(cublasDestroy(Get().cublas_handle_));
-  if (Get().curand_generator_) {
+  if (Get().hipblas_handle_) HIPBLAS_CHECK(hipblasDestroy(Get().hipblas_handle_));
+  /*if (Get().curand_generator_) {
     CURAND_CHECK(curandDestroyGenerator(Get().curand_generator_));
-  }
-  CUBLAS_CHECK(cublasCreate(&Get().cublas_handle_));
-  CURAND_CHECK(curandCreateGenerator(&Get().curand_generator_,
+  }*/
+  HIPBLAS_CHECK(hipblasCreate(&Get().hipblas_handle_));
+  /*CURAND_CHECK(curandCreateGenerator(&Get().curand_generator_,
       CURAND_RNG_PSEUDO_DEFAULT));
   CURAND_CHECK(curandSetPseudoRandomGeneratorSeed(Get().curand_generator_,
       cluster_seedgen()));*/
@@ -263,39 +261,33 @@ void* Caffe::RNG::generator() {
   return static_cast<void*>(generator_->rng());
 }
 
-//TODO HIP Equivalent
 
-/*const char* cublasGetErrorString(cublasStatus_t error) {
-  switch (error) {
-  case CUBLAS_STATUS_SUCCESS:
-    return "CUBLAS_STATUS_SUCCESS";
-  case CUBLAS_STATUS_NOT_INITIALIZED:
-    return "CUBLAS_STATUS_NOT_INITIALIZED";
-  case CUBLAS_STATUS_ALLOC_FAILED:
-    return "CUBLAS_STATUS_ALLOC_FAILED";
-  case CUBLAS_STATUS_INVALID_VALUE:
-    return "CUBLAS_STATUS_INVALID_VALUE";
-  case CUBLAS_STATUS_ARCH_MISMATCH:
-    return "CUBLAS_STATUS_ARCH_MISMATCH";
-  case CUBLAS_STATUS_MAPPING_ERROR:
-    return "CUBLAS_STATUS_MAPPING_ERROR";
-  case CUBLAS_STATUS_EXECUTION_FAILED:
-    return "CUBLAS_STATUS_EXECUTION_FAILED";
-  case CUBLAS_STATUS_INTERNAL_ERROR:
-    return "CUBLAS_STATUS_INTERNAL_ERROR";
+const char* hipblasGetErrorString(hipblasStatus_t error) {
+  /*switch (error) {
+  case HIPBLAS_STATUS_SUCCESS:
+    return "HIPBLAS_STATUS_SUCCESS";
+  case HIPBLAS_STATUS_NOT_INITIALIZED:
+    return "HIPBLAS_STATUS_NOT_INITIALIZED";
+  case HIPBLAS_STATUS_ALLOC_FAILED:
+    return "HIPBLAS_STATUS_ALLOC_FAILED";
+  case HIPBLAS_STATUS_INVALID_VALUE:
+    return "HIPBLAS_STATUS_INVALID_VALUE";
+  case HIPBLAS_STATUS_MAPPING_ERROR:
+    return "HIPBLAS_STATUS_MAPPING_ERROR";
+  case HIPBLAS_STATUS_EXECUTION_FAILED:
+    return "HIPBLAS_STATUS_EXECUTION_FAILED";
+  case HIPBLAS_STATUS_INTERNAL_ERROR:
+    return "HIPBLAS_STATUS_INTERNAL_ERROR";
 #if HIP_VERSION >= 6000
-  case CUBLAS_STATUS_NOT_SUPPORTED:
-    return "CUBLAS_STATUS_NOT_SUPPORTED";
+  case HIPBLAS_STATUS_INTERNAL_ERROR:
+    return "HIPBLAS_STATUS_INTERNAL_ERROR";
 #endif
-#if HIP_VERSION >= 6050
-  case CUBLAS_STATUS_LICENSE_ERROR:
-    return "CUBLAS_STATUS_LICENSE_ERROR";
-#endif
-  }
-  return "Unknown cublas status";
+  }*/
+  return "Unknown hipblas status";
 }
 
-const char* curandGetErrorString(curandStatus_t error) {
+// TODO HIP Equivalent
+/*const char* curandGetErrorString(curandStatus_t error) {
   switch (error) {
   case CURAND_STATUS_SUCCESS:
     return "CURAND_STATUS_SUCCESS";

@@ -32,6 +32,7 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 #else  // Normal GPU + CPU Caffe.
 
 #include <hip_runtime.h>
+#include <hipblas.h>
 
 //
 // HIP macros
@@ -48,15 +49,15 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
        }\
      }while (0)
 
-// TODO: Get HIP equivalent
-/*#define CUBLAS_CHECK(condition) \
+#define HIPBLAS_CHECK(condition) \
   do { \
-    cublasStatus_t status = condition; \
-    CHECK_EQ(status, CUBLAS_STATUS_SUCCESS) << " " \
-      << caffe::cublasGetErrorString(status); \
+    hipblasStatus_t status = condition; \
+    CHECK_EQ(status, HIPBLAS_STATUS_SUCCESS) << " " \
+      << caffe::hipblasGetErrorString(status); \
   } while (0)
 
-#define CURAND_CHECK(condition) \
+// TODO: Get HIP equivalent
+/*#define CURAND_CHECK(condition) \
   do { \
     curandStatus_t status = condition; \
     CHECK_EQ(status, CURAND_STATUS_SUCCESS) << " " \
@@ -76,6 +77,8 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 
 namespace caffe {
 
+// HIP: library error reporting.
+const char* hipblasGetErrorString(hipblasStatus_t error);
 // HIP: use 512 threads per block
 const int CAFFE_HIP_NUM_THREADS = 512;
 
