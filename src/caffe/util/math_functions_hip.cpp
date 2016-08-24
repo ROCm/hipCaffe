@@ -1,3 +1,4 @@
+#include "hip_runtime.h"
 #include <cmath>
 #include "caffe/common.hpp"
 #include "caffe/util/math_functions.hpp"
@@ -9,17 +10,16 @@ void caffe_gpu_gemm<float>(const CBLAS_TRANSPOSE TransA,
     const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
     const float alpha, const float* A, const float* B, const float beta,
     float* C) {
-  // Note that cublas follows fortran order.
+  // Note that hipblas follows fortran order.
   int lda = (TransA == CblasNoTrans) ? K : M;
   int ldb = (TransB == CblasNoTrans) ? N : K;
 
-  // TODO: HIP Equivalent
-/*  cublasOperation_t cuTransA =
-      (TransA == CblasNoTrans) ? CUBLAS_OP_N : CUBLAS_OP_T;
-  cublasOperation_t cuTransB =
-      (TransB == CblasNoTrans) ? CUBLAS_OP_N : CUBLAS_OP_T;
-  CUBLAS_CHECK(cublasSgemm(Caffe::cublas_handle(), cuTransB, cuTransA,
-      N, M, K, &alpha, B, ldb, A, lda, &beta, C, N));*/
+  hipblasOperation_t hipTransA =
+      (TransA == CblasNoTrans) ? HIPBLAS_OP_N : HIPBLAS_OP_T;
+  hipblasOperation_t hipTransB =
+      (TransB == CblasNoTrans) ? HIPBLAS_OP_N : HIPBLAS_OP_T;
+  HIPBLAS_CHECK(hipblasSgemm(Caffe::hipblas_handle(), hipTransB, hipTransA,
+      N, M, K, &alpha, B, ldb, A, lda, &beta, C, N));
 }
 
 template <>
@@ -27,27 +27,25 @@ void caffe_gpu_gemm<double>(const CBLAS_TRANSPOSE TransA,
     const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
     const double alpha, const double* A, const double* B, const double beta,
     double* C) {
-  // Note that cublas follows fortran order.
+  // Note that hipblas follows fortran order.
   int lda = (TransA == CblasNoTrans) ? K : M;
   int ldb = (TransB == CblasNoTrans) ? N : K;
-  // TODO: HIP Equivalent
-/*  cublasOperation_t cuTransA =
-      (TransA == CblasNoTrans) ? CUBLAS_OP_N : CUBLAS_OP_T;
-  cublasOperation_t cuTransB =
-      (TransB == CblasNoTrans) ? CUBLAS_OP_N : CUBLAS_OP_T;
-  CUBLAS_CHECK(cublasDgemm(Caffe::cublas_handle(), cuTransB, cuTransA,
-      N, M, K, &alpha, B, ldb, A, lda, &beta, C, N));*/
+  hipblasOperation_t hipTransA =
+      (TransA == CblasNoTrans) ? HIPBLAS_OP_N : HIPBLAS_OP_T;
+  hipblasOperation_t hipTransB =
+      (TransB == CblasNoTrans) ? HIPBLAS_OP_N : HIPBLAS_OP_T;
+  HIPBLAS_CHECK(hipblasDgemm(Caffe::hipblas_handle(), hipTransB, hipTransA,
+      N, M, K, &alpha, B, ldb, A, lda, &beta, C, N));
 }
 
 template <>
 void caffe_gpu_gemv<float>(const CBLAS_TRANSPOSE TransA, const int M,
     const int N, const float alpha, const float* A, const float* x,
     const float beta, float* y) {
-  // TODO: HIP Equivalent
-  /*cublasOperation_t cuTransA =
-      (TransA == CblasNoTrans) ? CUBLAS_OP_T : CUBLAS_OP_N;
-  CUBLAS_CHECK(cublasSgemv(Caffe::cublas_handle(), cuTransA, N, M, &alpha,
-      A, N, x, 1, &beta, y, 1));*/
+  hipblasOperation_t hipTransA =
+      (TransA == CblasNoTrans) ? HIPBLAS_OP_T : HIPBLAS_OP_N;
+  HIPBLAS_CHECK(hipblasSgemv(Caffe::hipblas_handle(), hipTransA, N, M, &alpha,
+      A, N, x, 1, &beta, y, 1));
 }
 
 template <>
@@ -56,43 +54,38 @@ void caffe_gpu_gemv<double>(const CBLAS_TRANSPOSE TransA, const int M,
     const double beta, double* y) {
 
   // TODO: HIP Equivalent
-  /*cublasOperation_t cuTransA =
-      (TransA == CblasNoTrans) ? CUBLAS_OP_T : CUBLAS_OP_N;
-  CUBLAS_CHECK(cublasDgemv(Caffe::cublas_handle(), cuTransA, N, M, &alpha,
-      A, N, x, 1, &beta, y, 1));*/
+  hipblasOperation_t hipTransA =
+      (TransA == CblasNoTrans) ? HIPBLAS_OP_T : HIPBLAS_OP_N;
+  HIPBLAS_CHECK(hipblasDgemv(Caffe::hipblas_handle(), hipTransA, N, M, &alpha,
+      A, N, x, 1, &beta, y, 1));
 }
 
 template <>
 void caffe_gpu_axpy<float>(const int N, const float alpha, const float* X,
     float* Y) {
-  // TODO: HIP Equivalent
-  //CUBLAS_CHECK(cublasSaxpy(Caffe::cublas_handle(), N, &alpha, X, 1, Y, 1));
+  HIPBLAS_CHECK(hipblasSaxpy(Caffe::hipblas_handle(), N, &alpha, X, 1, Y, 1));
 }
 
 template <>
 void caffe_gpu_axpy<double>(const int N, const double alpha, const double* X,
     double* Y) {
-  // TODO: HIP Equivalent
-  //CUBLAS_CHECK(cublasDaxpy(Caffe::cublas_handle(), N, &alpha, X, 1, Y, 1));
+  HIPBLAS_CHECK(hipblasDaxpy(Caffe::hipblas_handle(), N, &alpha, X, 1, Y, 1));
 }
 
 void caffe_gpu_memcpy(const size_t N, const void* X, void* Y) {
   if (X != Y) {
-  // TODO: HIP Equivalent
-  //  HIP_CHECK(cudaMemcpy(Y, X, N, cudaMemcpyDefault));  // NOLINT(caffe/alt_fn)
+    HIP_CHECK(hipMemcpy(Y, X, N, hipMemcpyDefault));  // NOLINT(caffe/alt_fn)
   }
 }
 
 template <>
 void caffe_gpu_scal<float>(const int N, const float alpha, float *X) {
-  // TODO: HIP Equivalent
-  //CUBLAS_CHECK(cublasSscal(Caffe::cublas_handle(), N, &alpha, X, 1));
+  HIPBLAS_CHECK(hipblasSscal(Caffe::hipblas_handle(), N, &alpha, X, 1));
 }
 
 template <>
 void caffe_gpu_scal<double>(const int N, const double alpha, double *X) {
-  // TODO: HIP Equivalent
-  //CUBLAS_CHECK(cublasDscal(Caffe::cublas_handle(), N, &alpha, X, 1));
+  HIPBLAS_CHECK(hipblasDscal(Caffe::hipblas_handle(), N, &alpha, X, 1));
 }
 
 template <>
@@ -112,43 +105,37 @@ void caffe_gpu_axpby<double>(const int N, const double alpha, const double* X,
 template <>
 void caffe_gpu_dot<float>(const int n, const float* x, const float* y,
     float* out) {
-  // TODO: HIP Equivalent
-  //CUBLAS_CHECK(cublasSdot(Caffe::cublas_handle(), n, x, 1, y, 1, out));
+  HIPBLAS_CHECK(hipblasSdot(Caffe::hipblas_handle(), n, x, 1, y, 1, out));
 }
 
 template <>
 void caffe_gpu_dot<double>(const int n, const double* x, const double* y,
     double * out) {
-  // TODO: HIP Equivalent
-  //CUBLAS_CHECK(cublasDdot(Caffe::cublas_handle(), n, x, 1, y, 1, out));
+  HIPBLAS_CHECK(hipblasDdot(Caffe::hipblas_handle(), n, x, 1, y, 1, out));
 }
 
 template <>
 void caffe_gpu_asum<float>(const int n, const float* x, float* y) {
-  // TODO: HIP Equivalent
-  //CUBLAS_CHECK(cublasSasum(Caffe::cublas_handle(), n, x, 1, y));
+  HIPBLAS_CHECK(hipblasSasum(Caffe::hipblas_handle(), n, x, 1, y));
 }
 
 template <>
 void caffe_gpu_asum<double>(const int n, const double* x, double* y) {
-  // TODO: HIP Equivalent
-  //CUBLAS_CHECK(cublasDasum(Caffe::cublas_handle(), n, x, 1, y));
+  HIPBLAS_CHECK(hipblasDasum(Caffe::hipblas_handle(), n, x, 1, y));
 }
 
 template <>
 void caffe_gpu_scale<float>(const int n, const float alpha, const float *x,
                             float* y) {
-  // TODO: HIP Equivalent
-  //CUBLAS_CHECK(cublasScopy(Caffe::cublas_handle(), n, x, 1, y, 1));
-  //CUBLAS_CHECK(cublasSscal(Caffe::cublas_handle(), n, &alpha, y, 1));
+  HIPBLAS_CHECK(hipblasScopy(Caffe::hipblas_handle(), n, x, 1, y, 1));
+  HIPBLAS_CHECK(hipblasSscal(Caffe::hipblas_handle(), n, &alpha, y, 1));
 }
 
 template <>
 void caffe_gpu_scale<double>(const int n, const double alpha, const double *x,
                              double* y) {
-  // TODO: HIP Equivalent
-  //CUBLAS_CHECK(cublasDcopy(Caffe::cublas_handle(), n, x, 1, y, 1));
-  //CUBLAS_CHECK(cublasDscal(Caffe::cublas_handle(), n, &alpha, y, 1));
+  HIPBLAS_CHECK(hipblasDcopy(Caffe::hipblas_handle(), n, x, 1, y, 1));
+  HIPBLAS_CHECK(hipblasDscal(Caffe::hipblas_handle(), n, &alpha, y, 1));
 }
 
 template <typename Dtype>
