@@ -15,7 +15,8 @@ namespace caffe {
 inline void CaffeMallocHost(void** ptr, size_t size, bool* use_hip) {
 #ifndef CPU_ONLY
   if (Caffe::mode() == Caffe::GPU) {
-    HIP_CHECK(hipHostMalloc(ptr, size));
+    if (size > 0)
+      HIP_CHECK(hipHostMalloc(ptr, size));
     *use_hip = true;
     return;
   }
