@@ -52,8 +52,6 @@ template <>
 void caffe_gpu_gemv<double>(const CBLAS_TRANSPOSE TransA, const int M,
     const int N, const double alpha, const double* A, const double* x,
     const double beta, double* y) {
-
-  // TODO: HIP Equivalent
   hipblasOperation_t hipTransA =
       (TransA == CblasNoTrans) ? HIPBLAS_OP_T : HIPBLAS_OP_N;
   HIPBLAS_CHECK(hipblasDgemv(Caffe::hipblas_handle(), hipTransA, N, M, &alpha,
@@ -369,16 +367,28 @@ DEFINE_AND_INSTANTIATE_GPU_UNARY_FUNC(sign, y[index] = (Dtype(0) < x[index])
                                       - (x[index] < Dtype(0)));
 DEFINE_AND_INSTANTIATE_GPU_UNARY_FUNC(sgnbit, y[index] = signbit(x[index]));
 
+// TODO: currently all RNG routines use CPU logic and the results are just copied onto device buffer for further usage
+// Got to have hiprand equivalents for all these
+
 void caffe_gpu_rng_uniform(const int n, unsigned int* r) {
-  // TODO: HIP Equivalent
   //CURAND_CHECK(curandGenerate(Caffe::curand_generator(), r, n));
+  // Currently invoke CPU counterpart and copy the contents to Device buffer
+  unsigned int temp[n];
+  caffe_rng_uniform(n, temp);
+  // Copy the host result to device buffer: A gimmick indeed !!!
+  hipMemcpy(r, temp, n * sizeof(unsigned int), hipMemcpyHostToDevice);
+  
 }
 
 template <>
 void caffe_gpu_rng_uniform<float>(const int n, const float a, const float b,
                                   float* r) {
-  // TODO: HIP Equivalent
   //CURAND_CHECK(curandGenerateUniform(Caffe::curand_generator(), r, n));
+  // Currently invoke CPU counterpart and copy the contents to Device buffer
+  float temp[n];
+  caffe_rng_uniform(n, a, b, temp);
+  // Copy the host result to device buffer: A gimmick indeed !!!
+  hipMemcpy(r, temp, n * sizeof(float), hipMemcpyHostToDevice);
   const float range = b - a;
   if (range != static_cast<float>(1)) {
     caffe_gpu_scal(n, range, r);
@@ -391,8 +401,12 @@ void caffe_gpu_rng_uniform<float>(const int n, const float a, const float b,
 template <>
 void caffe_gpu_rng_uniform<double>(const int n, const double a, const double b,
                                    double* r) {
-  // TODO: HIP Equivalent
   //CURAND_CHECK(curandGenerateUniformDouble(Caffe::curand_generator(), r, n));
+  // Currently invoke CPU counterpart and copy the contents to Device buffer
+  double temp[n];
+  caffe_rng_uniform(n, a, b, temp);
+  // Copy the host result to device buffer: A gimmick indeed !!!
+  hipMemcpy(r, temp, n * sizeof(double), hipMemcpyHostToDevice);
   const double range = b - a;
   if (range != static_cast<double>(1)) {
     caffe_gpu_scal(n, range, r);
@@ -405,17 +419,25 @@ void caffe_gpu_rng_uniform<double>(const int n, const double a, const double b,
 template <>
 void caffe_gpu_rng_gaussian(const int n, const float mu, const float sigma,
                             float* r) {
-  // TODO: HIP Equivalent
   // CURAND_CHECK(
   //    curandGenerateNormal(Caffe::curand_generator(), r, n, mu, sigma));
+  // Currently invoke CPU counterpart and copy the contents to Device buffer
+  float temp[n];
+  caffe_rng_gaussian(n, mu, sigma, temp);
+  // Copy the host result to device buffer: A gimmick indeed !!!
+  hipMemcpy(r, temp, n * sizeof(float), hipMemcpyHostToDevice);
 }
 
 template <>
 void caffe_gpu_rng_gaussian(const int n, const double mu, const double sigma,
                             double* r) {
-  // TODO: HIP Equivalent
   // CURAND_CHECK(
   //    curandGenerateNormalDouble(Caffe::curand_generator(), r, n, mu, sigma));
+  // Currently invoke CPU counterpart and copy the contents to Device buffer
+  double temp[n];
+  caffe_rng_uniform(n, mu, sigma, temp);
+  // Copy the host result to device buffer: A gimmick indeed !!!
+  hipMemcpy(r, temp, n * sizeof(double), hipMemcpyHostToDevice);
 }
 
 }  // namespace caffe
