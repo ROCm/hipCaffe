@@ -19,7 +19,7 @@ void caffe_gpu_gemm<float>(const CBLAS_TRANSPOSE TransA,
   hipblasOperation_t hipTransB =
       (TransB == CblasNoTrans) ? HIPBLAS_OP_N : HIPBLAS_OP_T;
   HIPBLAS_CHECK(hipblasSgemm(Caffe::hipblas_handle(), hipTransB, hipTransA,
-      N, M, K, &alpha, B, ldb, A, lda, &beta, C, N));
+      N, M, K, &alpha, const_cast<float*>(B), ldb, const_cast<float*>(A), lda, &beta, C, N));
 }
 
 template <>
@@ -35,7 +35,7 @@ void caffe_gpu_gemm<double>(const CBLAS_TRANSPOSE TransA,
   hipblasOperation_t hipTransB =
       (TransB == CblasNoTrans) ? HIPBLAS_OP_N : HIPBLAS_OP_T;
   HIPBLAS_CHECK(hipblasDgemm(Caffe::hipblas_handle(), hipTransB, hipTransA,
-      N, M, K, &alpha, B, ldb, A, lda, &beta, C, N));
+      N, M, K, &alpha, const_cast<double*>(B), ldb, const_cast<double*>(A), lda, &beta, C, N));
 }
 
 template <>
@@ -45,7 +45,7 @@ void caffe_gpu_gemv<float>(const CBLAS_TRANSPOSE TransA, const int M,
   hipblasOperation_t hipTransA =
       (TransA == CblasNoTrans) ? HIPBLAS_OP_T : HIPBLAS_OP_N;
   HIPBLAS_CHECK(hipblasSgemv(Caffe::hipblas_handle(), hipTransA, N, M, &alpha,
-      A, N, x, 1, &beta, y, 1));
+     const_cast<float*>(A), N, const_cast<float*>(x), 1, &beta, y, 1));
 }
 
 template <>
@@ -55,7 +55,7 @@ void caffe_gpu_gemv<double>(const CBLAS_TRANSPOSE TransA, const int M,
   hipblasOperation_t hipTransA =
       (TransA == CblasNoTrans) ? HIPBLAS_OP_T : HIPBLAS_OP_N;
   HIPBLAS_CHECK(hipblasDgemv(Caffe::hipblas_handle(), hipTransA, N, M, &alpha,
-      A, N, x, 1, &beta, y, 1));
+      const_cast<double*>(A), N, const_cast<double*>(x), 1, &beta, y, 1));
 }
 
 template <>
@@ -114,12 +114,12 @@ void caffe_gpu_dot<double>(const int n, const double* x, const double* y,
 
 template <>
 void caffe_gpu_asum<float>(const int n, const float* x, float* y) {
-  HIPBLAS_CHECK(hipblasSasum(Caffe::hipblas_handle(), n, x, 1, y));
+  HIPBLAS_CHECK(hipblasSasum(Caffe::hipblas_handle(), n, const_cast<float*>(x), 1, y));
 }
 
 template <>
 void caffe_gpu_asum<double>(const int n, const double* x, double* y) {
-  HIPBLAS_CHECK(hipblasDasum(Caffe::hipblas_handle(), n, x, 1, y));
+  HIPBLAS_CHECK(hipblasDasum(Caffe::hipblas_handle(), n, const_cast<double*>(x), 1, y));
 }
 
 template <>
