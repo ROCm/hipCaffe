@@ -364,7 +364,7 @@ LIBRARY_DIRS += $(LIB_BUILD_DIR)
 # Complete build flags.
 COMMON_FLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
 COMMON_FLAGS += -fPIC 
-COMMON_FLAGS += -stdlib=libc++ 
+COMMON_FLAGS += -stdlib=libstdc++ 
 COMMON_FLAGS += -DGTEST_USE_OWN_TR1_TUPLE=1
 CXXFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
 HIPFLAGS += $(COMMON_FLAGS)
