@@ -278,7 +278,7 @@ void caffe_gpu_div<double>(const int N, const double* a,
 template <typename Dtype>
 __global__ void abs_kernel(hipLaunchParm lp, const int n, const Dtype* a, Dtype* y) {
   HIP_KERNEL_LOOP(index, n) {
-    y[index] = hc::precise_math::fabs(a[index]);
+    y[index] = fabs(a[index]);
   }
 }
 
