@@ -1,5 +1,5 @@
 #ifndef CPU_ONLY
-#include <hip_runtime.h>
+#include <hip/hip_runtime.h>
 #endif
 #include <glog/logging.h>
 #include <stdio.h>
@@ -307,7 +307,7 @@ void P2PSync<Dtype>::on_start() {
     Dtype* dst = children_[i]->data_;
 
 #ifdef DEBUG
-    hipPointerAttributes attributes;
+    hipPointerAttribute_t attributes;
     HIP_CHECK(hipPointerGetAttributes(&attributes, src));
     CHECK(attributes.device == device);
     HIP_CHECK(hipPointerGetAttributes(&attributes, dst));
@@ -345,7 +345,7 @@ void P2PSync<Dtype>::on_gradients_ready() {
       }
     }
     CHECK(ok);
-    hipPointerAttributes attributes;
+    hipPointerAttribute_t attributes;
     HIP_CHECK(hipPointerGetAttributes(&attributes, src));
     CHECK(attributes.device == device);
     HIP_CHECK(hipPointerGetAttributes(&attributes, dst));
@@ -361,7 +361,7 @@ void P2PSync<Dtype>::on_gradients_ready() {
     Dtype* dst = parent_grads_;
 
 #ifdef DEBUG
-    hipPointerAttributes attributes;
+    hipPointerAttribute_t attributes;
     HIP_CHECK(hipPointerGetAttributes(&attributes, src));
     CHECK(attributes.device == device);
     HIP_CHECK(hipPointerGetAttributes(&attributes, dst));

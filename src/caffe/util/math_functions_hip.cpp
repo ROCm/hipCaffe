@@ -1,4 +1,4 @@
-#include "hip_runtime.h"
+#include "hip/hip_runtime.h"
 #include <cmath>
 #include "caffe/common.hpp"
 #include "caffe/util/math_functions.hpp"
