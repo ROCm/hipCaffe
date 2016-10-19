@@ -163,9 +163,9 @@ NONEMPTY_WARN_REPORT := $(BUILD_DIR)/$(WARNS_EXT)
 ##############################
 # Derive include and lib directories
 ##############################
-HIP_INCLUDE_DIR := $(HIP_DIR)/include
+HIP_INCLUDE_DIR := $(HIP_PATH)/include
 
-HIP_LIB_DIR += $(HIP_DIR)/lib
+HIP_LIB_DIR += $(HIP_PATH)/lib
 
 INCLUDE_DIRS += $(BUILD_INCLUDE_DIR) ./src ./include
 
@@ -247,7 +247,7 @@ endif
 
 # Linux
 ifeq ($(LINUX), 1)
-	CXX ?= /opt/rocm/hip/bin/hipcc
+	CXX ?= $(HIP_PATH)bin/hipcc
 	# boost::thread is reasonably called boost_thread (compare OS X)
 	# We will also explicitly add stdc++ to the link target.
 	LIBRARIES += boost_thread stdc++
@@ -351,9 +351,12 @@ else
 endif
 INCLUDE_DIRS += $(BLAS_INCLUDE)
 #Include HC and HCblas libraries
-INCLUDE_DIRS += "/opt/rocm/hcblas/include"
+
+HCBLAS_DIR?=/opt/rocm/hcblas
+INCLUDE_DIRS += "$(HCBLAS_DIR)/include"
 LIBRARY_DIRS += $(BLAS_LIB)
-LIBRARY_DIRS += "/opt/rocm/hcblas/lib"
+LIBRARY_DIRS += "$(HCBLAS_DIR)/lib"
+
 
 LIBRARY_DIRS += $(LIB_BUILD_DIR)
 
@@ -449,6 +452,7 @@ $(LINT_OUTPUTS): $(LINT_OUTPUT_DIR)/%.lint.txt : % $(LINT_SCRIPT) | $(LINT_OUTPU
 		|| true
 
 test: $(TEST_ALL_BIN) $(TEST_ALL_DYNLINK_BIN) $(TEST_BINS)
+	echo TEST_BINS=$(TEST_BINS)
 
 tools: $(TOOL_BINS) $(TOOL_BIN_LINKS)
 
@@ -547,9 +551,9 @@ $(PROTO_BUILD_DIR)/%.pb.o: $(PROTO_BUILD_DIR)/%.pb.cc $(PROTO_GEN_HEADER) \
 
 $(BUILD_DIR)/hip/%.o: %.cu | $(ALL_BUILD_DIRS)
 	@ echo HIP $<
-	$(Q)$(HIP_DIR)/bin/hipcc $(HIPFLAGS) $(HIP_ARCH) -M $< -o ${@:.o=.d} \
+	$(Q)$(HIP_PATH)/bin/hipcc $(HIPFLAGS) $(HIP_ARCH) -M $< -o ${@:.o=.d} \
 		-odir $(@D)
-	$(Q)$(HIP_DIR)/bin/hipcc $(HIPFLAGS) $(HIP_ARCH) -c $< -o $@ 2> $@.$(WARNS_EXT) \
+	$(Q)$(HIP_PATH)/bin/hipcc $(HIPFLAGS) $(HIP_ARCH) -c $< -o $@ 2> $@.$(WARNS_EXT) \
 		|| (cat $@.$(WARNS_EXT); exit 1)
 	@ cat $@.$(WARNS_EXT)
 
