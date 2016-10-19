@@ -182,11 +182,23 @@ void LRNLayer<Dtype>::CrossChannelBackward_gpu(
     const vector<Blob<Dtype>*>& bottom) {
   int n_threads = num_ * height_ * width_;
   // NOLINT_NEXT_LINE(whitespace/operators)
+#if 0
   hipLaunchKernel(HIP_KERNEL_NAME(LRNComputeDiff), dim3(CAFFE_GET_BLOCKS(n_threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       n_threads, bottom[0]->gpu_data(), top[0]->gpu_data(),
       scale_.gpu_data(), top[0]->gpu_diff(), num_, channels_, height_, width_,
       size_, -beta_, Dtype(2. * alpha_ * beta_ / size_),
       bottom[0]->mutable_gpu_diff());
+#endif
+  auto bot_gpu_data = bottom[0]->gpu_data();
+  auto top_gpu_data = top[0]->gpu_data();
+  auto scale_gpu_data = scale_.gpu_data();
+  auto top_gpu_diff = top[0]->gpu_diff();
+  auto bot_gpu_diff = bottom[0]->mutable_gpu_diff();
+  hipLaunchKernel( LRNComputeDiff, dim3(CAFFE_GET_BLOCKS(n_threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+      n_threads, bot_gpu_data, top_gpu_data, 
+      scale_gpu_data, top_gpu_diff, num_, channels_, height_, width_,
+      size_, -beta_, Dtype(2. * alpha_ * beta_ / size_),
+      bot_gpu_diff);
 }
 template void LRNLayer<float>::CrossChannelBackward_gpu(
     const vector<Blob<float>*>& top, const vector<bool>& propagate_down,
