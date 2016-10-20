@@ -133,6 +133,7 @@ TYPED_TEST(Im2colKernelTest, Test2D) {
     for (int n = 0; n < this->blob_bottom_->num(); ++n) {
       int grid_dim = default_grid_dim/grid_div;
       // NOLINT_NEXT_LINE(whitespace/operators)
+#ifdef DISABLE_HIP_LAUNCH_FIX
       hipLaunchKernel(HIP_KERNEL_NAME(im2col_gpu_kernel<TypeParam>), dim3(grid_dim), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         num_kernels, bottom_data + this->blob_bottom_->offset(n),
         this->height_, this->width_, this->kernel_size_, this->kernel_size_,
@@ -140,6 +141,16 @@ TYPED_TEST(Im2colKernelTest, Test2D) {
         this->dilation_, this->dilation_,
         this->height_col_, this->width_col_,
         top_data + this->blob_top_->offset(n));
+#else 
+      auto blobb = this->blob_bottom_->offset(n);
+      hipLaunchKernel(HIP_KERNEL_NAME(im2col_gpu_kernel<TypeParam>), dim3(grid_dim), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+        num_kernels, bottom_data + blobb,
+        this->height_, this->width_, this->kernel_size_, this->kernel_size_,
+        this->pad_, this->pad_, this->stride_, this->stride_,
+        this->dilation_, this->dilation_,
+        this->height_col_, this->width_col_,
+        top_data + this->blob_top_->offset(n));
+#endif
       //HIP_POST_KERNEL_CHECK;
     }
 
