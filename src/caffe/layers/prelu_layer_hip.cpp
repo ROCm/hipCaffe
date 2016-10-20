@@ -90,11 +90,22 @@ void PReLULayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 
     // compute element-wise diff
     // NOLINT_NEXT_LINE(whitespace/operators)
+#ifdef DISABLE_HIP_LAUNCH_FIX
     hipLaunchKernel(HIP_KERNEL_NAME(PReLUParamBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(cdim)),
       dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       cdim, bottom[0]->num(), top[0]->offset(1), top_diff ,
       bottom_data ,
       backward_buff_.mutable_gpu_diff());
+#else
+    auto bot0_num = bottom[0]->num();
+    auto top0_offset = top[0]->offset(1);
+    auto bb = backward_buff_.mutable_gpu_diff();
+    hipLaunchKernel(HIP_KERNEL_NAME(PReLUParamBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(cdim)),
+      dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
+      cdim, bot0_num, top0_offset, top_diff ,
+      bottom_data ,
+      bb); 
+#endif
     //HIP_POST_KERNEL_CHECK;
     if (channel_shared_) {
       Dtype dsum;

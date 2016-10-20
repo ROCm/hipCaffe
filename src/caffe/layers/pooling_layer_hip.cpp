@@ -166,24 +166,46 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_mask = NULL;
   switch (this->layer_param_.pooling_param().pool()) {
   case PoolingParameter_PoolMethod_MAX:
+    {
     if (use_top_mask) {
       top_mask = top[1]->mutable_gpu_data();
     } else {
       mask = max_idx_.mutable_gpu_data();
     }
     // NOLINT_NEXT_LINE(whitespace/operators)
+#ifdef DISABLE_HIP_LAUNCH_FIX
     hipLaunchKernel(HIP_KERNEL_NAME(MaxPoolForward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, bottom[0]->num(), channels_,
         height_, width_, pooled_height_, pooled_width_, kernel_h_,
         kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data,
         mask, top_mask);
+#else
+    auto bot0_num = bottom[0]->num();
+    hipLaunchKernel(HIP_KERNEL_NAME(MaxPoolForward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+        count, bottom_data, bot0_num, channels_,
+        height_, width_, pooled_height_, pooled_width_, kernel_h_,
+        kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data,
+        mask, top_mask);
+#endif
+    }
     break;
   case PoolingParameter_PoolMethod_AVE:
+    {
     // NOLINT_NEXT_LINE(whitespace/operators)
+#ifdef DISABLE_HIP_LAUNCH_FIX
     hipLaunchKernel(HIP_KERNEL_NAME(AvePoolForward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, bottom[0]->num(), channels_,
         height_, width_, pooled_height_, pooled_width_, kernel_h_,
         kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data);
+#else
+    auto bot0_numB = bottom[0]->num();
+    hipLaunchKernel(HIP_KERNEL_NAME(AvePoolForward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+        count, bottom_data, bot0_numB, channels_,
+        height_, width_, pooled_height_, pooled_width_, kernel_h_,
+        kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data);
+#endif
+
+    }
     break;
   case PoolingParameter_PoolMethod_STOCHASTIC:
     if (this->phase_ == TRAIN) {
@@ -191,19 +213,37 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       caffe_gpu_rng_uniform(count, Dtype(0), Dtype(1),
                             rand_idx_.mutable_gpu_data());
       // NOLINT_NEXT_LINE(whitespace/operators)
+#ifdef DISABLE_HIP_LAUNCH_FIX
       hipLaunchKernel(HIP_KERNEL_NAME(StoPoolForwardTrain<Dtype>), dim3(CAFFE_GET_BLOCKS(count)),
                                    dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
           count, bottom_data, bottom[0]->num(), channels_,
           height_, width_, pooled_height_, pooled_width_, kernel_h_,
           kernel_w_, stride_h_, stride_w_,
           rand_idx_.mutable_gpu_data(), top_data);
+#else
+      hipLaunchKernel(HIP_KERNEL_NAME(StoPoolForwardTrain<Dtype>), dim3(CAFFE_GET_BLOCKS(count)),
+                                   dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+          count, bottom_data, bottom[0]->num(), channels_,
+          height_, width_, pooled_height_, pooled_width_, kernel_h_,
+          kernel_w_, stride_h_, stride_w_,
+          rand_idx_.mutable_gpu_data(), top_data);
+#endif
     } else {
       // NOLINT_NEXT_LINE(whitespace/operators)
+#ifdef DISABLE_HIP_LAUNCH_FIX
       hipLaunchKernel(HIP_KERNEL_NAME(StoPoolForwardTest<Dtype>), dim3(CAFFE_GET_BLOCKS(count)),
                                   dim3(CAFFE_HIP_NUM_THREADS),0, 0, 
           count, bottom_data, bottom[0]->num(), channels_,
           height_, width_, pooled_height_, pooled_width_, kernel_h_,
           kernel_w_, stride_h_, stride_w_, top_data);
+#else
+      auto bot0_num = bottom[0]->num();
+      hipLaunchKernel(HIP_KERNEL_NAME(StoPoolForwardTest<Dtype>), dim3(CAFFE_GET_BLOCKS(count)),
+                                  dim3(CAFFE_HIP_NUM_THREADS),0, 0, 
+          count, bottom_data, bot0_num, channels_,
+          height_, width_, pooled_height_, pooled_width_, kernel_h_,
+          kernel_w_, stride_h_, stride_w_, top_data);
+#endif
     }
     break;
   default:
@@ -346,32 +386,65 @@ void PoolingLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   const Dtype* top_mask = NULL;
   switch (this->layer_param_.pooling_param().pool()) {
   case PoolingParameter_PoolMethod_MAX:
+    {
     if (use_top_mask) {
       top_mask = top[1]->gpu_data();
     } else {
       mask = max_idx_.gpu_data();
     }
     // NOLINT_NEXT_LINE(whitespace/operators)
+#ifdef DISABLE_HIP_LAUNCH_FIX
     hipLaunchKernel(HIP_KERNEL_NAME(MaxPoolBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, mask, top_mask, top[0]->num(), channels_,
         height_, width_, pooled_height_, pooled_width_,
         kernel_h_, kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
         bottom_diff);
+#else
+    auto top0_num = top[0]->num();
+    hipLaunchKernel(HIP_KERNEL_NAME(MaxPoolBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+        count, top_diff, mask, top_mask, top0_num, channels_,
+        height_, width_, pooled_height_, pooled_width_,
+        kernel_h_, kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
+        bottom_diff);
+#endif
+    }
+
     break;
   case PoolingParameter_PoolMethod_AVE:
+    {
     // NOLINT_NEXT_LINE(whitespace/operators)
+#ifdef DISABLE_HIP_LAUNCH_FIX
     hipLaunchKernel(HIP_KERNEL_NAME(AvePoolBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, top[0]->num(), channels_,
         height_, width_, pooled_height_, pooled_width_, kernel_h_,
         kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, bottom_diff);
+#else
+    auto top0_num = top[0]->num();
+    hipLaunchKernel(HIP_KERNEL_NAME(AvePoolBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+        count, top_diff, top0_num, channels_,
+        height_, width_, pooled_height_, pooled_width_, kernel_h_,
+        kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, bottom_diff);
+#endif
+    }
     break;
   case PoolingParameter_PoolMethod_STOCHASTIC:
+    {
     // NOLINT_NEXT_LINE(whitespace/operators)
+#ifdef DISABLE_HIP_LAUNCH_FIX
     hipLaunchKernel(HIP_KERNEL_NAME(StoPoolBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, rand_idx_.gpu_data(), top_diff,
         top[0]->num(), channels_, height_, width_, pooled_height_,
         pooled_width_, kernel_h_, kernel_w_, stride_h_, stride_w_,
         bottom_diff);
+#else
+    auto top0_num = top[0]->num();
+    hipLaunchKernel(HIP_KERNEL_NAME(StoPoolBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+        count, rand_idx_.gpu_data(), top_diff,
+        top0_num, channels_, height_, width_, pooled_height_,
+        pooled_width_, kernel_h_, kernel_w_, stride_h_, stride_w_,
+        bottom_diff);
+#endif
+    }
     break;
   default:
     LOG(FATAL) << "Unknown pooling method.";
