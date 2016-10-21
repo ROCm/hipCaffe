@@ -1,0 +1,14 @@
+
+### CAFFE directed tests: 
+# Run all tests:
+./build/test/test_all.testbin
+
+# Run a specific test:
+./build/test/test_all.testbin --gtest_filter=Im2colKernelTest/0.TestND
+
+
+
+### How to run mninst:
+http://caffe.berkeleyvision.org/gathered/examples/mnist.html
+cd $CAFFE_ROOT
+./examples/mnist/train_lenet.sh
