@@ -200,12 +200,25 @@ TYPED_TEST(Im2colKernelTest, TestND) {
       const int grid_dim = default_grid_dim / grid_div;
       TypeParam* top_data_gpu = this->blob_top_->mutable_gpu_data();
       // NOLINT_NEXT_LINE(whitespace/operators)
+#ifdef DISABLE_HIP_LAUNCH_FIX 
       hipLaunchKernel(HIP_KERNEL_NAME(im2col_nd_gpu_kernel<TypeParam, 2>), dim3(grid_dim), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
           num_kernels, bottom_data_gpu + this->blob_bottom_->offset(n),
           this->blob_bottom_->gpu_shape() + 1, this->blob_top_->gpu_shape() + 1,
           this->blob_kernel_shape_->gpu_data(), this->blob_pad_->gpu_data(),
           this->blob_stride_->gpu_data(), this->blob_dilation_->gpu_data(),
           top_data_gpu + this->blob_top_->offset(n));
+#else 
+			auto data_im = bottom_data_gpu + this->blob_bottom_->offset(n);
+      auto im_shape = this->blob_bottom_->gpu_shape() + 1;
+		  auto col_shape = this->blob_top_->gpu_shape() + 1;
+      auto kernel_shape = this->blob_kernel_shape_->gpu_data();
+			auto pad = this->blob_pad_->gpu_data();
+      auto stride = this->blob_stride_->gpu_data();
+      auto dilation = this->blob_dilation_->gpu_data();
+      auto data_col = top_data_gpu + this->blob_top_->offset(n);
+      hipLaunchKernel(HIP_KERNEL_NAME(im2col_nd_gpu_kernel<TypeParam, 2>), dim3(grid_dim), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+											num_kernels, data_im, im_shape, col_shape, kernel_shape, pad, stride, dilation, data_col);
+#endif
       //HIP_POST_KERNEL_CHECK;
     }
 
