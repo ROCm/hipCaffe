@@ -32,6 +32,7 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 #else  // Normal GPU + CPU Caffe.
 
 #include <hip/hip_runtime.h>
+#include <hip/hip_profile.h>  // Only avail in bleeding-edge versions of HIP
 #include <hipblas.h>
 
 //
