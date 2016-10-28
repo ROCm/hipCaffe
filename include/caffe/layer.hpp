@@ -444,6 +444,20 @@ class Layer {
   DISABLE_COPY_AND_ASSIGN(Layer);
 };  // class Layer
 
+
+
+static inline void tokenize(const std::string &s, char delim, std::vector<std::string> *tokens)
+{
+    std::stringstream ss;
+    ss.str(s);
+    std::string item;
+    while (getline(ss, item, delim)) {
+        item.erase (std::remove (item.begin(), item.end(), ' '), item.end()); // remove whitespace.
+        tokens->push_back(item);
+    }
+}
+
+
 // Forward and backward wrappers. You should implement the cpu and
 // gpu specific implementations instead, and should not change these
 // functions.
@@ -454,22 +468,41 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
   Lock();
   Dtype loss = 0;
   Reshape(bottom, top);
-  switch (Caffe::mode()) {
+  auto mode = Caffe::mode();
+
+// TODO - remove, debug code:
+  std::vector<std::string> forceCpu;
+  const char *CAFFE_FORCE_CPU = getenv("CAFFE_FORCE_CPU");
+  if (CAFFE_FORCE_CPU) {
+      tokenize(CAFFE_FORCE_CPU, ',', &forceCpu);
+      for (auto o=forceCpu.begin(); o!=forceCpu.end(); o++) {
+          if (0 || (*o == type())) {
+              printf ("force CPU for layer %s\n", o->c_str());
+              mode = Caffe::CPU;
+          }
+      }
+  }
+  printf ("run layer %s mode=%s\n", type(), mode==Caffe::CPU ? "CPU" : "GPU");
+  switch (mode) {
   case Caffe::CPU:
     HIP_BEGIN_MARKER(type(), "CAFFE-fwd");
     Forward_cpu(bottom, top);
+    HIP_END_MARKER();
     for (int top_id = 0; top_id < top.size(); ++top_id) {
       if (!this->loss(top_id)) { continue; }
       const int count = top[top_id]->count();
       const Dtype* data = top[top_id]->cpu_data();
       const Dtype* loss_weights = top[top_id]->cpu_diff();
-      loss += caffe_cpu_dot(count, data, loss_weights);
+      Dtype blob_loss  = caffe_cpu_dot(count, data, loss_weights);
+      loss += blob_loss;
+      printf ("cpu: loss += %6.2f = %6.2f\n", blob_loss, loss);
     }
     break;
     HIP_END_MARKER();
   case Caffe::GPU:
     HIP_BEGIN_MARKER(type(), "CAFFE-fwd");
     Forward_gpu(bottom, top);
+    HIP_END_MARKER();
 #ifndef CPU_ONLY
     for (int top_id = 0; top_id < top.size(); ++top_id) {
       if (!this->loss(top_id)) { continue; }
@@ -479,6 +512,7 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
       Dtype blob_loss = 0;
       caffe_gpu_dot(count, data, loss_weights, &blob_loss);
       loss += blob_loss;
+      printf ("gpu: loss += %6.2f = %6.2f\n", blob_loss, loss);
     }
     HIP_END_MARKER();
 #endif
