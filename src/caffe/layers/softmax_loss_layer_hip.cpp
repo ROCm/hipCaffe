@@ -28,9 +28,13 @@ __global__ void SoftmaxLossForwardGPU(hipLaunchParm lp, const int nthreads,
   }
 }
 
+#define FORCE_SOFTMAX_CPU 1
 template <typename Dtype>
 void SoftmaxWithLossLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
+#if FORCE_SOFTMAX_CPU
+    Forward_cpu(bottom, top);
+#else
   softmax_layer_->Forward(softmax_bottom_vec_, softmax_top_vec_);
   const Dtype* prob_data = prob_.gpu_data();
   const Dtype* label = bottom[1]->gpu_data();
@@ -61,6 +65,7 @@ void SoftmaxWithLossLayer<Dtype>::Forward_gpu(
   if (top.size() == 2) {
     top[1]->ShareData(prob_);
   }
+#endif
 }
 
 template <typename Dtype>
