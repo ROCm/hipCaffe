@@ -17,7 +17,7 @@ __global__ void AdaDeltaUpdate(hipLaunchParm lp, int N, Dtype* g, Dtype* h, Dtyp
 template <typename Dtype>
 void adadelta_update_gpu(int N, Dtype* g, Dtype* h, Dtype* h2, Dtype momentum,
     Dtype delta, Dtype local_rate) {
-  hipLaunchKernel(HIP_KERNEL_NAME(AdaDeltaUpdate<Dtype>),   // NOLINT_NEXT_LINE(whitespace/operators)
+  hipLaunchKernel(AdaDeltaUpdate<Dtype>,   // NOLINT_NEXT_LINE(whitespace/operators)
       dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       N, g, h, h2, momentum, delta, local_rate);
 }

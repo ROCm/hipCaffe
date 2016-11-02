@@ -54,7 +54,7 @@ void im2col_gpu(const Dtype* data_im, const int channels,
       (dilation_w * (kernel_w - 1) + 1)) / stride_w + 1;
   int num_kernels = channels * height_col * width_col;
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(im2col_gpu_kernel<Dtype>), dim3(CAFFE_GET_BLOCKS(num_kernels)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
+  hipLaunchKernel(im2col_gpu_kernel<Dtype>, dim3(CAFFE_GET_BLOCKS(num_kernels)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       num_kernels, data_im, height, width, kernel_h, kernel_w, pad_h,
       pad_w, stride_h, stride_w, dilation_h, dilation_w, height_col,
       width_col, data_col);

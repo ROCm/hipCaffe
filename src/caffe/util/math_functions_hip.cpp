@@ -150,7 +150,7 @@ void caffe_gpu_set(const int N, const Dtype alpha, Dtype* Y) {
     return;
   }
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(set_kernel<Dtype>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(set_kernel<Dtype>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, alpha, Y);
 }
 
@@ -168,14 +168,14 @@ __global__ void add_scalar_kernel(hipLaunchParm lp, const int n, const Dtype alp
 template <>
 void caffe_gpu_add_scalar(const int N, const float alpha, float* Y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(add_scalar_kernel<float>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(add_scalar_kernel<float>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, alpha, Y);
 }
 
 template <>
 void caffe_gpu_add_scalar(const int N, const double alpha, double* Y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(add_scalar_kernel<double>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(add_scalar_kernel<double>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, alpha, Y);
 }
 
@@ -191,7 +191,7 @@ template <>
 void caffe_gpu_add<float>(const int N, const float* a, const float* b,
     float* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(add_kernel<float>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(add_kernel<float>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, b, y);
 }
 
@@ -199,7 +199,7 @@ template <>
 void caffe_gpu_add<double>(const int N, const double* a, const double* b,
     double* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(add_kernel<double>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(add_kernel<double>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, b, y);
 }
 
@@ -215,7 +215,7 @@ template <>
 void caffe_gpu_sub<float>(const int N, const float* a, const float* b,
     float* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(sub_kernel<float>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(sub_kernel<float>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, b, y);
 }
 
@@ -223,7 +223,7 @@ template <>
 void caffe_gpu_sub<double>(const int N, const double* a, const double* b,
     double* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(sub_kernel<double>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(sub_kernel<double>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, b, y);
 }
 
@@ -239,7 +239,7 @@ template <>
 void caffe_gpu_mul<float>(const int N, const float* a,
     const float* b, float* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(mul_kernel<float>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(mul_kernel<float>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, b, y);
 }
 
@@ -247,7 +247,7 @@ template <>
 void caffe_gpu_mul<double>(const int N, const double* a,
     const double* b, double* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(mul_kernel<double>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(mul_kernel<double>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, b, y);
 }
 
@@ -263,7 +263,7 @@ template <>
 void caffe_gpu_div<float>(const int N, const float* a,
     const float* b, float* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(div_kernel<float>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(div_kernel<float>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, b, y);
 }
 
@@ -271,7 +271,7 @@ template <>
 void caffe_gpu_div<double>(const int N, const double* a,
     const double* b, double* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(div_kernel<double>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(div_kernel<double>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, b, y);
 }
 
@@ -285,14 +285,14 @@ __global__ void abs_kernel(hipLaunchParm lp, const int n, const Dtype* a, Dtype*
 template <>
 void caffe_gpu_abs<float>(const int N, const float* a, float* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(abs_kernel<float>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(abs_kernel<float>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, y);
 }
 
 template <>
 void caffe_gpu_abs<double>(const int N, const double* a, double* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(abs_kernel<double>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(abs_kernel<double>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, y);
 }
 
@@ -307,14 +307,14 @@ __global__ void exp_kernel(hipLaunchParm lp, const int n, const Dtype* a, Dtype*
 template <>
 void caffe_gpu_exp<float>(const int N, const float* a, float* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(exp_kernel<float>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(exp_kernel<float>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, y);
 }
 
 template <>
 void caffe_gpu_exp<double>(const int N, const double* a, double* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(exp_kernel<double>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(exp_kernel<double>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, y);
 }
 
@@ -328,14 +328,14 @@ __global__ void log_kernel(hipLaunchParm lp, const int n, const Dtype* a, Dtype*
 template <>
 void caffe_gpu_log<float>(const int N, const float* a, float* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(log_kernel<float>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(log_kernel<float>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, y);
 }
 
 template <>
 void caffe_gpu_log<double>(const int N, const double* a, double* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(log_kernel<double>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(log_kernel<double>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, y);
 }
 
@@ -351,7 +351,7 @@ template <>
 void caffe_gpu_powx<float>(const int N, const float* a,
     const float alpha, float* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(powx_kernel<float>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(powx_kernel<float>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, alpha, y);
 }
 
@@ -359,7 +359,7 @@ template <>
 void caffe_gpu_powx<double>(const int N, const double* a,
     const double alpha, double* y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(powx_kernel<double>), dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(powx_kernel<double>, dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, a, alpha, y);
 }
 

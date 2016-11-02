@@ -21,7 +21,7 @@ void TanHLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_data = top[0]->mutable_gpu_data();
   const int count = bottom[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(TanHForward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
+  hipLaunchKernel(TanHForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       count, bottom_data, top_data);
   //HIP_POST_KERNEL_CHECK;
 }
@@ -45,7 +45,7 @@ void TanHLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
     const int count = bottom[0]->count();
     // NOLINT_NEXT_LINE(whitespace/operators)
-   hipLaunchKernel(HIP_KERNEL_NAME(TanHBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
+   hipLaunchKernel(TanHBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
         count, top_diff, top_data, bottom_diff);
     //HIP_POST_KERNEL_CHECK;
   }

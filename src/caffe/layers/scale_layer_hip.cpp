@@ -44,12 +44,12 @@ void ScaleLayer<Dtype>::Forward_gpu(
   Dtype* top_data = top[0]->mutable_gpu_data();
   if (bias_layer_) {
     const Dtype* bias_data = this->blobs_[bias_param_id_]->gpu_data();
-    hipLaunchKernel(HIP_KERNEL_NAME(ScaleBiasForward<Dtype>),  // NOLINT_NEXT_LINE(whitespace/operators)
+    hipLaunchKernel(ScaleBiasForward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
         dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, scale_data, bias_data, scale_dim_, inner_dim_,
         top_data);
   } else {
-    hipLaunchKernel(HIP_KERNEL_NAME(ScaleForward<Dtype>),  // NOLINT_NEXT_LINE(whitespace/operators)
+    hipLaunchKernel(ScaleForward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
         dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, scale_data, scale_dim_, inner_dim_, top_data);
   }
@@ -124,7 +124,7 @@ void ScaleLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const Dtype* top_diff = top[0]->gpu_diff();
     const Dtype* scale_data = scale->gpu_data();
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
-    hipLaunchKernel(HIP_KERNEL_NAME(ScaleForward<Dtype>),  // NOLINT_NEXT_LINE(whitespace/operators)
+    hipLaunchKernel(ScaleForward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
         dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, scale_data, scale_dim_, inner_dim_, bottom_diff);
   }

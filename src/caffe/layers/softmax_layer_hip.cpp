@@ -93,26 +93,26 @@ void SoftmaxLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   // and then normalize.
   // compute max
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(kernel_channel_max<Dtype>), dim3(CAFFE_GET_BLOCKS(outer_num_ * inner_num_)),
+  hipLaunchKernel(kernel_channel_max<Dtype>, dim3(CAFFE_GET_BLOCKS(outer_num_ * inner_num_)),
       dim3(CAFFE_HIP_NUM_THREADS), 0, 0, outer_num_, channels, inner_num_, top_data,
       scale_data);
   // subtract
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(kernel_channel_subtract<Dtype>), dim3(CAFFE_GET_BLOCKS(count)),
+  hipLaunchKernel(kernel_channel_subtract<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
       dim3(CAFFE_HIP_NUM_THREADS), 0, 0, count, outer_num_, channels, inner_num_,
       scale_data, top_data);
   // exponentiate
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(kernel_exp<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernel(kernel_exp<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       count, top_data, top_data);
   // sum after exp
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(kernel_channel_sum<Dtype>), dim3(CAFFE_GET_BLOCKS(outer_num_ * inner_num_)),
+  hipLaunchKernel(kernel_channel_sum<Dtype>, dim3(CAFFE_GET_BLOCKS(outer_num_ * inner_num_)),
       dim3(CAFFE_HIP_NUM_THREADS), 0, 0, outer_num_, channels, inner_num_, top_data,
       scale_data);
   // divide
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(kernel_channel_div<Dtype>), dim3(CAFFE_GET_BLOCKS(count)),
+  hipLaunchKernel(kernel_channel_div<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
       dim3(CAFFE_HIP_NUM_THREADS), 0, 0,  count, outer_num_, channels, inner_num_,
       scale_data, top_data);
 }
@@ -129,11 +129,11 @@ void SoftmaxLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   caffe_copy(count, top_diff, bottom_diff);
   // Compute inner1d(top_diff, top_data) and subtract them from the bottom diff.
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(kernel_channel_dot<Dtype>), dim3(CAFFE_GET_BLOCKS(outer_num_ * inner_num_)),
+  hipLaunchKernel(kernel_channel_dot<Dtype>, dim3(CAFFE_GET_BLOCKS(outer_num_ * inner_num_)),
       dim3(CAFFE_HIP_NUM_THREADS), 0, 0, outer_num_, channels, inner_num_,
       top_diff, top_data, scale_data);
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(kernel_channel_subtract<Dtype>), dim3(CAFFE_GET_BLOCKS(count)),
+  hipLaunchKernel(kernel_channel_subtract<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
       dim3(CAFFE_HIP_NUM_THREADS), 0, 0, count, outer_num_, channels, inner_num_,
       scale_data, bottom_diff);
   // elementwise multiplication

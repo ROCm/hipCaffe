@@ -13,7 +13,7 @@ __global__ void SGDUpdate(hipLaunchParm lp, int N, Dtype* g, Dtype* h,
 template <typename Dtype>
 void sgd_update_gpu(int N, Dtype* g, Dtype* h, Dtype momentum,
     Dtype local_rate) {
-  hipLaunchKernel(HIP_KERNEL_NAME(SGDUpdate<Dtype>),  // NOLINT_NEXT_LINE(whitespace/operators)
+  hipLaunchKernel(SGDUpdate<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
       dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, g, h, momentum, local_rate);
 }

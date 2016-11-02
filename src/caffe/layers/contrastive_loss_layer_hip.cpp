@@ -94,7 +94,7 @@ void ContrastiveLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
           static_cast<Dtype>(bottom[0]->num());
       // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-      hipLaunchKernel(HIP_KERNEL_NAME(CLLBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
+      hipLaunchKernel(CLLBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
           count, channels, margin, legacy_version, alpha,
           bottom[2]->gpu_data(),  // pair similarity 0 or 1
           diff_.gpu_data(),  // the cached eltwise difference between a and b
@@ -105,7 +105,7 @@ void ContrastiveLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
       auto diff_gpu_data = diff_.gpu_data();  // the cached eltwise difference between a and b
       auto dist_sq_gpu_data = dist_sq_.gpu_data();  // the cached square distance between a and b
       auto bot_mutable_gpu_diff = bottom[i]->mutable_gpu_diff();
-      hipLaunchKernel(HIP_KERNEL_NAME(CLLBackward<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
+      hipLaunchKernel(CLLBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
           count, channels, margin, legacy_version, alpha,
           bot2_gpu_data,  // pair similarity 0 or 1
           diff_gpu_data,  // the cached eltwise difference between a and b
