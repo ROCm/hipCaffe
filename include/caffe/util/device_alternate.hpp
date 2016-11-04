@@ -81,9 +81,9 @@ namespace caffe {
 const char* hipblasGetErrorString(hipblasStatus_t error);
 // HIP: use 512 threads per block
 
-#ifdef __NVCC__
+#ifdef __HIP_PLATFORM_NVCC__
 const int CAFFE_HIP_NUM_THREADS = 512;
-#elif __HCC__
+#elif __HIP_PLATFORM_HCC__
 const int CAFFE_HIP_NUM_THREADS = 256;
 #endif
 
