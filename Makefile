@@ -47,13 +47,13 @@ COMMON_FLAGS += -DCAFFE_VERSION=$(DYNAMIC_VERSION_MAJOR).$(DYNAMIC_VERSION_MINOR
 # CXX_SRCS are the source files excluding the test ones.
 CXX_SRCS := $(shell find src/$(PROJECT) ! -name "test_*.cpp" -name "*.cpp" ! -name "*_hip.cpp" ! -name "test_*_hip.cpp")
 # CU_SRCS are the cuda source files
-CU_SRCS := $(shell find src/$(PROJECT)  -name "*_hip.cpp")
+CU_SRCS := $(shell find src/$(PROJECT)  -name "*_hip.cpp" -name "*.cu")
 #CU_SRCS := $(shell find src/$(PROJECT) ! -name "*_hip.cpp")
 # TEST_SRCS are the test source files
 TEST_MAIN_SRC := src/$(PROJECT)/test/test_caffe_main.cpp
-TEST_SRCS := $(shell find src/$(PROJECT) -name "test_*.cpp")
+TEST_SRCS := $(shell find src/$(PROJECT) -name "test_*.cpp" ! -name "test*_kernel.cpp")
 TEST_SRCS := $(filter-out $(TEST_MAIN_SRC), $(TEST_SRCS))
-TEST_CU_SRCS := $(shell find src/$(PROJECT) -name "test_*.cu")
+TEST_CU_SRCS := $(shell find src/$(PROJECT) -name "test_*.cu" -name "test*_kernel.cpp")
 GTEST_SRC := src/gtest/gtest-all.cpp
 # TOOL_SRCS are the source files for the tool binaries
 TOOL_SRCS := $(shell find tools -name "*.cpp")
@@ -412,7 +412,7 @@ CXXFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
 NVCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS) -std=c++11 -Wno-deprecated-gpu-targets
 # mex may invoke an older gcc that is too liberal with -Wuninitalized
 MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
-LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
+LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS) $(shell hipconfig -C)
 
 USE_PKG_CONFIG ?= 0
 ifeq ($(USE_PKG_CONFIG), 1)
