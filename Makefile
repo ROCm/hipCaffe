@@ -174,9 +174,9 @@ endif
 #hip_LIB_DIR += $(HIP_PATH)/lib
 hip_LIB_DIR += /usr/local/cuda/lib64
 
-ifneq (, $findstring hcc, $(HIP_PLATFORM))
+ifneq (, $(findstring hcc, $(HIP_PLATFORM)))
 	HIP_LIBS := hip_hcc hcblas
-else ifneq (, $findstring nvcc, $(HIP_PLATFORM))
+else ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
 	HIP_LIBS := cudart cublas curand
 endif
 
@@ -418,9 +418,9 @@ CXXFLAGS += -MMD -MP $(shell hipconfig -C)
 COMMON_FLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
 CXXFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
 
-ifneq (, $findstring hcc, $(HIP_PLATFORM))
+ifneq (, $(findstring hcc, $(HIP_PLATFORM)))
 	HIPCCFLAGS += -fPIC $(COMMON_FLAGS) -std=c++11 
-else ifneq (, $findstring nvcc, $(HIP_PLATFORM))
+else ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
 	HIPCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS) -std=c++11 -Wno-deprecated-gpu-targets
 endif
 
