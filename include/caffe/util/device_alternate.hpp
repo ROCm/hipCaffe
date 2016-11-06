@@ -33,6 +33,9 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 
 #include <hip/hip_runtime.h>
 #include <hipblas.h>
+#ifdef USE_CUDNN
+#include "caffe/util/cudnn.hpp"
+#endif
 
 //
 // HIP macros

@@ -329,6 +329,7 @@ endif
 ifeq ($(USE_CUDNN), 1)
 	LIBRARIES += cudnn
 	COMMON_FLAGS += -DUSE_CUDNN
+ 	INCLUDE_DIRS += $(CUDNN_PATH)/include
 endif
 
 # configure IO libraries
