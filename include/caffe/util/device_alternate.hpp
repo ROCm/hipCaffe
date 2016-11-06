@@ -86,7 +86,8 @@ const char* hipblasGetErrorString(hipblasStatus_t error);
 
 #ifdef __HIP_PLATFORM_NVCC__
 const int CAFFE_HIP_NUM_THREADS = 512;
-#elif __HIP_PLATFORM_HCC__
+#endif
+#ifdef __HIP_PLATFORM_HCC__
 const int CAFFE_HIP_NUM_THREADS = 256;
 #endif
 

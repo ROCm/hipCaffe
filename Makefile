@@ -174,11 +174,17 @@ endif
 #hip_LIB_DIR += $(HIP_PATH)/lib
 hip_LIB_DIR += /usr/local/cuda/lib64
 
+ifneq (, $findstring hcc, $(HIP_PLATFORM))
+	HIP_LIBS := hip_hcc hcblas
+else ifneq (, $findstring nvcc, $(HIP_PLATFORM))
+	HIP_LIBS := cudart cublas curand
+endif
+
 INCLUDE_DIRS += $(BUILD_INCLUDE_DIR) ./src ./include
 ifneq ($(CPU_ONLY), 1)
 	INCLUDE_DIRS += $(hip_INCLUDE_DIR)
 	LIBRARY_DIRS += $(hip_LIB_DIR)
-	LIBRARIES := cudart cublas curand
+	LIBRARIES := $(HIP_LIBS)
 endif
 
 LIBRARIES += glog gflags protobuf boost_system boost_filesystem m hdf5_hl hdf5
@@ -308,7 +314,7 @@ ifdef CUSTOM_CXX
 endif
 
 # Static linking
-ifneq (,$(findstring clang++,$(CXX)))
+ifneq (,$(findstring hipcc,$(CXX)))
 	STATIC_LINK_COMMAND := -Wl,-force_load $(STATIC_NAME)
 else ifneq (,$(findstring g++,$(CXX)))
 	STATIC_LINK_COMMAND := -Wl,--whole-archive $(STATIC_NAME) -Wl,--no-whole-archive
@@ -411,7 +417,13 @@ CXXFLAGS += -MMD -MP $(shell hipconfig -C)
 # Complete build flags.
 COMMON_FLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
 CXXFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
-HIPCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS) -std=c++11 -Wno-deprecated-gpu-targets
+
+ifneq (, $findstring hcc, $(HIP_PLATFORM))
+	HIPCCFLAGS += -fPIC $(COMMON_FLAGS) -std=c++11 
+else ifneq (, $findstring nvcc, $(HIP_PLATFORM))
+	HIPCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS) -std=c++11 -Wno-deprecated-gpu-targets
+endif
+
 # mex may invoke an older gcc that is too liberal with -Wuninitalized
 MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
 LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS) $(shell hipconfig -C)
