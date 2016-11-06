@@ -47,7 +47,7 @@ COMMON_FLAGS += -DCAFFE_VERSION=$(DYNAMIC_VERSION_MAJOR).$(DYNAMIC_VERSION_MINOR
 # CXX_SRCS are the source files excluding the test ones.
 CXX_SRCS := $(shell find src/$(PROJECT) ! -name "test_*.cpp" -name "*.cpp" ! -name "*_hip.cpp" ! -name "test_*_hip.cpp")
 # CU_SRCS are the cuda source files
-CU_SRCS := $(shell find src/$(PROJECT)  -name "*_hip.cpp" -name "*.cu")
+CU_SRCS := $(shell find src/$(PROJECT)  -name "*_hip.cpp")
 #CU_SRCS := $(shell find src/$(PROJECT) ! -name "*_hip.cpp")
 # TEST_SRCS are the test source files
 TEST_MAIN_SRC := src/$(PROJECT)/test/test_caffe_main.cpp
