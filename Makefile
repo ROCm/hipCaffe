@@ -330,6 +330,7 @@ ifeq ($(USE_CUDNN), 1)
 	LIBRARIES += cudnn
 	COMMON_FLAGS += -DUSE_CUDNN
  	INCLUDE_DIRS += $(CUDNN_PATH)/include
+	LIBRARY_DIRS += $(CUDNN_PATH)/lib64
 endif
 
 # configure IO libraries
