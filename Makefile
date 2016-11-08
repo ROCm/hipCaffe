@@ -119,7 +119,7 @@ OBJS := $(PROTO_OBJS) $(CXX_OBJS) $(HIP_OBJS)
 TOOL_OBJS := $(addprefix $(BUILD_DIR)/, ${TOOL_SRCS:.cpp=.o})
 TOOL_BUILD_DIR := $(BUILD_DIR)/tools
 TEST_CXX_BUILD_DIR := $(BUILD_DIR)/src/$(PROJECT)/test
-TEST_CU_BUILD_DIR := $(BUILD_DIR)/hip/src/$(PROJECT)/test
+TEST_HIP_BUILD_DIR := $(BUILD_DIR)/hip/src/$(PROJECT)/test
 TEST_CXX_OBJS := $(addprefix $(BUILD_DIR)/, ${TEST_SRCS:.cpp=.o})
 TEST_HIP_OBJS := $(addprefix $(BUILD_DIR)/hip/, ${TEST_HIP_SRCS:.cu=.o})
 TEST_OBJS := $(TEST_CXX_OBJS) $(TEST_HIP_OBJS)
@@ -135,11 +135,11 @@ EXAMPLE_BINS := ${EXAMPLE_OBJS:.o=.bin}
 TOOL_BIN_LINKS := ${TOOL_BINS:.bin=}
 # Put the test binaries in build/test for convenience.
 TEST_BIN_DIR := $(BUILD_DIR)/test
-TEST_CU_BINS := $(addsuffix .testbin,$(addprefix $(TEST_BIN_DIR)/, \
+TEST_HIP_BINS := $(addsuffix .testbin,$(addprefix $(TEST_BIN_DIR)/, \
 		$(foreach obj,$(TEST_HIP_OBJS),$(basename $(notdir $(obj))))))
 TEST_CXX_BINS := $(addsuffix .testbin,$(addprefix $(TEST_BIN_DIR)/, \
 		$(foreach obj,$(TEST_CXX_OBJS),$(basename $(notdir $(obj))))))
-TEST_BINS := $(TEST_CXX_BINS) $(TEST_CU_BINS)
+TEST_BINS := $(TEST_CXX_BINS) $(TEST_HIP_BINS)
 # TEST_ALL_BIN is the test binary that links caffe dynamically.
 TEST_ALL_BIN := $(TEST_BIN_DIR)/test_all.testbin
 
@@ -148,14 +148,14 @@ TEST_ALL_BIN := $(TEST_BIN_DIR)/test_all.testbin
 ##############################
 WARNS_EXT := warnings.txt
 CXX_WARNS := $(addprefix $(BUILD_DIR)/, ${CXX_SRCS:.cpp=.o.$(WARNS_EXT)})
-CU_WARNS := $(addprefix $(BUILD_DIR)/hip/, ${HIP_SRCS:.cpp=.o.$(WARNS_EXT)})
+HIP_WARNS := $(addprefix $(BUILD_DIR)/hip/, ${HIP_SRCS:.cpp=.o.$(WARNS_EXT)})
 TOOL_WARNS := $(addprefix $(BUILD_DIR)/, ${TOOL_SRCS:.cpp=.o.$(WARNS_EXT)})
 EXAMPLE_WARNS := $(addprefix $(BUILD_DIR)/, ${EXAMPLE_SRCS:.cpp=.o.$(WARNS_EXT)})
 TEST_WARNS := $(addprefix $(BUILD_DIR)/, ${TEST_SRCS:.cpp=.o.$(WARNS_EXT)})
-TEST_CU_WARNS := $(addprefix $(BUILD_DIR)/hip/, ${TEST_HIP_SRCS:.cu=.o.$(WARNS_EXT)})
+TEST_HIP_WARNS := $(addprefix $(BUILD_DIR)/hip/, ${TEST_HIP_SRCS:.cu=.o.$(WARNS_EXT)})
 ALL_CXX_WARNS := $(CXX_WARNS) $(TOOL_WARNS) $(EXAMPLE_WARNS) $(TEST_WARNS)
-ALL_CU_WARNS := $(CU_WARNS) $(TEST_CU_WARNS)
-ALL_WARNS := $(ALL_CXX_WARNS) $(ALL_CU_WARNS)
+ALL_HIP_WARNS := $(HIP_WARNS) $(TEST_HIP_WARNS)
+ALL_WARNS := $(ALL_CXX_WARNS) $(ALL_HIP_WARNS)
 
 EMPTY_WARN_REPORT := $(BUILD_DIR)/.$(WARNS_EXT)
 NONEMPTY_WARN_REPORT := $(BUILD_DIR)/$(WARNS_EXT)
@@ -163,16 +163,16 @@ NONEMPTY_WARN_REPORT := $(BUILD_DIR)/$(WARNS_EXT)
 ##############################
 # Derive include and lib directories
 ##############################
-hip_INCLUDE_DIR := $(HIP_PATH)/include /usr/local/hip/include
+HIP_INCLUDE_DIR := $(HIP_PATH)/include /usr/local/hip/include
 
-hip_LIB_DIR :=
+HIP_LIB_DIR :=
 # add <hip>/lib64 only if it exists
 ifneq ("$(wildcard $(HIP_PATH)/lib64)","")
-	hip_LIB_DIR += $(HIP_PATH)/lib64
+	HIP_LIB_DIR += $(HIP_PATH)/lib64
 endif
 #TODO: make it compatible to HIP lib
-#hip_LIB_DIR += $(HIP_PATH)/lib
-hip_LIB_DIR += /usr/local/cuda/lib64
+#HIP_LIB_DIR += $(HIP_PATH)/lib
+HIP_LIB_DIR += /usr/local/cuda/lib64
 
 ifneq (, $(findstring hcc, $(HIP_PLATFORM)))
 	#HIP_LIBS := hip_hcc hcblas
@@ -183,8 +183,8 @@ endif
 
 INCLUDE_DIRS += $(BUILD_INCLUDE_DIR) ./src ./include
 ifneq ($(CPU_ONLY), 1)
-	INCLUDE_DIRS += $(hip_INCLUDE_DIR)
-	LIBRARY_DIRS += $(hip_LIB_DIR)
+	INCLUDE_DIRS += $(HIP_INCLUDE_DIR)
+	LIBRARY_DIRS += $(HIP_LIB_DIR)
 	LIBRARIES := $(HIP_LIBS)
 endif
 
@@ -282,8 +282,8 @@ endif
 ifeq ($(OSX), 1)
 	CXX := /usr/bin/clang++
 	ifneq ($(CPU_ONLY), 1)
-		hip_VERSION := $(shell $(HIP_PATH)/bin/nvcc -V | grep -o 'release [0-9.]*' | tr -d '[a-z ]')
-		ifeq ($(shell echo | awk '{exit $(hip_VERSION) < 7.0;}'), 1)
+		HIP_VERSION := $(shell $(HIP_PATH)/bin/nvcc -V | grep -o 'release [0-9.]*' | tr -d '[a-z ]')
+		ifeq ($(shell echo | awk '{exit $(HIP_VERSION) < 7.0;}'), 1)
 			CXXFLAGS += -stdlib=libstdc++
 			LINKFLAGS += -stdlib=libstdc++
 		endif
@@ -294,7 +294,7 @@ ifeq ($(OSX), 1)
 		OSX_10_5_OR_LATER := $(shell [ $(OSX_MINOR_VERSION) -ge 5 ] && echo true)
 		ifeq ($(OSX_10_OR_LATER),true)
 			ifeq ($(OSX_10_5_OR_LATER),true)
-				LDFLAGS += -Wl,-rpath,$(hip_LIB_DIR)
+				LDFLAGS += -Wl,-rpath,$(HIP_LIB_DIR)
 			endif
 		endif
 	endif
@@ -413,7 +413,9 @@ LIBRARY_DIRS += $(BLAS_LIB)
 LIBRARY_DIRS += $(LIB_BUILD_DIR)
 
 # Automatic dependency generation (nvcc is handled separately)
-CXXFLAGS += -MMD -MP $(shell hipconfig -C)
+ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
+	CXXFLAGS += -MMD -MP $(shell hipconfig -C)
+endif
 
 # Complete build flags.
 COMMON_FLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
@@ -616,7 +618,7 @@ $(TEST_ALL_BIN): $(TEST_MAIN_SRC) $(TEST_OBJS) $(GTEST_OBJ) \
 	$(Q)$(CXX) $(TEST_MAIN_SRC) $(TEST_OBJS) $(GTEST_OBJ) \
 		-o $@ $(LINKFLAGS) $(LDFLAGS) -l$(LIBRARY_NAME) -Wl,-rpath,$(ORIGIN)/../lib
 
-$(TEST_CU_BINS): $(TEST_BIN_DIR)/%.testbin: $(TEST_CU_BUILD_DIR)/%.o \
+$(TEST_HIP_BINS): $(TEST_BIN_DIR)/%.testbin: $(TEST_HIP_BUILD_DIR)/%.o \
 	$(GTEST_OBJ) | $(DYNAMIC_NAME) $(TEST_BIN_DIR)
 	@ echo LD $<
 	$(Q)$(CXX) $(TEST_MAIN_SRC) $< $(GTEST_OBJ) \
