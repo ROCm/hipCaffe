@@ -45,14 +45,15 @@ COMMON_FLAGS += -DCAFFE_VERSION=$(DYNAMIC_VERSION_MAJOR).$(DYNAMIC_VERSION_MINOR
 # Get all source files
 ##############################
 # CXX_SRCS are the source files excluding the test ones.
-CXX_SRCS := $(shell find src/$(PROJECT) ! -name "test_*.cpp" -name "*.cpp")
-# HIP_SRCS are the HIP source files
-HIP_SRCS := $(shell find src/$(PROJECT) ! -name "test_*.cxx" -name "*.cxx")
+CXX_SRCS := $(shell find src/$(PROJECT) ! -name "test_*.cpp" -name "*.cpp" ! -name "*_hip.cpp" ! -name "test_*_hip.cpp")
+# HIP_SRCS are the hip source files
+HIP_SRCS := $(shell find src/$(PROJECT)  -name "*_hip.cpp")
+#HIP_SRCS := $(shell find src/$(PROJECT) ! -name "*_hip.cpp")
 # TEST_SRCS are the test source files
 TEST_MAIN_SRC := src/$(PROJECT)/test/test_caffe_main.cpp
-TEST_SRCS := $(shell find src/$(PROJECT) -name "test_*.cpp")
+TEST_SRCS := $(shell find src/$(PROJECT) -name "test_*.cpp" ! -name "test*_kernel.cpp")
 TEST_SRCS := $(filter-out $(TEST_MAIN_SRC), $(TEST_SRCS))
-TEST_HIP_SRCS := $(shell find src/$(PROJECT) -name "test_*.cxx")
+TEST_HIP_SRCS := $(shell find src/$(PROJECT) -name "test_*.cu" -name "test*_kernel.cpp")
 GTEST_SRC := src/gtest/gtest-all.cpp
 # TOOL_SRCS are the source files for the tool binaries
 TOOL_SRCS := $(shell find tools -name "*.cpp")
@@ -76,8 +77,7 @@ NONGEN_CXX_SRCS := $(shell find \
 	matlab/+$(PROJECT)/private \
 	examples \
 	tools \
-	-name "*.cpp" -or -name "*.hpp")
-
+	-name "*.cpp" -or -name "*.hpp" -or -name "*.cu" -or -name "*.cuh")
 LINT_SCRIPT := scripts/cpp_lint.py
 LINT_OUTPUT_DIR := $(BUILD_DIR)/.lint
 LINT_EXT := lint.txt
@@ -112,7 +112,7 @@ PROTO_GEN_PY := $(foreach file,${PROTO_SRCS:.proto=_pb2.py}, \
 # These objects will be linked into the final shared library, so we
 # exclude the tool, example, and test objects.
 CXX_OBJS := $(addprefix $(BUILD_DIR)/, ${CXX_SRCS:.cpp=.o})
-HIP_OBJS := $(addprefix $(BUILD_DIR)/hip/, ${HIP_SRCS:.cxx=.o})
+HIP_OBJS := $(addprefix $(BUILD_DIR)/hip/, ${HIP_SRCS:.cpp=.o})
 PROTO_OBJS := ${PROTO_GEN_CC:.cc=.o}
 OBJS := $(PROTO_OBJS) $(CXX_OBJS) $(HIP_OBJS)
 # tool, example, and test objects
@@ -121,7 +121,7 @@ TOOL_BUILD_DIR := $(BUILD_DIR)/tools
 TEST_CXX_BUILD_DIR := $(BUILD_DIR)/src/$(PROJECT)/test
 TEST_HIP_BUILD_DIR := $(BUILD_DIR)/hip/src/$(PROJECT)/test
 TEST_CXX_OBJS := $(addprefix $(BUILD_DIR)/, ${TEST_SRCS:.cpp=.o})
-TEST_HIP_OBJS := $(addprefix $(BUILD_DIR)/hip/, ${TEST_HIP_SRCS:.cxx=.o})
+TEST_HIP_OBJS := $(addprefix $(BUILD_DIR)/hip/, ${TEST_HIP_SRCS:.cu=.o})
 TEST_OBJS := $(TEST_CXX_OBJS) $(TEST_HIP_OBJS)
 GTEST_OBJ := $(addprefix $(BUILD_DIR)/, ${GTEST_SRC:.cpp=.o})
 EXAMPLE_OBJS := $(addprefix $(BUILD_DIR)/, ${EXAMPLE_SRCS:.cpp=.o})
@@ -148,11 +148,11 @@ TEST_ALL_BIN := $(TEST_BIN_DIR)/test_all.testbin
 ##############################
 WARNS_EXT := warnings.txt
 CXX_WARNS := $(addprefix $(BUILD_DIR)/, ${CXX_SRCS:.cpp=.o.$(WARNS_EXT)})
-HIP_WARNS := $(addprefix $(BUILD_DIR)/hip/, ${HIP_SRCS:.cxx=.o.$(WARNS_EXT)})
+HIP_WARNS := $(addprefix $(BUILD_DIR)/hip/, ${HIP_SRCS:.cpp=.o.$(WARNS_EXT)})
 TOOL_WARNS := $(addprefix $(BUILD_DIR)/, ${TOOL_SRCS:.cpp=.o.$(WARNS_EXT)})
 EXAMPLE_WARNS := $(addprefix $(BUILD_DIR)/, ${EXAMPLE_SRCS:.cpp=.o.$(WARNS_EXT)})
 TEST_WARNS := $(addprefix $(BUILD_DIR)/, ${TEST_SRCS:.cpp=.o.$(WARNS_EXT)})
-TEST_HIP_WARNS := $(addprefix $(BUILD_DIR)/hip/, ${TEST_HIP_SRCS:.cxx=.o.$(WARNS_EXT)})
+TEST_HIP_WARNS := $(addprefix $(BUILD_DIR)/hip/, ${TEST_HIP_SRCS:.cu=.o.$(WARNS_EXT)})
 ALL_CXX_WARNS := $(CXX_WARNS) $(TOOL_WARNS) $(EXAMPLE_WARNS) $(TEST_WARNS)
 ALL_HIP_WARNS := $(HIP_WARNS) $(TEST_HIP_WARNS)
 ALL_WARNS := $(ALL_CXX_WARNS) $(ALL_HIP_WARNS)
@@ -163,16 +163,29 @@ NONEMPTY_WARN_REPORT := $(BUILD_DIR)/$(WARNS_EXT)
 ##############################
 # Derive include and lib directories
 ##############################
-HIP_INCLUDE_DIR := $(HIP_PATH)/include
+HIP_INCLUDE_DIR := $(HIP_PATH)/include /usr/local/hip/include
 
-HIP_LIB_DIR += $(HIP_PATH)/lib
+HIP_LIB_DIR :=
+# add <hip>/lib64 only if it exists
+ifneq ("$(wildcard $(HIP_PATH)/lib64)","")
+	HIP_LIB_DIR += $(HIP_PATH)/lib64
+endif
+#TODO: make it compatible to HIP lib
+#HIP_LIB_DIR += $(HIP_PATH)/lib
+HIP_LIB_DIR += /usr/local/cuda/lib64
+
+ifneq (, $(findstring hcc, $(HIP_PLATFORM)))
+	#HIP_LIBS := hip_hcc hcblas
+	HIP_LIBS := hcblas
+else ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
+	HIP_LIBS := cudart cublas curand
+endif
 
 INCLUDE_DIRS += $(BUILD_INCLUDE_DIR) ./src ./include
-
 ifneq ($(CPU_ONLY), 1)
 	INCLUDE_DIRS += $(HIP_INCLUDE_DIR)
 	LIBRARY_DIRS += $(HIP_LIB_DIR)
-	LIBRARIES := hcblas 
+	LIBRARIES := $(HIP_LIBS)
 endif
 
 LIBRARIES += glog gflags protobuf boost_system boost_filesystem m hdf5_hl hdf5
@@ -230,7 +243,7 @@ DOXYGEN_SOURCES := $(shell find \
 	matlab/ \
 	examples \
 	tools \
-	-name "*.cpp" -or -name "*.hpp"\
+	-name "*.cpp" -or -name "*.hpp" -or -name "*.cu" -or -name "*.cuh" -or \
         -name "*.py" -or -name "*.m")
 DOXYGEN_SOURCES += $(DOXYGEN_CONFIG_FILE)
 
@@ -243,15 +256,55 @@ DOXYGEN_SOURCES += $(DOXYGEN_CONFIG_FILE)
 UNAME := $(shell uname -s)
 ifeq ($(UNAME), Linux)
 	LINUX := 1
+else ifeq ($(UNAME), Darwin)
+	OSX := 1
+	OSX_MAJOR_VERSION := $(shell sw_vers -productVersion | cut -f 1 -d .)
+	OSX_MINOR_VERSION := $(shell sw_vers -productVersion | cut -f 2 -d .)
 endif
 
 # Linux
 ifeq ($(LINUX), 1)
-	CXX ?= $(HIP_PATH)bin/hipcc
+	CXX ?= /usr/bin/g++
+	GCCVERSION := $(shell $(CXX) -dumpversion | cut -f1,2 -d.)
+	# older versions of gcc are too dumb to build boost with -Wuninitalized
+	ifeq ($(shell echo | awk '{exit $(GCCVERSION) < 4.6;}'), 1)
+		WARNINGS += -Wno-uninitialized
+	endif
 	# boost::thread is reasonably called boost_thread (compare OS X)
 	# We will also explicitly add stdc++ to the link target.
 	LIBRARIES += boost_thread stdc++
 	VERSIONFLAGS += -Wl,-soname,$(DYNAMIC_VERSIONED_NAME_SHORT) -Wl,-rpath,$(ORIGIN)/../lib
+endif
+
+# OS X:
+# clang++ instead of g++
+# libstdc++ for HIPCC compatibility on OS X >= 10.9 with hip < 7.0
+ifeq ($(OSX), 1)
+	CXX := /usr/bin/clang++
+	ifneq ($(CPU_ONLY), 1)
+		HIP_VERSION := $(shell $(HIP_PATH)/bin/nvcc -V | grep -o 'release [0-9.]*' | tr -d '[a-z ]')
+		ifeq ($(shell echo | awk '{exit $(HIP_VERSION) < 7.0;}'), 1)
+			CXXFLAGS += -stdlib=libstdc++
+			LINKFLAGS += -stdlib=libstdc++
+		endif
+		# clang throws this warning for hip headers
+		WARNINGS += -Wno-unneeded-internal-declaration
+		# 10.11 strips DYLD_* env vars so link hip (rpath is available on 10.5+)
+		OSX_10_OR_LATER   := $(shell [ $(OSX_MAJOR_VERSION) -ge 10 ] && echo true)
+		OSX_10_5_OR_LATER := $(shell [ $(OSX_MINOR_VERSION) -ge 5 ] && echo true)
+		ifeq ($(OSX_10_OR_LATER),true)
+			ifeq ($(OSX_10_5_OR_LATER),true)
+				LDFLAGS += -Wl,-rpath,$(HIP_LIB_DIR)
+			endif
+		endif
+	endif
+	# gtest needs to use its own tuple to not conflict with clang
+	COMMON_FLAGS += -DGTEST_USE_OWN_TR1_TUPLE=1
+	# boost::thread is called boost_thread-mt to mark multithreading on OS X
+	LIBRARIES += boost_thread-mt
+	# we need to explicitly ask for the rpath to be obeyed
+	ORIGIN := @loader_path
+	VERSIONFLAGS += -Wl,-install_name,@rpath/$(DYNAMIC_VERSIONED_NAME_SHORT) -Wl,-rpath,$(ORIGIN)/../../build/lib
 else
 	ORIGIN := \$$ORIGIN
 endif
@@ -274,7 +327,7 @@ endif
 # Debugging
 ifeq ($(DEBUG), 1)
 	COMMON_FLAGS += -DDEBUG -g -O0
-	HIPFLAGS += -G
+	HIPCCFLAGS += -G
 else
 	COMMON_FLAGS += -DNDEBUG -O2
 endif
@@ -283,6 +336,8 @@ endif
 ifeq ($(USE_CUDNN), 1)
 	LIBRARIES += cudnn
 	COMMON_FLAGS += -DUSE_CUDNN
+ 	INCLUDE_DIRS += $(CUDNN_PATH)/include
+	LIBRARY_DIRS += $(CUDNN_PATH)/lib64
 endif
 
 # configure IO libraries
@@ -339,8 +394,11 @@ else
 		LIBRARIES += cblas
 		# 10.10 has accelerate while 10.9 has veclib
 		XCODE_CLT_VER := $(shell pkgutil --pkg-info=com.apple.pkg.CLTools_Executables | grep 'version' | sed 's/[^0-9]*\([0-9]\).*/\1/')
+		XCODE_CLT_GEQ_7 := $(shell [ $(XCODE_CLT_VER) -gt 6 ] && echo 1)
 		XCODE_CLT_GEQ_6 := $(shell [ $(XCODE_CLT_VER) -gt 5 ] && echo 1)
-		ifeq ($(XCODE_CLT_GEQ_6), 1)
+		ifeq ($(XCODE_CLT_GEQ_7), 1)
+			BLAS_INCLUDE ?= /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
+		else ifeq ($(XCODE_CLT_GEQ_6), 1)
 			BLAS_INCLUDE ?= /System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework/Headers/
 			LDFLAGS += -framework Accelerate
 		else
@@ -350,30 +408,28 @@ else
 	endif
 endif
 INCLUDE_DIRS += $(BLAS_INCLUDE)
-#Include HC and HCblas libraries
-
-HCBLAS_DIR?=/opt/rocm/hcblas
-INCLUDE_DIRS += "$(HCBLAS_DIR)/include"
 LIBRARY_DIRS += $(BLAS_LIB)
-LIBRARY_DIRS += "$(HCBLAS_DIR)/lib"
-
 
 LIBRARY_DIRS += $(LIB_BUILD_DIR)
 
-# Automatic dependency generation (hipcc is handled separately)
-#CXXFLAGS += -MMD -MP
-
+# Automatic dependency generation (nvcc is handled separately)
+ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
+	CXXFLAGS += -MMD -MP $(shell hipconfig -C)
+endif
 
 # Complete build flags.
 COMMON_FLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
-COMMON_FLAGS += -fPIC 
-COMMON_FLAGS += -stdlib=libstdc++ 
-COMMON_FLAGS += -DGTEST_USE_OWN_TR1_TUPLE=1
 CXXFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
-HIPFLAGS += $(COMMON_FLAGS)
+
+ifneq (, $(findstring hcc, $(HIP_PLATFORM)))
+	HIPCCFLAGS += -fPIC $(COMMON_FLAGS) -std=c++11 
+else ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
+	HIPCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS) -std=c++11 -Wno-deprecated-gpu-targets
+endif
+
 # mex may invoke an older gcc that is too liberal with -Wuninitalized
 MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
-LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS) 
+LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS) $(shell hipconfig -C)
 
 USE_PKG_CONFIG ?= 0
 ifeq ($(USE_PKG_CONFIG), 1)
@@ -452,7 +508,6 @@ $(LINT_OUTPUTS): $(LINT_OUTPUT_DIR)/%.lint.txt : % $(LINT_SCRIPT) | $(LINT_OUTPU
 		|| true
 
 test: $(TEST_ALL_BIN) $(TEST_ALL_DYNLINK_BIN) $(TEST_BINS)
-	echo TEST_BINS=$(TEST_BINS)
 
 tools: $(TOOL_BINS) $(TOOL_BIN_LINKS)
 
@@ -549,11 +604,11 @@ $(PROTO_BUILD_DIR)/%.pb.o: $(PROTO_BUILD_DIR)/%.pb.cc $(PROTO_GEN_HEADER) \
 		|| (cat $@.$(WARNS_EXT); exit 1)
 	@ cat $@.$(WARNS_EXT)
 
-$(BUILD_DIR)/hip/%.o: %.cu | $(ALL_BUILD_DIRS)
-	@ echo HIP $<
-	$(Q)$(HIP_PATH)/bin/hipcc $(HIPFLAGS) $(HIP_ARCH) -M $< -o ${@:.o=.d} \
+$(BUILD_DIR)/hip/%.o: %.cpp | $(ALL_BUILD_DIRS)
+	@ echo HIPCC $<
+	$(Q)$(HIP_PATH)/bin/hipcc $(HIPCCFLAGS) $(HIP_ARCH) -M $< -o ${@:.o=.d} \
 		-odir $(@D)
-	$(Q)$(HIP_PATH)/bin/hipcc $(HIPFLAGS) $(HIP_ARCH) -c $< -o $@ 2> $@.$(WARNS_EXT) \
+	$(Q)$(HIP_PATH)/bin/hipcc $(HIPCCFLAGS) $(HIP_ARCH) -c $< -o $@ 2> $@.$(WARNS_EXT) \
 		|| (cat $@.$(WARNS_EXT); exit 1)
 	@ cat $@.$(WARNS_EXT)
 

@@ -33,6 +33,9 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 
 #include <hip/hip_runtime.h>
 #include <hipblas.h>
+#ifdef USE_CUDNN
+#include "caffe/util/cudnn.hpp"
+#endif
 
 //
 // HIP macros
@@ -81,9 +84,10 @@ namespace caffe {
 const char* hipblasGetErrorString(hipblasStatus_t error);
 // HIP: use 512 threads per block
 
-#ifdef __NVCC__
+#ifdef __HIP_PLATFORM_NVCC__
 const int CAFFE_HIP_NUM_THREADS = 512;
-#elif __HCC__
+#endif
+#ifdef __HIP_PLATFORM_HCC__
 const int CAFFE_HIP_NUM_THREADS = 256;
 #endif
 

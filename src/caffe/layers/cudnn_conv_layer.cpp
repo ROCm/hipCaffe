@@ -19,7 +19,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   ConvolutionLayer<Dtype>::LayerSetUp(bottom, top);
   // Initialize CUDA streams and cuDNN.
-  stream_         = new cudaStream_t[this->group_ * CUDNN_STREAMS_PER_GROUP];
+  stream_         = new hipStream_t[this->group_ * CUDNN_STREAMS_PER_GROUP];
   handle_         = new cudnnHandle_t[this->group_ * CUDNN_STREAMS_PER_GROUP];
 
   // Initialize algorithm arrays
@@ -49,7 +49,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   }
 
   for (int g = 0; g < this->group_ * CUDNN_STREAMS_PER_GROUP; g++) {
-    CUDA_CHECK(cudaStreamCreate(&stream_[g]));
+    HIP_CHECK(hipStreamCreate(&stream_[g]));
     CUDNN_CHECK(cudnnCreate(&handle_[g]));
     CUDNN_CHECK(cudnnSetStream(handle_[g], stream_[g]));
     workspace[g] = NULL;
@@ -195,10 +195,10 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     workspaceSizeInBytes = total_max_workspace;
 
     // free the existing workspace and allocate a new (larger) one
-    cudaFree(this->workspaceData);
+    hipFree(this->workspaceData);
 
-    cudaError_t err = cudaMalloc(&(this->workspaceData), workspaceSizeInBytes);
-    if (err != cudaSuccess) {
+    hipError_t err = hipMalloc(&(this->workspaceData), workspaceSizeInBytes);
+    if (err != hipSuccess) {
       // force zero memory path
       for (int i = 0; i < bottom.size(); i++) {
         workspace_fwd_sizes_[i] = 0;
@@ -247,11 +247,11 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
   cudnnDestroyFilterDescriptor(filter_desc_);
 
   for (int g = 0; g < this->group_ * CUDNN_STREAMS_PER_GROUP; g++) {
-    cudaStreamDestroy(stream_[g]);
+    hipStreamDestroy(stream_[g]);
     cudnnDestroy(handle_[g]);
   }
 
-  cudaFree(workspaceData);
+  hipFree(workspaceData);
   delete [] stream_;
   delete [] handle_;
   delete [] fwd_algo_;
