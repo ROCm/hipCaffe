@@ -456,6 +456,7 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
   Reshape(bottom, top);
   switch (Caffe::mode()) {
   case Caffe::CPU:
+    HIP_BEGIN_MARKER(type(), "CAFFE-fwd");
     Forward_cpu(bottom, top);
     for (int top_id = 0; top_id < top.size(); ++top_id) {
       if (!this->loss(top_id)) { continue; }
@@ -465,7 +466,9 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
       loss += caffe_cpu_dot(count, data, loss_weights);
     }
     break;
+    HIP_END_MARKER();
   case Caffe::GPU:
+    HIP_BEGIN_MARKER(type(), "CAFFE-fwd");
     Forward_gpu(bottom, top);
 #ifndef CPU_ONLY
     for (int top_id = 0; top_id < top.size(); ++top_id) {
@@ -477,6 +480,7 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
       caffe_gpu_dot(count, data, loss_weights, &blob_loss);
       loss += blob_loss;
     }
+    HIP_END_MARKER();
 #endif
     break;
   default:
@@ -492,10 +496,14 @@ inline void Layer<Dtype>::Backward(const vector<Blob<Dtype>*>& top,
     const vector<Blob<Dtype>*>& bottom) {
   switch (Caffe::mode()) {
   case Caffe::CPU:
+    HIP_BEGIN_MARKER(type(), "CAFFE-back");
     Backward_cpu(top, propagate_down, bottom);
+    HIP_END_MARKER();
     break;
   case Caffe::GPU:
+    HIP_BEGIN_MARKER(type(), "CAFFE-back");
     Backward_gpu(top, propagate_down, bottom);
+    HIP_END_MARKER();
     break;
   default:
     LOG(FATAL) << "Unknown caffe mode.";

@@ -32,6 +32,13 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 #else  // Normal GPU + CPU Caffe.
 
 #include <hip/hip_runtime.h>
+#ifndef DISABLE_HIP_PROFILE
+#include <hip/hip_profile.h> // requires latest versions of HIP
+#else
+#define HIP_BEGIN_MARKER(u,g)
+#define HIP_END_MARKER()
+#endif
+
 #include <hipblas.h>
 #ifdef USE_CUDNN
 #include "caffe/util/cudnn.hpp"
