@@ -296,7 +296,7 @@ void col2im_gpu(const Dtype* data_col, const int channels,
   // To avoid involving atomic operations, we will launch one kernel per
   // bottom dimension, and then in the kernel add up the top dimensions.
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(col2im_gpu_kernel<Dtype>), dim3(CAFFE_GET_BLOCKS(num_kernels)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
+  hipLaunchKernel(col2im_gpu_kernel<Dtype>, dim3(CAFFE_GET_BLOCKS(num_kernels)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       num_kernels, data_col, height, width, channels, kernel_h, kernel_w,
       pad_h, pad_w, stride_h, stride_w, dilation_h, dilation_w,
       height_col, width_col, data_im);
