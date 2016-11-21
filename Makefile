@@ -210,7 +210,7 @@ ifeq ($(USE_OPENCV), 1)
 		
 endif
 PYTHON_LIBRARIES ?= boost_python python2.7
-WARNINGS := -Wall -Wno-sign-compare
+WARNINGS := -Wall -Wno-sign-compare -Wno-unused-local-typedef
 
 ##############################
 # Set build directories
