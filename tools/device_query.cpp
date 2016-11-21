@@ -5,3 +5,5 @@ int main(int argc, char** argv) {
                 "[--device_id=0] instead.";
   return 0;
 }
+
+#include "caffe/data_reader_hack.inl"

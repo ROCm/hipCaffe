@@ -29,6 +29,9 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
     const vector<bool>& propagate_down, \
     const vector<Blob<Dtype>*>& bottom) { NO_GPU; } \
 
+#define HIP_BEGIN_MARKER(u,g)
+#define HIP_END_MARKER()
+
 #else  // Normal GPU + CPU Caffe.
 
 #include <hip/hip_runtime.h>

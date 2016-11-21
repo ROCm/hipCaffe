@@ -451,3 +451,6 @@ int main(int argc, char** argv) {
     gflags::ShowUsageWithFlagsRestrict(argv[0], "tools/caffe");
   }
 }
+
+#include "caffe/data_reader_hack.inl"
+

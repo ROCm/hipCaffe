@@ -127,3 +127,5 @@ int main(int argc, char** argv) {
   LOG(FATAL) << "This example requires LevelDB; compile with USE_LEVELDB.";
 }
 #endif  // USE_LEVELDB
+
+#include "caffe/data_reader_hack.inl"

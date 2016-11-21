@@ -263,3 +263,5 @@ int main(int argc, char** argv) {
   LOG(FATAL) << "This example requires OpenCV; compile with USE_OPENCV.";
 }
 #endif  // USE_OPENCV
+
+#include "caffe/data_reader_hack.inl"

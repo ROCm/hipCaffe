@@ -5,3 +5,5 @@ int main(int argc, char** argv) {
       "--weights=... instead.";
   return 0;
 }
+
+#include "caffe/data_reader_hack.inl"

@@ -181,3 +181,5 @@ int feature_extraction_pipeline(int argc, char** argv) {
   LOG(ERROR)<< "Successfully extracted the features!";
   return 0;
 }
+
+#include "caffe/data_reader_hack.inl"

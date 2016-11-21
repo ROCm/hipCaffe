@@ -108,3 +108,5 @@ int main(int argc, char** argv) {
   }
   return 0;
 }
+
+#include "caffe/data_reader_hack.inl"
