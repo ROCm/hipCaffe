@@ -96,3 +96,5 @@ TYPED_TEST(ThresholdLayerTest, Test2) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

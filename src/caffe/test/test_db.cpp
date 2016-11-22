@@ -134,3 +134,5 @@ TYPED_TEST(DBTest, TestWrite) {
 
 }  // namespace caffe
 #endif  // USE_LEVELDB, USE_LMDB and USE_OPENCV
+
+#include "caffe/data_reader_hack.inl"

@@ -130,3 +130,5 @@ TYPED_TEST(GemmTest, TestGemvCPUGPU) {
 }  // namespace caffe
 
 #endif  // CPU_ONLY
+
+#include "caffe/data_reader_hack.inl"

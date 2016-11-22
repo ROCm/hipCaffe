@@ -168,3 +168,5 @@ TYPED_TEST(PowerLayerTest, TestPowerTwoScaleHalfGradient) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

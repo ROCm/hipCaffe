@@ -159,3 +159,5 @@ TYPED_TEST(TileLayerTest, TestGradientChannels) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

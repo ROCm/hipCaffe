@@ -286,3 +286,5 @@ TYPED_TEST(LSTMLayerTest, TestGradientNonZeroContBufferSize2WithStaticInput) {
 
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

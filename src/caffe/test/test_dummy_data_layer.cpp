@@ -191,3 +191,5 @@ TYPED_TEST(DummyDataLayerTest, TestThreeTopConstantGaussianConstant) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

@@ -294,3 +294,5 @@ TYPED_TEST(ReductionLayerTest, TestSumOfSquaresCoeffAxis1Gradient) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

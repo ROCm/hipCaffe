@@ -176,3 +176,5 @@ TYPED_TEST(Im2colLayerTest, TestRectGradient) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

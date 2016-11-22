@@ -64,3 +64,5 @@ TEST_F(CommonTest, TestRandSeedGPU) {
 #endif
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

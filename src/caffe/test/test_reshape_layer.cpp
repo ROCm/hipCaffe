@@ -277,3 +277,5 @@ TYPED_TEST(ReshapeLayerTest, TestGradient) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

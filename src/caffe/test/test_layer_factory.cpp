@@ -49,3 +49,5 @@ TYPED_TEST(LayerFactoryTest, TestCreateLayer) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

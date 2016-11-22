@@ -107,3 +107,5 @@ TYPED_TEST(SolverTest, TestInitTrainTestNets) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

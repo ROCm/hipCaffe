@@ -176,3 +176,5 @@ TYPED_TEST(EmbedLayerTest, TestGradientWithBias) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

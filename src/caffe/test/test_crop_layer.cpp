@@ -281,3 +281,5 @@ TYPED_TEST(CropLayerTest, TestCrop5DGradient) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

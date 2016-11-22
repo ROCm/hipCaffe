@@ -207,3 +207,5 @@ TYPED_TEST(EltwiseLayerTest, TestMaxGradient) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

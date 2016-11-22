@@ -342,3 +342,5 @@ TYPED_TEST(DataTransformTest, TestMeanFile) {
 
 }  // namespace caffe
 #endif  // USE_OPENCV
+
+#include "caffe/data_reader_hack.inl"

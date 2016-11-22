@@ -72,3 +72,5 @@ TYPED_TEST(HingeLossLayerTest, TestGradientL2) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

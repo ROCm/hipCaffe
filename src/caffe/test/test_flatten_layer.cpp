@@ -106,3 +106,5 @@ TYPED_TEST(FlattenLayerTest, TestGradient) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

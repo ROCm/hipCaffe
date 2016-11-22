@@ -297,3 +297,5 @@ TYPED_TEST(MemoryDataLayerTest, TestSetBatchSize) {
 }
 #endif  // USE_OPENCV
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

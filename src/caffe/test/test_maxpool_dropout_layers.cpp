@@ -125,3 +125,5 @@ TYPED_TEST(MaxPoolingDropoutTest, TestBackward) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"

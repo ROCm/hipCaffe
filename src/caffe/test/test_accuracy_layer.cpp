@@ -334,3 +334,5 @@ TYPED_TEST(AccuracyLayerTest, TestForwardCPUPerClassWithIgnoreLabel) {
 }
 
 }  // namespace caffe
+
+#include "caffe/data_reader_hack.inl"
