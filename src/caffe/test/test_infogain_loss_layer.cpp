@@ -65,5 +65,3 @@ TYPED_TEST(InfogainLossLayerTest, TestGradient) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

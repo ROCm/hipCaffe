@@ -217,5 +217,3 @@ TYPED_TEST(ImageDataLayerTest, TestSpace) {
 
 }  // namespace caffe
 #endif  // USE_OPENCV
-
-#include "caffe/data_reader_hack.inl"

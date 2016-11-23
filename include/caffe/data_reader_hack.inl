@@ -1,5 +1,3 @@
-#ifndef __DATA_READER_HACK_H__
-#define __DATA_READER_HACK_H__
 // HACK for initializing DataReader::bodies_
 
 #include <boost/thread.hpp>
@@ -18,5 +16,3 @@ namespace caffe {
 
   map<const string, weak_ptr<DataReader::Body> > DataReader::bodies_;
 } // namespace caffe
-
-#endif

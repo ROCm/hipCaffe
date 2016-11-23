@@ -201,5 +201,3 @@ TYPED_TEST(GPUMathFunctionsTest, TestCopy) {
 
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

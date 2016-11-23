@@ -88,5 +88,3 @@ TYPED_TEST(BenchmarkTest, TestTimerSeconds) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

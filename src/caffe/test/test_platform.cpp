@@ -55,5 +55,3 @@ TEST_F(PlatformTest, TestInitialization) {
 }  // namespace caffe
 
 #endif  // CPU_ONLY
-
-#include "caffe/data_reader_hack.inl"

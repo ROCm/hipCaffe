@@ -1263,5 +1263,3 @@ TYPED_TEST(RMSPropSolverTest, TestSnapshotShare) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

@@ -132,5 +132,3 @@ TYPED_TEST(SPPLayerTest, TestGradient) {
 
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

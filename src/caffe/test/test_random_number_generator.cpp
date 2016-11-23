@@ -518,5 +518,3 @@ TYPED_TEST(RandomNumberGeneratorTest, TestRngUniformTimesUniformGPU) {
 #endif
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

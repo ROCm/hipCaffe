@@ -235,5 +235,3 @@ TYPED_TEST(Im2colKernelTest, TestND) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

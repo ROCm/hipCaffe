@@ -48,5 +48,3 @@ TYPED_TEST(SolverFactoryTest, TestCreateSolver) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

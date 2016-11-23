@@ -293,5 +293,3 @@ TYPED_TEST(ArgMaxLayerTest, TestCPUAxisMaxValTopK) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

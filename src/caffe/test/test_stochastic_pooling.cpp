@@ -173,5 +173,3 @@ TYPED_TEST(GPUStochasticPoolingLayerTest, TestGradient) {
 #endif
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

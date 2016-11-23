@@ -124,5 +124,3 @@ TYPED_TEST(FilterLayerTest, TestGradient) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

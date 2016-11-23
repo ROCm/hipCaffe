@@ -51,4 +51,3 @@ TEST_F(InternalThreadTest, TestRandomSeed) {
 
 }  // namespace caffe
 
-#include "caffe/data_reader_hack.inl"

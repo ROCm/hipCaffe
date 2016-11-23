@@ -215,5 +215,3 @@ TYPED_TEST(RNNLayerTest, TestGradientNonZeroContBufferSize2WithStaticInput) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

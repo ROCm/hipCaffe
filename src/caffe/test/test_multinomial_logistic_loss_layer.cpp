@@ -56,5 +56,3 @@ TYPED_TEST(MultinomialLogisticLossLayerTest, TestGradientCPU) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

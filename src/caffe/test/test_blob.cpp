@@ -299,5 +299,3 @@ TYPED_TEST(BlobMathTest, TestScaleData) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

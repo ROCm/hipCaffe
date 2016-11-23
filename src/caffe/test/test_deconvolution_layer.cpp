@@ -302,5 +302,3 @@ TYPED_TEST(DeconvolutionLayerTest, TestGradient3D) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

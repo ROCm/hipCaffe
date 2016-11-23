@@ -36,5 +36,3 @@ int main(int argc, char** argv) {
   // invoke the test.
   return RUN_ALL_TESTS();
 }
-
-#include "caffe/data_reader_hack.inl"

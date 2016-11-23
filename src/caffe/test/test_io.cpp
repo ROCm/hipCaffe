@@ -422,5 +422,3 @@ TEST_F(IOTest, TestDecodeDatumToCVMatContentNative) {
 
 }  // namespace caffe
 #endif  // USE_OPENCV
-
-#include "caffe/data_reader_hack.inl"

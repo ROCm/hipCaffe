@@ -99,5 +99,3 @@ TYPED_TEST(TanHLayerTest, TestTanHGradient) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

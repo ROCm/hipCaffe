@@ -87,5 +87,3 @@ TYPED_TEST(EuclideanLossLayerTest, TestGradient) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

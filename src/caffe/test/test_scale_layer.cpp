@@ -505,5 +505,3 @@ TYPED_TEST(ScaleLayerTest, TestGradientScaleAxis2) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

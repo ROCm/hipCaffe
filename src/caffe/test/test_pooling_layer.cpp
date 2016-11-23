@@ -1183,5 +1183,3 @@ TYPED_TEST(CuDNNPoolingLayerTest, TestGradientAvePaddedCuDNN) {
 #endif
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

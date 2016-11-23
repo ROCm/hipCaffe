@@ -106,5 +106,3 @@ TYPED_TEST(SoftmaxWithLossLayerTest, TestGradientUnnormalized) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

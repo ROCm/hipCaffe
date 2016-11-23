@@ -1084,5 +1084,3 @@ TYPED_TEST(CuDNNConvolutionLayerTest, TestGradientGroupCuDNN) {
 #endif
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

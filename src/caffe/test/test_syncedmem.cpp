@@ -123,5 +123,3 @@ TEST_F(SyncedMemoryTest, TestGPUWrite) {
 #endif
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

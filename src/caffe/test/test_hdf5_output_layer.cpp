@@ -119,5 +119,3 @@ TYPED_TEST(HDF5OutputLayerTest, TestForward) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

@@ -116,5 +116,3 @@ TYPED_TEST(BatchReindexLayerTest, TestGradient) {
   }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

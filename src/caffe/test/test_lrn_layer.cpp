@@ -448,5 +448,3 @@ TYPED_TEST(CuDNNLRNLayerTest, TestGradientAcrossChannelsLargeRegionCuDNN) {
 #endif
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

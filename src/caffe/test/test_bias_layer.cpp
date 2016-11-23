@@ -465,5 +465,3 @@ TYPED_TEST(BiasLayerTest, TestGradientBiasAxis2) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

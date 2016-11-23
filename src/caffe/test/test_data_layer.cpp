@@ -431,5 +431,3 @@ TYPED_TEST(DataLayerTest, TestReadCropTestLMDB) {
 #endif  // USE_LMDB
 }  // namespace caffe
 #endif  // USE_OPENCV
-
-#include "caffe/data_reader_hack.inl"

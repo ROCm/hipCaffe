@@ -142,5 +142,3 @@ TYPED_TEST(ContrastiveLossLayerTest, TestGradientLegacy) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

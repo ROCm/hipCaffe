@@ -213,5 +213,3 @@ TYPED_TEST(SliceLayerTest, TestGradientAcrossChannels) {
 }
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"

@@ -150,5 +150,3 @@ TYPED_TEST(CuDNNSoftmaxLayerTest, TestGradientCuDNN) {
 #endif
 
 }  // namespace caffe
-
-#include "caffe/data_reader_hack.inl"
