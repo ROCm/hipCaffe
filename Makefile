@@ -606,8 +606,7 @@ $(PROTO_BUILD_DIR)/%.pb.o: $(PROTO_BUILD_DIR)/%.pb.cc $(PROTO_GEN_HEADER) \
 
 $(BUILD_DIR)/hip/%.o: %.cpp | $(ALL_BUILD_DIRS)
 	@ echo HIPCC $<
-	$(Q)$(HIP_PATH)/bin/hipcc $(HIPCCFLAGS) $(HIP_ARCH) -M $< -o ${@:.o=.d} \
-		-odir $(@D)
+	$(Q)$(HIP_PATH)/bin/hipcc $(HIPCCFLAGS) $(HIP_ARCH) -M $< -o ${@:.o=.d} 
 	$(Q)$(HIP_PATH)/bin/hipcc $(HIPCCFLAGS) $(HIP_ARCH) -c $< -o $@ 2> $@.$(WARNS_EXT) \
 		|| (cat $@.$(WARNS_EXT); exit 1)
 	@ cat $@.$(WARNS_EXT)
