@@ -273,6 +273,8 @@ TYPED_TEST(DeconvolutionLayerTest, TestNDAgainst2D) {
 }
 
 TYPED_TEST(DeconvolutionLayerTest, TestGradient3D) {
+  // HACK: disable this test as it crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   vector<int> bottom_shape(5);
   bottom_shape[0] = this->blob_bottom_vec_[0]->shape(0);
@@ -299,6 +301,8 @@ TYPED_TEST(DeconvolutionLayerTest, TestGradient3D) {
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
       this->blob_top_vec_);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 }  // namespace caffe
