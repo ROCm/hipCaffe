@@ -327,7 +327,11 @@ endif
 # Debugging
 ifeq ($(DEBUG), 1)
 	COMMON_FLAGS += -DDEBUG -g -O0
+
+ifeq  (${HIP_PLATFORM}, nvcc)
 	HIPCCFLAGS += -G
+endif
+
 else
 	COMMON_FLAGS += -DNDEBUG -O2
 endif
