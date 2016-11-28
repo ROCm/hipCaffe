@@ -1,3 +1,8 @@
+# Build caffe:
+$ source setup.sh
+$ make DEBUG=1 -j20
+$ build/tools/caffe train --solver=examples/cifar10/cifar10_quick_solver.prototxt  --gpu 0,1
+
 
 ### CAFFE directed tests: 
 # Run all tests:
