@@ -114,7 +114,7 @@ Caffe::Caffe()
     LOG(ERROR) << "Cannot create Cublas handle. Cublas won't be available.";
   }
   // Try to create a hiprng handler.
-  if (hiprngCreateGenerator(&hiprng_generator_, HIPRNG_RNG_PSEUDO_DEFAULT)
+  if (hiprngCreateGenerator(&hiprng_generator_, HIPRNG_RNG_PSEUDO_MRG32K3A)
       != HIPRNG_STATUS_SUCCESS ||
       hiprngSetPseudoRandomGeneratorSeed(hiprng_generator_, cluster_seedgen())
       != HIPRNG_STATUS_SUCCESS) {
@@ -163,7 +163,7 @@ void Caffe::SetDevice(const int device_id) {
   }
   HIPBLAS_CHECK(hipblasCreate(&Get().hipblas_handle_));
   HIPRNG_CHECK(hiprngCreateGenerator(&Get().hiprng_generator_,
-      HIPRNG_RNG_PSEUDO_DEFAULT));
+      HIPRNG_RNG_PSEUDO_MRG32K3A));
   HIPRNG_CHECK(hiprngSetPseudoRandomGeneratorSeed(Get().hiprng_generator_,
       cluster_seedgen()));
 }
