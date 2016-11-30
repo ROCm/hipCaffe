@@ -1,3 +1,10 @@
+#ifdef USE_ACCELERATED_NN
+
+#ifdef USE_MLOPEN
+#include "caffe/util/cudnn.hpp"
+// TBD
+#endif
+
 #ifdef USE_CUDNN
 #include "caffe/util/cudnn.hpp"
 
@@ -21,3 +28,5 @@ const void* dataType<double>::zero =
 }  // namespace cudnn
 }  // namespace caffe
 #endif
+
+#endif // #ifdef USE_ACCELERATED_NN

@@ -1,5 +1,15 @@
 #ifndef CAFFE_UTIL_CUDNN_H_
 #define CAFFE_UTIL_CUDNN_H_
+#ifdef USE_ACCELERATED_NN
+
+#ifdef USE_MLOPEN
+// TBD
+//#include <mlopen.h>
+
+#include "caffe/common.hpp"
+#include "caffe/proto/caffe.pb.h"
+#endif
+
 #ifdef USE_CUDNN
 
 #include <cudnn.h>
@@ -150,4 +160,5 @@ inline void createActivationDescriptor(cudnnActivationDescriptor_t* activ_desc,
 }  // namespace caffe
 
 #endif  // USE_CUDNN
+#endif // USE_ACCELERATED_NN
 #endif  // CAFFE_UTIL_CUDNN_H_

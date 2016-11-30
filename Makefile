@@ -340,6 +340,14 @@ ifeq ($(USE_CUDNN), 1)
 	LIBRARY_DIRS += $(CUDNN_PATH)/lib64
 endif
 
+# MLOpen acceleration cofiguration.
+#ifeq ($(USE_MLOPEN), 1)
+#        LIBRARIES += MLOpen
+#        COMMON_FLAGS += -DUSE_MLOPEN
+#	INCLUDE_DIRS += $(MLOPEN_PATH)/include
+#	LIBRARY_DIRS += $(MLOPEN_PATH)/lib
+#endif
+
 # configure IO libraries
 ifeq ($(USE_OPENCV), 1)
 	COMMON_FLAGS += -DUSE_OPENCV

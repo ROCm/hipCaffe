@@ -43,7 +43,7 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 #endif
 
 #include <hipblas.h>
-#ifdef USE_CUDNN
+#ifdef USE_ACCELERATED_NN
 #include "caffe/util/cudnn.hpp"
 #endif
 

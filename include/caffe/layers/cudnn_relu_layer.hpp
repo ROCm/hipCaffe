@@ -12,7 +12,7 @@
 
 namespace caffe {
 
-#ifdef USE_CUDNN
+#ifdef USE_ACCELERATED_NN
 /**
  * @brief CuDNN acceleration of ReLULayer.
  */
@@ -33,11 +33,17 @@ class CuDNNReLULayer : public ReLULayer<Dtype> {
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
+#ifdef USE_MLOPEN
+  // TBD
+#endif
+
+#ifdef USE_CUDNN
   bool handles_setup_;
   cudnnHandle_t             handle_;
   cudnnTensorDescriptor_t bottom_desc_;
   cudnnTensorDescriptor_t top_desc_;
   cudnnActivationDescriptor_t activ_desc_;
+#endif
 };
 #endif
 

@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-#ifdef USE_CUDNN
+#ifdef USE_ACCELERATED_NN
 #include <vector>
 
 #include "caffe/layers/cudnn_conv_layer.hpp"
@@ -12,6 +12,13 @@ template <typename Dtype>
 void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   const Dtype* weight = this->blobs_[0]->gpu_data();
+#ifdef USE_MLOPEN
+  // TBD
+  // Fall back to standard Caffe
+  ConvolutionLayer<Dtype>::Forward_gpu(bottom, top);
+#endif
+
+#ifdef USE_CUDNN
   for (int i = 0; i < bottom.size(); ++i) {
     const Dtype* bottom_data = bottom[i]->gpu_data();
     Dtype* top_data = top[i]->mutable_gpu_data();
@@ -45,11 +52,18 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
     //hipLaunchKernel(HIP_KERNEL_NAME(sync_conv_groups), dim3(1), dim3(1), 0, 0, );
     sync_conv_groups<<<1, 1>>>();
   }
+#endif
 }
 
 template <typename Dtype>
 void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
+#ifdef USE_MLOPEN
+  // TBD
+  // Fall back to standard Caffe
+  ConvolutionLayer<Dtype>::Backward_gpu(top, propagate_down, bottom);
+#endif
+#if USE_CUDNN
   const Dtype* weight = NULL;
   Dtype* weight_diff = NULL;
   if (this->param_propagate_down_[0]) {
@@ -113,6 +127,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     //hipLaunchKernel(HIP_KERNEL_NAME(sync_conv_groups), dim3(1), dim3(1), 0, 0, );
     sync_conv_groups<<<1, 1>>>();
   }
+#endif
 }
 
 INSTANTIATE_LAYER_GPU_FUNCS(CuDNNConvolutionLayer);

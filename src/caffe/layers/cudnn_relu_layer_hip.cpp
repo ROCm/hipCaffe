@@ -1,4 +1,4 @@
-#ifdef USE_CUDNN
+#ifdef USE_ACCELERATED_NN
 #include <vector>
 
 #include "caffe/layers/cudnn_relu_layer.hpp"
@@ -15,6 +15,12 @@ void CuDNNReLULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
+#ifdef USE_MLOPEN
+  // TBD
+  // Fallback to standard Caffe
+  return ReLULayer<Dtype>::Forward_gpu(bottom, top);
+#endif
+#ifdef USE_CUDNN
 #if CUDNN_VERSION_MIN(5, 0, 0)
   CUDNN_CHECK(cudnnActivationForward(this->handle_,
         activ_desc_,
@@ -30,6 +36,7 @@ void CuDNNReLULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
         cudnn::dataType<Dtype>::zero,
         this->top_desc_, top_data));
 #endif
+#endif // #ifdef USE_CUDNN
 }
 
 template <typename Dtype>
@@ -49,6 +56,12 @@ void CuDNNReLULayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   const Dtype* top_diff = top[0]->gpu_diff();
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
+#ifdef USE_MLOPEN
+  // TBD
+  // Fallback to standard Caffe
+  return ReLULayer<Dtype>::Backward_gpu(top, propagate_down, bottom);
+#endif
+#ifdef USE_CUDNN
 #if CUDNN_VERSION_MIN(5, 0, 0)
   CUDNN_CHECK(cudnnActivationBackward(this->handle_,
         activ_desc_,
@@ -66,6 +79,7 @@ void CuDNNReLULayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         cudnn::dataType<Dtype>::zero,
         this->bottom_desc_, bottom_diff));
 #endif
+#endif // #ifdef USE_CUDNN
 }
 
 INSTANTIATE_LAYER_GPU_FUNCS(CuDNNReLULayer);
