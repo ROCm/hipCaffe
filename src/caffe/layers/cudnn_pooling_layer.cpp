@@ -10,7 +10,7 @@ void CuDNNPoolingLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   PoolingLayer<Dtype>::LayerSetUp(bottom, top);
 
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 
@@ -31,7 +31,7 @@ void CuDNNPoolingLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   PoolingLayer<Dtype>::Reshape(bottom, top);
 
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 
@@ -48,7 +48,7 @@ CuDNNPoolingLayer<Dtype>::~CuDNNPoolingLayer() {
   // Check that handles have been setup before destroying.
   if (!handles_setup_) { return; }
 
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 

@@ -9,7 +9,7 @@ template <typename Dtype>
 void CuDNNTanHLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   TanHLayer<Dtype>::LayerSetUp(bottom, top);
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 
@@ -31,7 +31,7 @@ void CuDNNTanHLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   const int K = bottom[0]->channels();
   const int H = bottom[0]->height();
   const int W = bottom[0]->width();
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 
@@ -46,7 +46,7 @@ CuDNNTanHLayer<Dtype>::~CuDNNTanHLayer() {
   // Check that handles have been setup before destroying.
   if (!handles_setup_) { return; }
 
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 

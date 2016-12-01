@@ -1,6 +1,6 @@
 #ifdef USE_ACCMI
 
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
 #include "caffe/util/cudnn.hpp"
 // TBD
 #endif

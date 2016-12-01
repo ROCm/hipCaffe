@@ -15,7 +15,7 @@ void CuDNNReLULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
   // Fallback to standard Caffe
   return ReLULayer<Dtype>::Forward_gpu(bottom, top);
@@ -56,7 +56,7 @@ void CuDNNReLULayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   const Dtype* top_diff = top[0]->gpu_diff();
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
   // Fallback to standard Caffe
   return ReLULayer<Dtype>::Backward_gpu(top, propagate_down, bottom);

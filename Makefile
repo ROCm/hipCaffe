@@ -341,9 +341,9 @@ ifeq ($(USE_CUDNN), 1)
 endif
 
 # MLOpen acceleration cofiguration.
-#ifeq ($(USE_MLOPEN), 1)
+#ifeq ($(USE_MIOPEN), 1)
 #        LIBRARIES += MLOpen
-#        COMMON_FLAGS += -DUSE_MLOPEN
+#        COMMON_FLAGS += -DUSE_MIOPEN
 #	INCLUDE_DIRS += $(MLOPEN_PATH)/include
 #	LIBRARY_DIRS += $(MLOPEN_PATH)/lib
 #endif

@@ -34,7 +34,7 @@ class CuDNNSigmoidLayer : public SigmoidLayer<Dtype> {
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
   bool handles_setup_;
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 

@@ -12,7 +12,7 @@ template <typename Dtype>
 void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   const Dtype* weight = this->blobs_[0]->gpu_data();
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
   // Fall back to standard Caffe
   ConvolutionLayer<Dtype>::Forward_gpu(bottom, top);
@@ -58,7 +58,7 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
 template <typename Dtype>
 void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
   // Fall back to standard Caffe
   ConvolutionLayer<Dtype>::Backward_gpu(top, propagate_down, bottom);

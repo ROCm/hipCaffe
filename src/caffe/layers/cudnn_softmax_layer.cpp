@@ -11,7 +11,7 @@ template <typename Dtype>
 void CuDNNSoftmaxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   SoftmaxLayer<Dtype>::LayerSetUp(bottom, top);
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 
@@ -32,7 +32,7 @@ void CuDNNSoftmaxLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   int K = bottom[0]->shape(this->softmax_axis_);
   int H = this->inner_num_;
   int W = 1;
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 
@@ -47,7 +47,7 @@ CuDNNSoftmaxLayer<Dtype>::~CuDNNSoftmaxLayer() {
   // Check that handles have been setup before destroying.
   if (!handles_setup_) { return; }
 
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 

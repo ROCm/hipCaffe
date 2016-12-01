@@ -11,7 +11,7 @@ void CuDNNLCNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
 
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
   // Fall back to standard Caffe
   LRNLayer<DType>::Forward_gpu(bottom, top);
@@ -37,7 +37,7 @@ void CuDNNLCNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
 
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
   // Fall back to standard Caffe
   LRNLayer<DType>::Backward_gpu(top, propagate_down, bottom);

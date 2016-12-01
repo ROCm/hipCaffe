@@ -10,7 +10,7 @@ void CuDNNLRNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   LRNLayer<Dtype>::LayerSetUp(bottom, top);
 
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 
@@ -35,7 +35,7 @@ void CuDNNLRNLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   LRNLayer<Dtype>::Reshape(bottom, top);
 
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 
@@ -53,7 +53,7 @@ CuDNNLRNLayer<Dtype>::~CuDNNLRNLayer() {
   // Check that handles have been setup before destroying.
   if (!handles_setup_) { return; }
 
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 

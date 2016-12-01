@@ -2,7 +2,7 @@
 #define CAFFE_UTIL_CUDNN_H_
 #ifdef USE_ACCMI
 
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
 // TBD
 //#include <mlopen.h>
 

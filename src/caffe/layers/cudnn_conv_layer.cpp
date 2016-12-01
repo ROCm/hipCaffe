@@ -18,7 +18,7 @@ template <typename Dtype>
 void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   ConvolutionLayer<Dtype>::LayerSetUp(bottom, top);
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 #ifdef USE_CUDNN
@@ -43,7 +43,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   workspace = new void*[this->group_ * CUDNN_STREAMS_PER_GROUP];
 
   for (size_t i = 0; i < bottom.size(); ++i) {
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
     // TBD
 #endif
 
@@ -60,7 +60,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   }
 
   for (int g = 0; g < this->group_ * CUDNN_STREAMS_PER_GROUP; g++) {
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
     // TBD
 #endif
 
@@ -85,7 +85,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
 
   // Create tensor descriptor(s) for data and corresponding convolution(s).
   for (int i = 0; i < bottom.size(); i++) {
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
     // TBD
 #endif
 
@@ -104,7 +104,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
 
   // Tensor descriptor for bias.
   if (this->bias_term_) {
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
     // TBD
 #endif
 
@@ -142,7 +142,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
   size_t workspace_limit_bytes = 8*1024*1024;
 
   for (int i = 0; i < bottom.size(); i++) {
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
     // TBD
 #endif
 
@@ -239,7 +239,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         workspace_fwd_sizes_[i] = 0;
         workspace_bwd_filter_sizes_[i] = 0;
         workspace_bwd_data_sizes_[i] = 0;
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
         // TBD
 #endif
 #ifdef USE_CUDNN
@@ -266,7 +266,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 
   // Tensor descriptor for bias.
   if (this->bias_term_) {
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
     // TBD
 #endif
 
@@ -283,7 +283,7 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
   if (!handles_setup_) { return; }
 
   for (int i = 0; i < bottom_descs_.size(); i++) {
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
     // TBD
 #endif
 
@@ -294,7 +294,7 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
 #endif
   }
   if (this->bias_term_) {
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
     // TBD
 #endif
 
@@ -302,7 +302,7 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
     cudnnDestroyTensorDescriptor(bias_desc_);
 #endif
   }
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 #ifdef USE_CUDNN
@@ -310,7 +310,7 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
 #endif
 
   for (int g = 0; g < this->group_ * CUDNN_STREAMS_PER_GROUP; g++) {
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
     // TBD
 #endif
 #ifdef USE_CUDNN
@@ -320,7 +320,7 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
   }
 
   hipFree(workspaceData);
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 #ifdef USE_CUDNN

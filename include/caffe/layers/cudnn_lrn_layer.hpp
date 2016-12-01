@@ -31,7 +31,7 @@ class CuDNNLRNLayer : public LRNLayer<Dtype> {
 
 
   bool handles_setup_;
-#ifdef USE_MLOPEN
+#ifdef USE_MIOPEN
   // TBD
 #endif
 #ifdef USE_CUDNN
