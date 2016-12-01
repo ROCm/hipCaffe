@@ -45,9 +45,22 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
 
 
   bool handles_setup_;
+
 #ifdef USE_MIOPEN
-  // TBD
+  mlopenHandle_t* handle_;
+  hipStream_t*    stream_;
+
+  // algorithms for forward and backwards convolutions
+  mlopenConvFwdAlgorithm_t*       fwd_algo_;
+  mlopenConvBwdWeightAlgorithm_t* bwd_weight_algo_;
+  mlopenConvBwdDataAlgorithm_t*   bwd_data_algo_;
+
+  vector<mlopenTensorDescriptor_t>      bottom_descs_, top_descs_;
+  mlopenTensorDescriptor_t              bias_desc_;
+  mlopenTensorDescriptor_t              filter_desc_;
+  vector<mlopenConvolutionDescriptor_t> conv_descs_;
 #endif
+
 #ifdef USE_CUDNN
   cudnnHandle_t* handle_;
   cudaStream_t*  stream_;
@@ -62,6 +75,7 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   cudnnFilterDescriptor_t      filter_desc_;
   vector<cudnnConvolutionDescriptor_t> conv_descs_;
 #endif
+
   int bottom_offset_, top_offset_, bias_offset_;
 
   size_t *workspace_fwd_sizes_;
