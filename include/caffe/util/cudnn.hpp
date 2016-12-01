@@ -3,11 +3,135 @@
 #ifdef USE_ACCMI
 
 #ifdef USE_MIOPEN
-// TBD
-//#include <mlopen.h>
+#include <mlopen.h>
 
 #include "caffe/common.hpp"
 #include "caffe/proto/caffe.pb.h"
+
+#define MIOPEN_CHECK(condition) \
+  do { \
+    mlopenStatus_t status = condition; \
+    CHECK_EQ(status, mlopenStatusSuccess) << " "\
+      << miopenGetErrorString(status); \
+  } while (0)
+
+inline const char* miopenGetErrorString(mlopenStatus_t status) {
+  switch (status) {
+  case mlopenStatusSuccess:
+    return "mlopenStatusSuccess";
+  case mlopenStatusNotInitialized:
+    return "mlopenStatusNotInitialized";
+  case mlopenStatusInvalidValue:
+    return "mlopenStatusInvalidValue";
+  case mlopenStatusBadParm:
+    return "mlopenStatusBadParm";
+  case mlopenStatusAllocFailed:
+    return "mlopenStatusAllocFailed";
+  case mlopenStatusInternalError:
+    return "mlopenStatusInternalError";
+  case mlopenStatusNotImplemented:
+    return "mlopenStatusNotImplemented";
+  case mlopenStatusUnknownError:
+    return "mlopenStatusUnknownError";
+  }
+  return "Unknown MIOpen status";
+}
+
+namespace caffe {
+
+namespace miopen {
+
+template <typename Dtype> class dataType;
+template<> class dataType<float>  {
+ public:
+  static const mlopenDataType_t type = mlopenFloat;
+  static float oneval, zeroval;
+  static const void *one, *zero;
+};
+template<> class dataType<double> {
+ public:
+  static const mlopenDataType_t type = mlopenDouble;
+  static double oneval, zeroval;
+  static const void *one, *zero;
+};
+
+template <typename Dtype>
+inline void createTensor4dDesc(mlopenTensorDescriptor_t* desc) {
+  MIOPEN_CHECK(mlopenCreateTensorDescriptor(desc));
+}
+
+template <typename Dtype>
+inline void setTensor4dDesc(mlopenTensorDescriptor_t* desc,
+    int n, int c, int h, int w,
+    int stride_n, int stride_c, int stride_h, int stride_w) {
+  // MIOpen doesn't API to set stride_n, stride_c, stride_h, stride_w yet
+  MIOPEN_CHECK(mlopenSetTensor4dDescriptor(*desc, dataType<Dtype>::type,
+        n, c, h, w));
+}
+
+template <typename Dtype>
+inline void setTensor4dDesc(mlopenTensorDescriptor_t* desc,
+    int n, int c, int h, int w) {
+  const int stride_w = 1;
+  const int stride_h = w * stride_w;
+  const int stride_c = h * stride_h;
+  const int stride_n = c * stride_c;
+  setTensor4dDesc<Dtype>(desc, n, c, h, w,
+                         stride_n, stride_c, stride_h, stride_w);
+}
+
+template <typename Dtype>
+inline void createFilterDesc(mlopenTensorDescriptor_t* desc,
+    int n, int c, int h, int w) {
+  MIOPEN_CHECK(mlopenCreateTensorDescriptor(desc));
+  MIOPEN_CHECK(mlopenSetTensor4dDescriptor(*desc, dataType<Dtype>::type,
+        c, h, w));
+}
+
+template <typename Dtype>
+inline void createConvolutionDesc(mlopenConvolutionDescriptor_t* conv) {
+  MIOPEN_CHECK(mlopenCreateConvolutionDescriptor(conv));
+}
+
+template <typename Dtype>
+inline void setConvolutionDesc(mlopenConvolutionDescriptor_t* conv,
+    mlopenTensorDescriptor_t bottom, mlopenTensorDescriptor_t filter,
+    int pad_h, int pad_w, int stride_h, int stride_w) {
+  MIOPEN_CHECK(mlopenInitConvolutionDescriptor(*conv, mlopenCrossCorrelation,
+        pad_h, pad_w, stride_h, stride_w, 1, 1));
+}
+
+template <typename Dtype>
+inline void createPoolingDesc(mlopenPoolingDescriptor_t* pool_desc,
+    PoolingParameter_PoolMethod poolmethod, mlopenPoolingMode_t* mode,
+    int h, int w, int pad_h, int pad_w, int stride_h, int stride_w) {
+  switch (poolmethod) {
+  case PoolingParameter_PoolMethod_MAX:
+    *mode = mlopenPoolingMax;
+    break;
+  case PoolingParameter_PoolMethod_AVE:
+    *mode = mlopenPoolingAverage;
+    break;
+  default:
+    LOG(FATAL) << "Unknown pooling method.";
+  }
+  MIOPEN_CHECK(mlopenCreatePoolingDescriptor(pool_desc));
+  MIOPEN_CHECK(cudnnSet2dPoolingDescriptor(*pool_desc, *mode,
+        h, w, pad_h, pad_w, stride_h, stride_w));
+}
+
+template <typename Dtype>
+inline void createActivationDescriptor(mlopenActivationDescriptor_t* activ_desc,
+    mlopenActivationMode_t mode) {
+  MIOPEN_CHECK(mlopenCreateActivationDescriptor(activ_desc));
+  MIOPEN_CHECK(mlopenSetActivationDescriptor(*activ_desc, mode,
+                                           Dtype(0), Dtype(0), Dtype(0)));
+}
+
+}  // namespace miopen
+
+}  // namespace caffe
+
 #endif
 
 #ifdef USE_CUDNN
