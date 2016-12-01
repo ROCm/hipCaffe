@@ -11,7 +11,7 @@
 
 namespace caffe {
 
-#ifdef USE_ACCELERATED_NN
+#ifdef USE_ACCMI
 /*
  * @brief cuDNN implementation of PoolingLayer.
  *        Fallback to PoolingLayer for CPU mode.

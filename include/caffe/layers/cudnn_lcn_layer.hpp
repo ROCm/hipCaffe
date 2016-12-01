@@ -12,7 +12,7 @@
 
 namespace caffe {
 
-#ifdef USE_ACCELERATED_NN
+#ifdef USE_ACCMI
 template <typename Dtype>
 class CuDNNLCNLayer : public LRNLayer<Dtype> {
  public:

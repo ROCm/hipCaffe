@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-#ifdef USE_ACCELERATED_NN
+#ifdef USE_ACCMI
 #include <vector>
 
 #include "caffe/layers/cudnn_conv_layer.hpp"

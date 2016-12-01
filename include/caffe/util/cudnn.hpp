@@ -1,6 +1,6 @@
 #ifndef CAFFE_UTIL_CUDNN_H_
 #define CAFFE_UTIL_CUDNN_H_
-#ifdef USE_ACCELERATED_NN
+#ifdef USE_ACCMI
 
 #ifdef USE_MLOPEN
 // TBD
@@ -160,5 +160,5 @@ inline void createActivationDescriptor(cudnnActivationDescriptor_t* activ_desc,
 }  // namespace caffe
 
 #endif  // USE_CUDNN
-#endif // USE_ACCELERATED_NN
+#endif // USE_ACCMI
 #endif  // CAFFE_UTIL_CUDNN_H_

@@ -1,4 +1,4 @@
-#ifdef USE_ACCELERATED_NN
+#ifdef USE_ACCMI
 #include <vector>
 
 #include "thrust/device_vector.h"

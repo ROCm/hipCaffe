@@ -1,4 +1,4 @@
-#ifdef USE_ACCELERATED_NN
+#ifdef USE_ACCMI
 #include <algorithm>
 #include <vector>
 

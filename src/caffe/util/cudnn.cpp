@@ -1,4 +1,4 @@
-#ifdef USE_ACCELERATED_NN
+#ifdef USE_ACCMI
 
 #ifdef USE_MLOPEN
 #include "caffe/util/cudnn.hpp"
@@ -29,4 +29,4 @@ const void* dataType<double>::zero =
 }  // namespace caffe
 #endif
 
-#endif // #ifdef USE_ACCELERATED_NN
+#endif // #ifdef USE_ACCMI

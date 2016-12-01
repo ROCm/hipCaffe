@@ -12,7 +12,7 @@
 
 namespace caffe {
 
-#ifdef USE_ACCELERATED_NN
+#ifdef USE_ACCMI
 /**
  * @brief CuDNN acceleration of SigmoidLayer.
  */
