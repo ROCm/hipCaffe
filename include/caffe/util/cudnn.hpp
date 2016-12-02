@@ -65,7 +65,7 @@ inline void setTensor4dDesc(mlopenTensorDescriptor_t* desc,
     int n, int c, int h, int w,
     int stride_n, int stride_c, int stride_h, int stride_w) {
   // MIOpen doesn't API to set stride_n, stride_c, stride_h, stride_w yet
-  MIOPEN_CHECK(mlopenSetTensor4dDescriptor(*desc, dataType<Dtype>::type,
+  MIOPEN_CHECK(mlopenSet4dTensorDescriptor(*desc, dataType<Dtype>::type,
         n, c, h, w));
 }
 

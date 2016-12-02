@@ -176,8 +176,6 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 
   for (int i = 0; i < bottom.size(); i++) {
 #ifdef USE_MIOPEN
-    // TBD
-#if 0
     miopen::setTensor4dDesc<Dtype>(&bottom_descs_[i],
         this->num_,
         this->channels_ / this->group_, height, width,
@@ -191,7 +189,6 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     miopen::setConvolutionDesc<Dtype>(&conv_descs_[i], bottom_descs_[i],
         filter_desc_, pad_h, pad_w,
         stride_h, stride_w);
-#endif
 
     // TBD
 #if 0
@@ -386,11 +383,8 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
   // Tensor descriptor for bias.
   if (this->bias_term_) {
 #ifdef USE_MIOPEN
-    // TBD
-#if 0
     miopen::setTensor4dDesc<Dtype>(&bias_desc_,
         1, this->num_output_ / this->group_, 1, 1);
-#endif
 #endif
 
 #ifdef USE_CUDNN
