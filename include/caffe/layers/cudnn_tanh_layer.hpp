@@ -35,7 +35,10 @@ class CuDNNTanHLayer : public TanHLayer<Dtype> {
 
   bool handles_setup_;
 #ifdef USE_MIOPEN
-  // TBD
+  mlopenHandle_t             handle_;
+  mlopenTensorDescriptor_t bottom_desc_;
+  mlopenTensorDescriptor_t top_desc_;
+  mlopenActivationDescriptor_t activ_desc_;
 #endif
 
 #ifdef USE_CUDNN
