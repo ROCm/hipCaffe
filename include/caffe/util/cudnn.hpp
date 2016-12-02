@@ -84,8 +84,8 @@ template <typename Dtype>
 inline void createFilterDesc(mlopenTensorDescriptor_t* desc,
     int n, int c, int h, int w) {
   MIOPEN_CHECK(mlopenCreateTensorDescriptor(desc));
-  MIOPEN_CHECK(mlopenSetTensor4dDescriptor(*desc, dataType<Dtype>::type,
-        c, h, w));
+  MIOPEN_CHECK(mlopenSet4dTensorDescriptor(*desc, dataType<Dtype>::type,
+        n, c, h, w));
 }
 
 template <typename Dtype>
@@ -116,7 +116,7 @@ inline void createPoolingDesc(mlopenPoolingDescriptor_t* pool_desc,
     LOG(FATAL) << "Unknown pooling method.";
   }
   MIOPEN_CHECK(mlopenCreatePoolingDescriptor(pool_desc));
-  MIOPEN_CHECK(cudnnSet2dPoolingDescriptor(*pool_desc, *mode,
+  MIOPEN_CHECK(mlopenSet2dPoolingDescriptor(*pool_desc, *mode,
         h, w, pad_h, pad_w, stride_h, stride_w));
 }
 

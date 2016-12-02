@@ -1,7 +1,9 @@
 #ifdef USE_ACCMI
 #include <vector>
 
+#ifdef USE_CUDNN
 #include "thrust/device_vector.h"
+#endif
 
 #include "caffe/layers/cudnn_softmax_layer.hpp"
 

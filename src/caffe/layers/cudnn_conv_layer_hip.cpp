@@ -6,7 +6,9 @@
 
 namespace caffe {
 
+#ifdef USE_CUDNN
 __global__ void sync_conv_groups() { }
+#endif
 
 template <typename Dtype>
 void CuDNNConvolutionLayer<Dtype>::Forward_gpu(

@@ -332,6 +332,10 @@ else
 	COMMON_FLAGS += -DNDEBUG -O2
 endif
 
+ifeq ($(USE_ACCMI), 1)
+	COMMON_FLAGS += -DUSE_ACCMI
+endif
+
 # cuDNN acceleration configuration.
 ifeq ($(USE_CUDNN), 1)
 	LIBRARIES += cudnn
@@ -343,7 +347,7 @@ endif
 # MLOpen acceleration cofiguration.
 ifeq ($(USE_MIOPEN), 1)
         LIBRARIES += MLOpen
-        COMMON_FLAGS += -DUSE_MIOPEN
+        COMMON_FLAGS += -DUSE_MIOPEN -DMLOPEN_BACKEND_HIP=1
 	INCLUDE_DIRS += $(MIOPEN_PATH)/include
 	LIBRARY_DIRS += $(MIOPEN_PATH)/lib
 endif

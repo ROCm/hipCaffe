@@ -33,12 +33,12 @@ class CuDNNReLULayer : public ReLULayer<Dtype> {
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
+  bool handles_setup_;
 #ifdef USE_MIOPEN
   // TBD
 #endif
 
 #ifdef USE_CUDNN
-  bool handles_setup_;
   cudnnHandle_t             handle_;
   cudnnTensorDescriptor_t bottom_desc_;
   cudnnTensorDescriptor_t top_desc_;
