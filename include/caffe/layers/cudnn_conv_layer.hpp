@@ -51,9 +51,9 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   hipStream_t*    stream_;
 
   // algorithms for forward and backwards convolutions
-  mlopenConvFwdAlgorithm_t*       fwd_algo_;
-  mlopenConvBwdWeightAlgorithm_t* bwd_weight_algo_;
-  mlopenConvBwdDataAlgorithm_t*   bwd_data_algo_;
+  mlopenConvFwdAlgorithm_t*        fwd_algo_;
+  mlopenConvBwdWeightsAlgorithm_t* bwd_weight_algo_;
+  mlopenConvBwdDataAlgorithm_t*    bwd_data_algo_;
 
   vector<mlopenTensorDescriptor_t>      bottom_descs_, top_descs_;
   mlopenTensorDescriptor_t              bias_desc_;

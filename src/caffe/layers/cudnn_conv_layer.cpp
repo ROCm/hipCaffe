@@ -21,12 +21,12 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
 #ifdef USE_MIOPEN
   // Initalize HIP streams and MIOpen.
   stream_         = new hipStream_t[this->group_ * CUDNN_STREAMS_PER_GROUP];
-  handle_         = new mlopenHandle_t[this->group_ * CUDNN_STREAMS_PERP_GROUP];
+  handle_         = new mlopenHandle_t[this->group_ * CUDNN_STREAMS_PER_GROUP];
 
   // Initialize algorithm arrays
   fwd_algo_       = new mlopenConvFwdAlgorithm_t[bottom.size()];
-  bwd_weight_algo_= new mlopenConvBwdWeightAlgorithm_t[bottom.size()];
-  bwd_data_algo_  = new mlopenConvBedDataAlgoritm_t[bottom.size()];
+  bwd_weight_algo_= new mlopenConvBwdWeightsAlgorithm_t[bottom.size()];
+  bwd_data_algo_  = new mlopenConvBwdDataAlgorithm_t[bottom.size()];
 #endif
 #ifdef USE_CUDNN
   // Initialize CUDA streams and cuDNN.
@@ -49,30 +49,37 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   workspaceData = NULL;
   workspace = new void*[this->group_ * CUDNN_STREAMS_PER_GROUP];
 
-  for (size_t i = 0; i < bottom.size(); ++i) {
 #ifdef USE_MIOPEN
+  for (size_t i = 0; i < bottom.size(); ++i) {
     // initialize all to default algorithms
     fwd_algo_[i] = mlopenConvolutionFwdAlgoDirect;
-    bwd_weight_algo_[i] = mlopenConvolutionBwdWeightAlgoGEMM;
+    bwd_weight_algo_[i] = mlopenConvolutionBwdWeightsAlgoGEMM;
     bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgo_0;
-#endif
 
-#ifdef USE_CUDNN
-    // initialize all to default algorithms
-    fwd_algo_[i] = (cudnnConvolutionFwdAlgo_t)0;
-    bwd_filter_algo_[i] = (cudnnConvolutionBwdFilterAlgo_t)0;
-    bwd_data_algo_[i] = (cudnnConvolutionBwdDataAlgo_t)0;
-#endif
     // default algorithms don't require workspace
     workspace_fwd_sizes_[i] = 0;
     workspace_bwd_data_sizes_[i] = 0;
     workspace_bwd_filter_sizes_[i] = 0;
   }
+#endif
+
+#ifdef USE_CUDNN
+  for (size_t i = 0; i < bottom.size(); ++i) {
+    // initialize all to default algorithms
+    fwd_algo_[i] = (cudnnConvolutionFwdAlgo_t)0;
+    bwd_filter_algo_[i] = (cudnnConvolutionBwdFilterAlgo_t)0;
+    bwd_data_algo_[i] = (cudnnConvolutionBwdDataAlgo_t)0;
+    // default algorithms don't require workspace
+    workspace_fwd_sizes_[i] = 0;
+    workspace_bwd_data_sizes_[i] = 0;
+    workspace_bwd_filter_sizes_[i] = 0;
+  }
+#endif
 
   for (int g = 0; g < this->group_ * CUDNN_STREAMS_PER_GROUP; g++) {
 #ifdef USE_MIOPEN
     HIP_CHECK(hipStreamCreate(&stream_[g]));
-    MIOPEN_CHECK(mlopenCreate(&handle_[g], 1, stream_[g]));
+    MIOPEN_CHECK(mlopenCreate(&handle_[g], 1, &stream_[g]));
 #endif
 
 #ifdef USE_CUDNN
@@ -90,22 +97,35 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   const int* kernel_shape_data = this->kernel_shape_.cpu_data();
   const int kernel_h = kernel_shape_data[0];
   const int kernel_w = kernel_shape_data[1];
+#ifdef USE_MIOPEN
+  // TBD
+#if 0
+  miopen::createFilterDesc<Dtype>(&filter_desc_,
+      this->num_output_ / this->group_, this->channels_ / this->group_,
+      kernel_h, kernel_w);
+#endif
+#endif
+#ifdef USE_CUDNN
   cudnn::createFilterDesc<Dtype>(&filter_desc_,
       this->num_output_ / this->group_, this->channels_ / this->group_,
       kernel_h, kernel_w);
+#endif
 
   // Create tensor descriptor(s) for data and corresponding convolution(s).
   for (int i = 0; i < bottom.size(); i++) {
 #ifdef USE_MIOPEN
+    // TBD
+#if 0
     mlopenTensorDescriptor_t bottom_desc;
     miopen::createTensor4dDesc<Dtype>(&bottom_desc);
     bottom_descs_.push_back(bottom_desc);
     mlopenTensorDescriptor_t top_desc;
-    miopen::createTensor4dDesc<Dtype>(&top_Desc);
+    miopen::createTensor4dDesc<Dtype>(&top_desc);
     top_descs_.push_back(top_desc);
     mlopenConvolutionDescriptor_t conv_desc;
-    miopen::createConvolutionDesc<Dtype>(&conv_dec);
+    miopen::createConvolutionDesc<Dtype>(&conv_desc);
     conv_descs_.push_back(conv_desc);
+#endif
 #endif
 
 #ifdef USE_CUDNN
@@ -124,7 +144,10 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   // Tensor descriptor for bias.
   if (this->bias_term_) {
 #ifdef USE_MIOPEN
+    // TBD
+#if 0
     miopen::createTensor4dDesc<Dtype>(&bias_desc_);
+#endif
 #endif
 
 #ifdef USE_CUDNN
@@ -162,6 +185,8 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 
   for (int i = 0; i < bottom.size(); i++) {
 #ifdef USE_MIOPEN
+    // TBD
+#if 0
     miopen::setTensor4dDesc<Dtype>(&bottom_descs_[i],
         this->num_,
         this->channels_ / this->group_, height, width,
@@ -175,7 +200,10 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     miopen::setConvolutionDesc<Dtype>(&conv_descs_[i], bottom_descs_[i],
         filter_desc_, pad_h, pad_w,
         stride_h, stride_w);
+#endif
 
+    // TBD
+#if 0
     // choose forward and backward algorithms + workspace(s)
     MIOPEN_CHECK(mlopenFindConvolutionForwardAlgorithm(
         handle_[0],                // handle
@@ -190,7 +218,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         &fwd_algo_[i],             // returnedAlgoCount
         NULL,                      // perfResults
         0,                         // preference
-        &(workspace_fwd_sizes[i]), // workSpace
+        &(workspace_fwd_sizes_[i]), // workSpace
         workspace_limit_bytes,     // workSpaceSize
         true                       // exhaustiveSearch
     ));
@@ -206,7 +234,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         filter_desc_,                      // dwDesc
         NULL,                              // *dw
         1,                                 // requestAlgoCount
-        &bwd_weight_algo[i],               // returnedAlgoCount
+        &bwd_weight_algo_[i],              // returnedAlgoCount
         NULL,                              // perfResults
         0,                                 // preference
         &(workspace_bwd_filter_sizes_[i]), // workSpace
@@ -241,6 +269,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         workspace_limit_bytes,             // workSpaceSize
         true                               // exhaustiveSearch
     ));
+#endif
 #endif
 
 #ifdef USE_CUDNN
@@ -338,7 +367,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         workspace_bwd_data_sizes_[i] = 0;
 #ifdef USE_MIOPEN
         fwd_algo_[i] = mlopenConvolutionFwdAlgoDirect;
-        bwd_weight_algo_[i] = mlopenConvolutionBwdWeightAlgoGEMM;
+        bwd_weight_algo_[i] = mlopenConvolutionBwdWeightsAlgoGEMM;
         bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgo_0;
 #endif
 #ifdef USE_CUDNN
@@ -366,8 +395,11 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
   // Tensor descriptor for bias.
   if (this->bias_term_) {
 #ifdef USE_MIOPEN
+    // TBD
+#if 0
     miopen::setTensor4dDesc<Dtype>(&bias_desc_,
         1, this->num_output_ / this->group_, 1, 1);
+#endif
 #endif
 
 #ifdef USE_CUDNN
@@ -382,19 +414,21 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
   // Check that handles have been setup before destroying.
   if (!handles_setup_) { return; }
 
-  for (int i = 0; i < bottom_descs_.size(); i++) {
 #ifdef USE_MIOPEN
+  for (int i = 0; i < bottom_descs_.size(); i++) {
     mlopenDestroyTensorDescriptor(bottom_descs_[i]);
     mlopenDestroyTensorDescriptor(top_descs_[i]);
     mlopenDestroyConvolutionDescriptor(conv_descs_[i]);
+  }
 #endif
 
 #ifdef USE_CUDNN
+  for (int i = 0; i < bottom_descs_.size(); i++) {
     cudnnDestroyTensorDescriptor(bottom_descs_[i]);
     cudnnDestroyTensorDescriptor(top_descs_[i]);
     cudnnDestroyConvolutionDescriptor(conv_descs_[i]);
-#endif
   }
+#endif
   if (this->bias_term_) {
 #ifdef USE_MIOPEN
     mlopenDestroyTensorDescriptor(bias_desc_);
@@ -405,7 +439,7 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
 #endif
   }
 #ifdef USE_MIOPEN
-  mlopenDestroyFilterDescriptor(filter_desc_);
+  mlopenDestroyTensorDescriptor(filter_desc_);
 #endif
 #ifdef USE_CUDNN
   cudnnDestroyFilterDescriptor(filter_desc_);
@@ -427,7 +461,7 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
   delete [] stream_;
   delete [] handle_;
   delete [] fwd_algo_;
-  delete [] bwd_filter_algo_;
+  delete [] bwd_weight_algo_;
   delete [] bwd_data_algo_;
 #endif
 #ifdef USE_CUDNN
