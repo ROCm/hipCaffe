@@ -98,12 +98,9 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   const int kernel_h = kernel_shape_data[0];
   const int kernel_w = kernel_shape_data[1];
 #ifdef USE_MIOPEN
-  // TBD
-#if 0
   miopen::createFilterDesc<Dtype>(&filter_desc_,
       this->num_output_ / this->group_, this->channels_ / this->group_,
       kernel_h, kernel_w);
-#endif
 #endif
 #ifdef USE_CUDNN
   cudnn::createFilterDesc<Dtype>(&filter_desc_,
@@ -114,8 +111,6 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   // Create tensor descriptor(s) for data and corresponding convolution(s).
   for (int i = 0; i < bottom.size(); i++) {
 #ifdef USE_MIOPEN
-    // TBD
-#if 0
     mlopenTensorDescriptor_t bottom_desc;
     miopen::createTensor4dDesc<Dtype>(&bottom_desc);
     bottom_descs_.push_back(bottom_desc);
@@ -125,7 +120,6 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
     mlopenConvolutionDescriptor_t conv_desc;
     miopen::createConvolutionDesc<Dtype>(&conv_desc);
     conv_descs_.push_back(conv_desc);
-#endif
 #endif
 
 #ifdef USE_CUDNN
@@ -144,10 +138,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   // Tensor descriptor for bias.
   if (this->bias_term_) {
 #ifdef USE_MIOPEN
-    // TBD
-#if 0
     miopen::createTensor4dDesc<Dtype>(&bias_desc_);
-#endif
 #endif
 
 #ifdef USE_CUDNN
@@ -447,8 +438,8 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
 
   for (int g = 0; g < this->group_ * CUDNN_STREAMS_PER_GROUP; g++) {
 #ifdef USE_MIOPEN
-    hipStreamDestroy(stream_[g]);
     mlopenDestroy(handle_[g]);
+    hipStreamDestroy(stream_[g]);
 #endif
 #ifdef USE_CUDNN
     hipStreamDestroy(stream_[g]);
