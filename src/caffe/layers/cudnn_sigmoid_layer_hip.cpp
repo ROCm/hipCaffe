@@ -11,9 +11,18 @@ void CuDNNSigmoidLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
 #ifdef USE_MIOPEN
-  // TBD
-  // Fall back to standard Caffe
-  SigmoidLayer<Dtype>::Forward_gpu(bottom, top);
+  MIOPEN_CHECK(mlopenActivationForward(
+      this->handle_,                // handle
+      activ_desc_,                  // activDesc
+      miopen::dataType<Dtype>::one, // *alpha
+      this->bottom_desc_,           // xDesc
+      bottom_data,                  // *x
+      miopen::dataType<Dtype>::zero,// *beta
+      this->top_desc_,              // yDesc
+      top_data,                     // *y
+      false,                        // do_backward
+      NULL                          // *workSpace
+  ));
 #endif
 
 #ifdef USE_CUDNN
@@ -48,9 +57,21 @@ void CuDNNSigmoidLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
 #ifdef USE_MIOPEN
-  // TBD
-  // Fall back to standard Caffe
-  SigmoidLayer<Dtype>::Backward_gpu(top, propagate_down, bottom);
+  MIOPEN_CHECK(mlopenActivationBackward(
+      this->handle_,                 // handle
+      activ_desc_,                   // activDesc
+      miopen::dataType<Dtype>::one,  // *alpha
+      this->top_desc_,               // yDesc
+      top_data,                      // *y
+      this->top_desc_,               // dyDesc
+      top_diff,                      // *dy
+      this->bottom_desc_,            // xDesc
+      bottom_data,                   // *x
+      miopen::dataType<Dtype>::zero, // *beta
+      this->bottom_desc_,            // dxDesc
+      bottom_diff,                   // *dx
+      NULL
+  ));
 #endif
 
 #ifdef USE_CUDNN

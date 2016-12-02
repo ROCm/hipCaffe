@@ -11,7 +11,12 @@ void CuDNNSigmoidLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   SigmoidLayer<Dtype>::LayerSetUp(bottom, top);
 
 #ifdef USE_MIOPEN
-  // TBD
+  // initialize MIOpen
+  MIOPEN_CHECK(mlopenCreate(&handle_));
+  miopen::createTensor4dDesc<Dtype>(&bottom_desc_);
+  miopen::createTensor4dDesc<Dtype>(&top_desc_);
+  miopen::createActivationDescriptor<Dtype>(&activ_desc_,
+                                            mlopenActivationLOGISTIC);
 #endif
 
 #ifdef USE_CUDNN
@@ -35,7 +40,8 @@ void CuDNNSigmoidLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   const int W = bottom[0]->width();
 
 #ifdef USE_MIOPEN
-  // TBD
+  miopen::setTensor4dDesc<Dtype>(&bottom_desc_, N, K, H, W);
+  miopen::setTensor4dDesc<Dtype>(&top_desc_, N, K, H, W);
 #endif
 
 #ifdef USE_CUDNN
@@ -50,7 +56,9 @@ CuDNNSigmoidLayer<Dtype>::~CuDNNSigmoidLayer() {
   if (!handles_setup_) { return; }
 
 #ifdef USE_MIOPEN
-  // TBD
+  mlopenDestroyTensorDescriptor(this->bottom_desc_);
+  mlopenDestroyTensorDescriptor(this->top_desc_);
+  mlopenDestroy(this->handle_);
 #endif
 
 #ifdef USE_CUDNN
