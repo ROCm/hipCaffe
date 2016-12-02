@@ -13,6 +13,7 @@ void CuDNNLCNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
 #ifdef USE_MIOPEN
   // TBD
+  // MIOpen doesn't have LCN logic yet
   // Fall back to standard Caffe
   LRNLayer<Dtype>::Forward_gpu(bottom, top);
 #endif
@@ -39,6 +40,7 @@ void CuDNNLCNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 
 #ifdef USE_MIOPEN
   // TBD
+  // MIOpen doesn't have LCN logic yet
   // Fall back to standard Caffe
   LRNLayer<Dtype>::Backward_gpu(top, propagate_down, bottom);
 #endif

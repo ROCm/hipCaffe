@@ -33,7 +33,9 @@ class CuDNNLCNLayer : public LRNLayer<Dtype> {
 
   bool handles_setup_;
 #ifdef USE_MIOPEN
-  // TBD
+  mlopenHandle_t             handle_;
+  mlopenLRNDescriptor_t norm_desc_;
+  mlopenTensorDescriptor_t bottom_desc_, top_desc_;
 #endif
 
 #ifdef USE_CUDNN

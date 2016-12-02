@@ -11,7 +11,10 @@ void CuDNNLCNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   LRNLayer<Dtype>::LayerSetUp(bottom, top);
 
 #ifdef USE_MIOPEN
-  // TBD
+  MIOPEN_CHECK(mlopenCreate(&handle_));
+  MIOPEN_CHECK(mlopenCreateLRNDescriptor(&norm_desc_));
+  miopen::createTensor4dDesc<Dtype>(&bottom_desc_);
+  miopen::createTensor4dDesc<Dtype>(&top_desc_);
 #endif
 
 #ifdef USE_CUDNN
@@ -36,7 +39,11 @@ void CuDNNLCNLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   LRNLayer<Dtype>::Reshape(bottom, top);
 #ifdef USE_MIOPEN
-  // TBD
+  miopen::setTensor4dDesc<Dtype>(&bottom_desc_, bottom[0]->num(),
+      this->channels_, this->height_, this->width_);
+  miopen::setTensor4dDesc<Dtype>(&top_desc_, bottom[0]->num(),
+      this->channels_, this->height_, this->width_);
+  MIOPEN_CHECK(mlopenSetLRNDescriptor(norm_desc_, mlopenLRNCrossChannel, size_, alpha_, beta_, k_));
 #endif
 
 #ifdef USE_CUDNN
@@ -69,7 +76,11 @@ CuDNNLCNLayer<Dtype>::~CuDNNLCNLayer() {
   if (!handles_setup_) { return; }
 
 #ifdef USE_MIOPEN
-  // TBD
+  mlopenDestroyTensorDescriptor(bottom_desc_);
+  mlopenDestroyTensorDescriptor(top_desc_);
+
+  // destroy LRN handle
+  mlopenDestroy(handle_);
 #endif
 
 #ifdef USE_CUDNN
