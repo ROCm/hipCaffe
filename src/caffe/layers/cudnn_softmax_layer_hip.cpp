@@ -14,11 +14,19 @@ void CuDNNSoftmaxLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
+
 #ifdef USE_MIOPEN
-  // TBD
-  // Fall back to standard Caffe
-  SoftmaxLayer<Dtype>::Forward_gpu(bottom, top);
+  MIOPEN_CHECK(mlopenSoftmaxForward(
+      handle_,                       // handle
+      miopen::dataType<Dtype>::one,  // *alpha
+      bottom_desc_,                  // xDesc
+      bottom_data,                   // *x
+      miopen::dataType<Dtype>::zero, // *beta
+      top_desc_,                     // yDesc
+      top_data                       // *y
+  ));
 #endif
+
 #ifdef USE_CUDNN
   CUDNN_CHECK(cudnnSoftmaxForward(handle_, CUDNN_SOFTMAX_ACCURATE,
         CUDNN_SOFTMAX_MODE_CHANNEL,
@@ -39,10 +47,19 @@ void CuDNNSoftmaxLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
 
 #ifdef USE_MIOPEN
-    // TBD
-  // Fall back to standard Caffe
-  SoftmaxLayer<Dtype>::Backward_gpu(top, propagate_down, bottom);
+    MIOPEN_CHECK(mlopenSoftmaxBackward(
+        handle_,                       // handle
+        miopen::dataType<Dtype>::one,  // *alpha
+        top_desc_,                     // yDesc
+        top_data,                      // *y
+        top_desc_,                     // dyDesc
+        top_diff,                      // *dy
+        miopen::dataType<Dtype>::zero, // *beta
+        bottom_desc_,                  // dxDesc
+        bottom_diff                    // *dx
+    ));
 #endif
+
 #ifdef USE_CUDNN
     CUDNN_CHECK(cudnnSoftmaxBackward(handle_, CUDNN_SOFTMAX_ACCURATE,
           CUDNN_SOFTMAX_MODE_CHANNEL,

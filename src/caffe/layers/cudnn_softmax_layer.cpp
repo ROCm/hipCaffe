@@ -14,7 +14,10 @@ void CuDNNSoftmaxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   SoftmaxLayer<Dtype>::LayerSetUp(bottom, top);
 #ifdef USE_MIOPEN
-  // TBD
+  // Initialize MIOpen
+  MIOPEN_CHECK(mlopenCreate(&handle_));
+  miopen::createTensor4dDesc<Dtype>(&bottom_desc_);
+  miopen::createTensor4dDesc<Dtype>(&top_desc_);
 #endif
 
 #ifdef USE_CUDNN
@@ -35,7 +38,8 @@ void CuDNNSoftmaxLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   int H = this->inner_num_;
   int W = 1;
 #ifdef USE_MIOPEN
-  // TBD
+  miopen::setTensor4dDesc<Dtype>(&bottom_desc_, N, K, H, W);
+  miopen::setTensor4dDesc<Dtype>(&top_desc_, N, K, H, W);
 #endif
 
 #ifdef USE_CUDNN
@@ -50,7 +54,9 @@ CuDNNSoftmaxLayer<Dtype>::~CuDNNSoftmaxLayer() {
   if (!handles_setup_) { return; }
 
 #ifdef USE_MIOPEN
-  // TBD
+  mlopenDestroyTensorDescriptor(bottom_desc_);
+  mlopenDestroyTensorDescriptor(top_desc_);
+  mlopenDestroy(handle_);
 #endif
 
 #ifdef USE_CUDNN
