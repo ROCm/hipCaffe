@@ -42,6 +42,17 @@ void CuDNNPoolingLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
       this->channels_, this->height_, this->width_);
   miopen::setTensor4dDesc<Dtype>(&top_desc_, bottom[0]->num(),
       this->channels_, this->pooled_height_, this->pooled_width_);
+
+  size_t totalSizeInBytes = 0;
+  mlopenPoolingGetWorkSpaceSize(top_desc_, &totalSizeInBytes);
+
+  if (totalSizeInBytes > workspaceSize) {
+    workspaceSize = totalSizeInBytes;
+
+    hipFree(workspace);
+
+    HIP_CHECK(hipMalloc(&workspace, workspaceSize));
+  }
 #endif
 
 #ifdef USE_CUDNN
@@ -62,6 +73,8 @@ CuDNNPoolingLayer<Dtype>::~CuDNNPoolingLayer() {
   mlopenDestroyTensorDescriptor(top_desc_);
   mlopenDestroyPoolingDescriptor(pooling_desc_);
   mlopenDestroy(handle_);
+
+  hipFree(workspace);
 #endif
 
 #ifdef USE_CUDNN
