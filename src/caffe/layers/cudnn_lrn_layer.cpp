@@ -44,6 +44,17 @@ void CuDNNLRNLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   miopen::setTensor4dDesc<Dtype>(&top_desc_, bottom[0]->num(),
       this->channels_, this->height_, this->width_);
   MIOPEN_CHECK(mlopenSetLRNDescriptor(norm_desc_, mlopenLRNCrossChannel, size_, alpha_, beta_, k_));
+
+  size_t totalSizeInBytes = 0;
+  mlopenLRNGetWorkSpaceSize(top_desc_, &totalSizeInBytes);
+
+  if (totalSizeInBytes > workspaceSize) {
+    workspaceSize = totalSizeInBytes;
+
+    hipFree(workspace);
+
+    HIP_CHECK(hipMalloc(&workspace, workspaceSize));
+  }
 #endif
 
 #ifdef USE_CUDNN
@@ -66,6 +77,8 @@ CuDNNLRNLayer<Dtype>::~CuDNNLRNLayer() {
 
   // destroy LRN handle
   mlopenDestroy(handle_);
+
+  hipFree(workspace);
 #endif
 
 #ifdef USE_CUDNN
