@@ -13,9 +13,22 @@ void CuDNNLRNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
 #ifdef USE_MIOPEN
   // TBD
-  // Fall back to standard Caffe
-  LRNLayer<Dtype>::Forward_gpu(bottom, top);
+  // check how to properly set workSpace
+
+  MIOPEN_CHECK(mlopenLRNForward(
+      handle_,                       // handle
+      norm_desc_,                    // lrnDesc
+      miopen::dataType<Dtype>::one,  // *alpha
+      bottom_desc_,                  // xDesc
+      bottom_data,                   // *x
+      miopen::dataType<Dtype>::zero, // *beta
+      top_desc_,                     // yDesc
+      top_data,                      // *y
+      false,                         // do_backward
+      NULL                           // *workSpace
+  ));
 #endif
+
 #ifdef USE_CUDNN
   CUDNN_CHECK(cudnnLRNCrossChannelForward(
         handle_, norm_desc_, CUDNN_LRN_CROSS_CHANNEL_DIM1,
@@ -36,9 +49,25 @@ void CuDNNLRNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 
 #ifdef USE_MIOPEN
   // TBD
-  // Fall back to standard Caffe
-  LRNLayer<Dtype>::Backward_gpu(top, propagate_down, bottom);
+  // check how to properly set workSpace
+
+  MIOPEN_CHECK(mlopenLRNBackward(
+      handle_,                       // handle
+      norm_desc_,                    // lrnDesc
+      miopen::dataType<Dtype>::one,  // *alpha
+      top_desc_,                     // yDesc
+      top_data,                      // *y
+      top_desc_,                     // dyDesc
+      top_diff,                      // *dy
+      bottom_desc_,                  // xDesc
+      bottom_data,                   // *x
+      miopen::dataType<Dtype>::zero, // *beta
+      bottom_desc_,                  // dxDesc
+      bottom_diff,                   // *dx
+      NULL                           // *workSpace
+  ));
 #endif
+
 #ifdef USE_CUDNN
   CUDNN_CHECK(cudnnLRNCrossChannelBackward(
         handle_, norm_desc_, CUDNN_LRN_CROSS_CHANNEL_DIM1,
