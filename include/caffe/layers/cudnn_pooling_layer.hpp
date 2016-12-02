@@ -38,8 +38,12 @@ class CuDNNPoolingLayer : public PoolingLayer<Dtype> {
 
   bool handles_setup_;
 #ifdef USE_MIOPEN
-  // TBD
+  mlopenHandle_t             handle_;
+  mlopenTensorDescriptor_t bottom_desc_, top_desc_;
+  mlopenPoolingDescriptor_t  pooling_desc_;
+  mlopenPoolingMode_t        mode_;
 #endif
+
 #ifdef USE_CUDNN
   cudnnHandle_t             handle_;
   cudnnTensorDescriptor_t bottom_desc_, top_desc_;

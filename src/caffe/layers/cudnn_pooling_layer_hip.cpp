@@ -13,8 +13,21 @@ void CuDNNPoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
 #ifdef USE_MIOPEN
   // TBD
-  // Fall back to standard Caffe
-  PoolingLayer<Dtype>::Forward_gpu(bottom, top);
+  // check how to properly set workSpace
+
+  MIOPEN_CHECK(mlopenPoolingForward(
+      handle_,                       // handle
+      pooling_desc_,                 // poolDesc
+      miopen::dataType<Dtype>::one,  // *alpha
+      bottom_desc_,                  // xDesc
+      bottom_data,                   // *x
+      miopen::dataType<Dtype>::zero, // *beta
+      top_desc_,                     // yDesc
+      top_data,                      // *y
+      false,                         // do_backward
+      NULL,                          // *workSpace
+      (size_t)0                      // workSpaceSize
+  ));
 #endif
 
 #ifdef USE_CUDNN
@@ -39,8 +52,23 @@ void CuDNNPoolingLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 
 #ifdef USE_MIOPEN
   // TBD
-  // Fall back to standard Caffe
-  PoolingLayer<Dtype>::Backward_gpu(top, propagate_down, bottom);
+  // check how to properly set workSpace
+
+  MIOPEN_CHECK(mlopenPoolingBackward(
+      handle_,                       // handle
+      pooling_desc_,                 // poolDesc
+      miopen::dataType<Dtype>::one,  // *alpha
+      top_desc_,                     // yDesc
+      top_data,                      // *y
+      top_desc_,                     // dyDesc
+      top_diff,                      // *dy
+      bottom_desc_,                  // xDesc
+      bottom_data,                   // *x
+      miopen::dataType<Dtype>::zero, // *beta
+      bottom_desc_,                  // dxDesc
+      bottom_diff,                   // *dx
+      NULL                           // *workSpace
+  ));
 #endif
 
 #ifdef USE_CUDNN
