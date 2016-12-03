@@ -170,9 +170,20 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
   const int stride_h = stride_data[0];
   const int stride_w = stride_data[1];
 
+#ifdef USE_MIOPEN
+  const Dtype* weight = NULL;
+  Dtype* weight_diff = NULL;
+  if (this->param_propagate_down_[0]) {
+    weight = this->blobs_[0]->gpu_data();
+    weight_diff = this->blobs_[0]->mutable_gpu_diff();
+  }
+#endif
+
+#ifdef USE_CUDNN
   // Specify workspace limit for kernels directly until we have a
   // planning strategy and a rewrite of Caffe's GPU memory mangagement
   size_t workspace_limit_bytes = 8*1024*1024;
+#endif
 
   for (int i = 0; i < bottom.size(); i++) {
 #ifdef USE_MIOPEN
@@ -190,74 +201,116 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         filter_desc_, pad_h, pad_w,
         stride_h, stride_w);
 
-    // TBD
-#if 0
+    const Dtype* bottom_data = bottom[i]->gpu_data();
+    Dtype* top_data = top[i]->mutable_gpu_data();
+
+    int ret_algo_count;
+    mlopenConvAlgoPerf_t perf;
+
     // choose forward and backward algorithms + workspace(s)
     MIOPEN_CHECK(mlopenFindConvolutionForwardAlgorithm(
-        handle_[0],                // handle
-        bottom_descs_[i],          // xDesc
-        NULL,                      // *x
-        filter_desc_,              // wDesc
-        NULL,                      // *w
-        conv_descs_[i],            // convDesc
-        top_descs_[i],             // yDesc
-        NULL,                      // *y
-        1,                         // requestAlgoCount
-        &fwd_algo_[i],             // returnedAlgoCount
-        NULL,                      // perfResults
-        0,                         // preference
-        &(workspace_fwd_sizes_[i]), // workSpace
-        workspace_limit_bytes,     // workSpaceSize
-        true                       // exhaustiveSearch
+        handle_[0],               // handle
+        bottom_descs_[i],         // xDesc
+        bottom_data,              // *x
+        filter_desc_,             // wDesc
+        weight,                   // *w
+        conv_descs_[i],           // convDesc
+        top_descs_[i],            // yDesc
+        top_data,                 // *y
+        1,                        // requestAlgoCount
+        &ret_algo_count,          // returnedAlgoCount
+        &perf,                    // perfResults
+        mlopenConvolutionFastest, // preference
+        NULL,                     // workSpace
+        (size_t)0,                // workSpaceSize
+        false                     // exhaustiveSearch
     ));
 
-    // choose backward algorithm for filter
-    MIOPEN_CHECK(mlopenFindConvolutionBackwardWeightsAlgorithm(
-        handle_[0],                        // handle
-        bottom_descs_[i],                  // dyDesc
-        NULL,                              // dy
-        top_descs_[i],                     // xDesc
-        NULL,                              // *x
-        conv_descs_[i],                    // convDesc
-        filter_desc_,                      // dwDesc
-        NULL,                              // *dw
-        1,                                 // requestAlgoCount
-        &bwd_weight_algo_[i],              // returnedAlgoCount
-        NULL,                              // perfResults
-        0,                                 // preference
-        &(workspace_bwd_filter_sizes_[i]), // workSpace
-        workspace_limit_bytes,             // workSpaceSize
-        true                               // exhaustiveSearch
-    ));
+    fwd_algo_[i] = perf.fwd_algo;
+#if 0
+    workspace_fwd_sizes_[i] = perf.memory;
+#endif
+#if 0
+    LOG(INFO) << "fwd_algo_[" << i << "]: " << fwd_algo_[i] << "\n";
+    LOG(INFO) << "workspace_fwd_sizes_[" << i << "]:" << workspace_fwd_sizes_[i] << "\n";
+#endif
 
+#if 0
+    LOG(INFO) << "Before mlopenConvolutionBackwardWeightsGetWorkSpaceSize\n";
     // get workspace for backwards filter algorithm
     MIOPEN_CHECK(mlopenConvolutionBackwardWeightsGetWorkSpaceSize(
-        bottom_descs_[i],               // dyDesc
-        top_descs_[i],                  // xDesc
+        top_descs_[i],                  // dyDesc
+        bottom_descs_[i],               // xDesc
         conv_descs_[i],                 // convDesc
         filter_desc_,                   // dwDesc
         &workspace_bwd_filter_sizes_[i] // workSpaceSize
     ));
+    LOG(INFO) << "After mlopenConvolutionBackwardWeightsGetWorkSpaceSize\n";
+    LOG(INFO) << "bwd_weight_algo_[" << i << "]: " << bwd_weight_algo_[i] << "\n";
+    LOG(INFO) << "workspace_bwd_filter_sizes_[" << i << "]:" << workspace_bwd_filter_sizes_[i] << "\n";
+#endif
 
+#if 0
+    const Dtype* top_diff = top[i]->gpu_diff();
+    LOG(INFO) << "Before mlopenFindConvolutionBackwardWeightsAlgorithm\n";
+    // choose backward algorithm for filter
+    MIOPEN_CHECK(mlopenFindConvolutionBackwardWeightsAlgorithm(
+        handle_[0],               // handle
+        top_descs_[i],            // dyDesc
+        top_diff,                 // *dy
+        bottom_descs_[i],         // xDesc
+        bottom_data,              // *x
+        conv_descs_[i],           // convDesc
+        filter_desc_,             // dwDesc
+        weight_diff,              // *dw
+        1,                        // requestAlgoCount
+        &ret_algo_count,          // returnedAlgoCount
+        &perf,                    // perfResults
+        mlopenConvolutionFastest, // preference
+        NULL,                     // workSpace
+        (size_t)0,                // workSpaceSize
+        false                     // exhaustiveSearch
+    ));
+    LOG(INFO) << "After mlopenFindConvolutionBackwardWeightsAlgorithm\n";
+
+    bwd_weight_algo_[i] = perf.bwd_weights_algo;
+    workspace_bwd_filter_sizes_[i] = perf.memory;
+#endif
+
+#if 0
+    Dtype* bottom_diff = bottom[i]->mutable_gpu_diff();
+
+    LOG(INFO) << "Before mlopenFindConvolutionBackwardDataAlgorithm\n";
     // choose backward algo for data
     MIOPEN_CHECK(mlopenFindConvolutionBackwardDataAlgorithm(
-        handle_[0],                        // handle
-        filter_desc_,                      // dyDesc
-        NULL,                              // *dy
-        top_descs_[i],                     // wDesc
-        NULL,                              // *w
-        conv_descs_[i],                    // convDesc
-        bottom_descs_[i],                  // dxDesc
-        NULL,                              // *dx
-        1,                                 // requestAlgoCount
-        &bwd_data_algo_[i],                // returnedAlgoCount
-        NULL,                              // perfResults
-        0,                                 // preference
-        &(workspace_bwd_data_sizes_[i]),   // workSpace
-        workspace_limit_bytes,             // workSpaceSize
-        true                               // exhaustiveSearch
+        handle_[0],               // handle
+        top_descs_[i],            // dyDesc
+        top_diff,                 // *dy
+        filter_desc_,             // wDesc
+        weight,                   // *w
+        conv_descs_[i],           // convDesc
+        bottom_descs_[i],         // dxDesc
+        bottom_diff,              // *dx
+        1,                        // requestAlgoCount
+        &ret_algo_count,          // returnedAlgoCount
+        &perf,                    // perfResults
+        mlopenConvolutionFastest, // preference
+        NULL,                     // workSpace
+        (size_t)0,                // workSpaceSize
+        false                     // exhaustiveSearch
     ));
+    LOG(INFO) << "After mlopenFindConvolutionBackwardDataAlgorithm\n";
+
+    bwd_data_algo_[i] = perf.bwd_data_algo;
 #endif
+#if 0
+    workspace_bwd_data_sizes_[i] = perf.memory;
+#endif
+#if 0
+    LOG(INFO) << "bwd_data_algo_[" << i << "]: " << bwd_data_algo_[i] << "\n";
+    LOG(INFO) << "workspace_bwd_data_sizes_[" << i << "]: " << workspace_bwd_data_sizes_[i] << "\n";
+#endif
+
 #endif
 
 #ifdef USE_CUDNN
@@ -330,13 +383,25 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     total_workspace_bwd_filter = std::max(total_workspace_bwd_filter,
                                      workspace_bwd_filter_sizes_[i]);
   }
+#if 0
+  LOG(INFO) << "total_workspace_fwd: " << total_workspace_fwd << "\n";
+  LOG(INFO) << "total_workspace_bwd_data: " << total_workspace_bwd_data << "\n";
+  LOG(INFO) << "total_workspace_bwd_filter: " << total_workspace_bwd_filter << "\n";
+#endif
+
   // get max over all operations
   size_t max_workspace = std::max(total_workspace_fwd,
                              total_workspace_bwd_data);
   max_workspace = std::max(max_workspace, total_workspace_bwd_filter);
+#if 0
+  LOG(INFO) << "max_workspace: " << max_workspace << "\n";
+#endif
   // ensure all groups have enough workspace
   size_t total_max_workspace = max_workspace *
                                (this->group_ * CUDNN_STREAMS_PER_GROUP);
+#if 0
+  LOG(INFO) << "total_max_workspace: " << total_max_workspace << "\n";
+#endif
 
   // this is the total amount of storage needed over all groups + streams
   if (total_max_workspace > workspaceSizeInBytes) {

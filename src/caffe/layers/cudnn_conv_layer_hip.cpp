@@ -16,8 +16,10 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
   const Dtype* weight = this->blobs_[0]->gpu_data();
 #ifdef USE_MIOPEN
 
-#if 1
-  // TBD
+#if 0
+  LOG(INFO) << "CuDNNConvolutionLayer<Dtype>::Forward_gpu()\n";
+#endif
+#if 0
   // Fall back to standard Caffe
   ConvolutionLayer<Dtype>::Forward_gpu(bottom, top);
 #else
@@ -34,7 +36,7 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
           bottom_descs_[i],                  // xDesc
           bottom_data + bottom_offset_ * g,  // *x
           filter_desc_,                      // wDesc
-          weight + weight_offset_ * g,       // *w
+          weight + this->weight_offset_ * g, // *w
           conv_descs_[i],                    // convDesc
           fwd_algo_[i],                      // algo
           miopen::dataType<Dtype>::zero,     // *beta
@@ -101,6 +103,9 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 
 #ifdef USE_MIOPEN
 
+#if 0
+  LOG(INFO) << "CuDNNConvolutionLayer<Dtype>::Backward_gpu()\n";
+#endif
 #if 1
   // TBD
   // Fall back to standard Caffe
@@ -130,19 +135,19 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
       if (this->param_propagate_down_[1]) {
         const Dtype* bottom_data = bottom[i]->gpu_data();
         MIOPEN_CHECK(mlopenConvolutionBackwardWeights(
-            handle_[1 * this->group_ + g],    // handle
-            miopen::dataType<Dtype>::one,     // *alpha
-            top_descs_[i],                    // dyDesc
-            top_diff + top_offset_ * g,       // *dy
-            bottom_descs_[i],                 // xDesc
-            bottom_data + bottom_offset_ * g, // *x
-            conv_descs_[i],                   // convDesc
-            bwd_weight_algo_[i],              // algo
-            miopen::dataType<Dtype>::one,     // *beta
-            filter_desc_,                     // dwDesc
-            weight_diff + weight_offset_ * g, // *dw
-            workspace[1 * this->group_ + g],  // *workSpace
-            workspace_bwd_filter_sizes_[i]    // workSpaceSize
+            handle_[1 * this->group_ + g],          // handle
+            miopen::dataType<Dtype>::one,           // *alpha
+            top_descs_[i],                          // dyDesc
+            top_diff + top_offset_ * g,             // *dy
+            bottom_descs_[i],                       // xDesc
+            bottom_data + bottom_offset_ * g,       // *x
+            conv_descs_[i],                         // convDesc
+            bwd_weight_algo_[i],                    // algo
+            miopen::dataType<Dtype>::one,           // *beta
+            filter_desc_,                           // dwDesc
+            weight_diff + this->weight_offset_ * g, // *dw
+            workspace[1 * this->group_ + g],        // *workSpace
+            workspace_bwd_filter_sizes_[i]          // workSpaceSize
         ));
       }
 
@@ -153,19 +158,19 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         }
         Dtype* bottom_diff = bottom[i]->mutable_gpu_diff();
         MIOPEN_CHECK(mlopenConvolutionBackwardData(
-            handle_[2 * this->group_ + g],   // handle
-            miopen::dataType<Dtype>::one,    // *alpha
-            top_descs_[i],                   // dyDesc
-            top_diff + top_offset_ * g,      // *dy
-            filter_desc_,                    // wDesc
-            weight + weight_offset_ * g,     // *w
-            conv_descs_[i],                  // convDesc
-            bwd_data_algo_[i],               // algo
-            miopen::dataType<Dtype>::zero,   // *beta
-            bottom_descs_[i],                // dxDesc
-            botom_diff _ bottom_offset_ * g, // *dx
-            workspace[2 * this->group_ + g], // workSpace
-            workspace_bwd_data_sizes_[i]     // workSpaceSize
+            handle_[2 * this->group_ + g],     // handle
+            miopen::dataType<Dtype>::one,      // *alpha
+            top_descs_[i],                     // dyDesc
+            top_diff + top_offset_ * g,        // *dy
+            filter_desc_,                      // wDesc
+            weight + this->weight_offset_ * g, // *w
+            conv_descs_[i],                    // convDesc
+            bwd_data_algo_[i],                 // algo
+            miopen::dataType<Dtype>::zero,     // *beta
+            bottom_descs_[i],                 // dxDesc
+            bottom_diff + bottom_offset_ * g, // *dx
+            workspace[2 * this->group_ + g],  // workSpace
+            workspace_bwd_data_sizes_[i]      // workSpaceSize
         ));
       }
     }
