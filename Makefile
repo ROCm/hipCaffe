@@ -210,7 +210,7 @@ ifeq ($(USE_OPENCV), 1)
 		
 endif
 PYTHON_LIBRARIES ?= boost_python python2.7
-WARNINGS := -Wall -Wno-sign-compare
+WARNINGS := -Wall -Wno-sign-compare -Wno-unused-local-typedef
 
 ##############################
 # Set build directories
@@ -336,12 +336,24 @@ else
 	COMMON_FLAGS += -DNDEBUG -O2
 endif
 
+ifeq ($(USE_ACCMI), 1)
+	COMMON_FLAGS += -DUSE_ACCMI
+endif
+
 # cuDNN acceleration configuration.
 ifeq ($(USE_CUDNN), 1)
 	LIBRARIES += cudnn
 	COMMON_FLAGS += -DUSE_CUDNN
  	INCLUDE_DIRS += $(CUDNN_PATH)/include
 	LIBRARY_DIRS += $(CUDNN_PATH)/lib64
+endif
+
+# MLOpen acceleration cofiguration.
+ifeq ($(USE_MIOPEN), 1)
+        LIBRARIES += MLOpen
+        COMMON_FLAGS += -DUSE_MIOPEN -DMLOPEN_BACKEND_HIP=1
+	INCLUDE_DIRS += $(MIOPEN_PATH)/include
+	LIBRARY_DIRS += $(MIOPEN_PATH)/lib
 endif
 
 # configure IO libraries
@@ -511,7 +523,7 @@ $(LINT_OUTPUTS): $(LINT_OUTPUT_DIR)/%.lint.txt : % $(LINT_SCRIPT) | $(LINT_OUTPU
 		> $@ \
 		|| true
 
-test: $(TEST_ALL_BIN) $(TEST_ALL_DYNLINK_BIN) $(TEST_BINS)
+test: $(TEST_ALL_BIN) #$(TEST_ALL_DYNLINK_BIN) $(TEST_BINS)
 
 tools: $(TOOL_BINS) $(TOOL_BIN_LINKS)
 

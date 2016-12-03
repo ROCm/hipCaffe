@@ -11,7 +11,7 @@
 
 namespace caffe {
 
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
 /**
  * @brief cuDNN implementation of SoftmaxLayer.
  *        Fallback to SoftmaxLayer for CPU mode.
@@ -34,9 +34,17 @@ class CuDNNSoftmaxLayer : public SoftmaxLayer<Dtype> {
      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
   bool handles_setup_;
+#ifdef USE_MIOPEN
+  mlopenHandle_t             handle_;
+  mlopenTensorDescriptor_t bottom_desc_;
+  mlopenTensorDescriptor_t top_desc_;
+#endif
+
+#ifdef USE_CUDNN
   cudnnHandle_t             handle_;
   cudnnTensorDescriptor_t bottom_desc_;
   cudnnTensorDescriptor_t top_desc_;
+#endif
 };
 #endif
 

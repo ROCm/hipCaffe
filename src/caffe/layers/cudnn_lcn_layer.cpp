@@ -1,4 +1,4 @@
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
 #include <vector>
 
 #include "caffe/layers/cudnn_lcn_layer.hpp"
@@ -10,10 +10,19 @@ void CuDNNLCNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   LRNLayer<Dtype>::LayerSetUp(bottom, top);
 
+#ifdef USE_MIOPEN
+  MIOPEN_CHECK(mlopenCreate(&handle_));
+  MIOPEN_CHECK(mlopenCreateLRNDescriptor(&norm_desc_));
+  miopen::createTensor4dDesc<Dtype>(&bottom_desc_);
+  miopen::createTensor4dDesc<Dtype>(&top_desc_);
+#endif
+
+#ifdef USE_CUDNN
   CUDNN_CHECK(cudnnCreate(&handle_));
   CUDNN_CHECK(cudnnCreateLRNDescriptor(&norm_desc_));
   cudnn::createTensor4dDesc<Dtype>(&bottom_desc_);
   cudnn::createTensor4dDesc<Dtype>(&top_desc_);
+#endif
 
   // create a LRN handle
   handles_setup_ = true;
@@ -29,11 +38,21 @@ template <typename Dtype>
 void CuDNNLCNLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   LRNLayer<Dtype>::Reshape(bottom, top);
+#ifdef USE_MIOPEN
+  miopen::setTensor4dDesc<Dtype>(&bottom_desc_, bottom[0]->num(),
+      this->channels_, this->height_, this->width_);
+  miopen::setTensor4dDesc<Dtype>(&top_desc_, bottom[0]->num(),
+      this->channels_, this->height_, this->width_);
+  MIOPEN_CHECK(mlopenSetLRNDescriptor(norm_desc_, mlopenLRNCrossChannel, size_, alpha_, beta_, k_));
+#endif
+
+#ifdef USE_CUDNN
   cudnn::setTensor4dDesc<Dtype>(&bottom_desc_, bottom[0]->num(),
       this->channels_, this->height_, this->width_);
   cudnn::setTensor4dDesc<Dtype>(&top_desc_, bottom[0]->num(),
       this->channels_, this->height_, this->width_);
   CUDNN_CHECK(cudnnSetLRNDescriptor(norm_desc_, size_, alpha_, beta_, k_));
+#endif
 
   // allocate / reallocate tempData buffers
   size_t totalSizeInBytes = sizeof(Dtype)*bottom[0]->num()* \
@@ -56,11 +75,21 @@ CuDNNLCNLayer<Dtype>::~CuDNNLCNLayer() {
   // Check that handles have been setup before destroying.
   if (!handles_setup_) { return; }
 
+#ifdef USE_MIOPEN
+  mlopenDestroyTensorDescriptor(bottom_desc_);
+  mlopenDestroyTensorDescriptor(top_desc_);
+
+  // destroy LRN handle
+  mlopenDestroy(handle_);
+#endif
+
+#ifdef USE_CUDNN
   cudnnDestroyTensorDescriptor(bottom_desc_);
   cudnnDestroyTensorDescriptor(top_desc_);
 
   // destroy LRN handle
   cudnnDestroy(handle_);
+#endif
 
   // free temp buffers
   hipFree(tempData1);

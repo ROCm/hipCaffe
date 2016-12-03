@@ -1156,12 +1156,16 @@ TYPED_TEST(NetTest, TestComboLossWeight) {
 }
 
 TYPED_TEST(NetTest, TestBackwardWithAccuracyLayer) {
+  // HACK: disable this test as it crashes
+#if 0
   const bool kForceBackward = false;
   const bool kAccuracyLayer = true;
   this->InitTinyNet(kForceBackward, kAccuracyLayer);
   EXPECT_TRUE(this->net_->has_blob("accuracy"));
   // Test that we can do Backward even though we have an 'Accuracy' layer.
   this->net_->ForwardBackward();
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(NetTest, TestUnsharedWeightsDataNet) {
@@ -1424,6 +1428,8 @@ TYPED_TEST(NetTest, TestParamPropagateDown) {
 }
 
 TYPED_TEST(NetTest, TestFromTo) {
+  // HACK: disable this test as it crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   this->InitTinyNet();
 
@@ -1455,6 +1461,8 @@ TYPED_TEST(NetTest, TestFromTo) {
           this->net_->blob_by_name("data")->cpu_diff()[j]);
     }
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 class FilterNetTest : public ::testing::Test {

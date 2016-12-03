@@ -5,3 +5,5 @@ int main(int argc, char** argv) {
              "[--iterations=50] [--gpu] [--device_id=0]";
   return 0;
 }
+
+#include "caffe/data_reader_hack.inl"

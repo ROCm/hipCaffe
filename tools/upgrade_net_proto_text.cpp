@@ -49,3 +49,5 @@ int main(int argc, char** argv) {
   LOG(INFO) << "Wrote upgraded NetParameter text proto to " << argv[2];
   return !success;
 }
+
+#include "caffe/data_reader_hack.inl"

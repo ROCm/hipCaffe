@@ -572,16 +572,26 @@ class SGDSolverTest : public GradientBasedSolverTest<TypeParam> {
 TYPED_TEST_CASE(SGDSolverTest, TestDtypesAndDevices);
 
 TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdate) {
+  // HACK: disable this test which crashes
+#if 0
   this->TestLeastSquaresUpdate();
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateLROneHundredth) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   this->TestLeastSquaresUpdate(kLearningRate);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithWeightDecay) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -590,9 +600,13 @@ TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithWeightDecay) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithWeightDecayMultiIter) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -601,9 +615,13 @@ TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithWeightDecayMultiIter) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithMomentum) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0;
@@ -612,9 +630,13 @@ TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithMomentum) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithMomentumMultiIter) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0;
@@ -623,9 +645,13 @@ TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithMomentumMultiIter) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithEverything) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -634,9 +660,13 @@ TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithEverything) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithEverythingShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -646,9 +676,13 @@ TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithEverythingShare) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithEverythingAccum) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -657,9 +691,13 @@ TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithEverythingAccum) {
   const int kIterSize = 2;
   this->CheckAccumulation(kLearningRate, kWeightDecay, kMomentum, kNumIters,
       kIterSize);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithEverythingAccumShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -669,9 +707,13 @@ TYPED_TEST(SGDSolverTest, TestLeastSquaresUpdateWithEverythingAccumShare) {
   this->share_ = true;
   this->CheckAccumulation(kLearningRate, kWeightDecay, kMomentum, kNumIters,
       kIterSize);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(SGDSolverTest, TestSnapshot) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -680,9 +722,13 @@ TYPED_TEST(SGDSolverTest, TestSnapshot) {
   for (int i = 1; i <= kNumIters; ++i) {
     this->TestSnapshot(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(SGDSolverTest, TestSnapshotShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -692,6 +738,8 @@ TYPED_TEST(SGDSolverTest, TestSnapshotShare) {
   for (int i = 1; i <= kNumIters; ++i) {
     this->TestSnapshot(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 
@@ -708,23 +756,37 @@ class AdaGradSolverTest : public GradientBasedSolverTest<TypeParam> {
 TYPED_TEST_CASE(AdaGradSolverTest, TestDtypesAndDevices);
 
 TYPED_TEST(AdaGradSolverTest, TestAdaGradLeastSquaresUpdate) {
+  // HACK: disable this test which crashes
+#if 0
   this->TestLeastSquaresUpdate();
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaGradSolverTest, TestAdaGradLeastSquaresUpdateLROneHundredth) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   this->TestLeastSquaresUpdate(kLearningRate);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaGradSolverTest, TestAdaGradLeastSquaresUpdateWithWeightDecay) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
   this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaGradSolverTest, TestAdaGradLeastSquaresUpdateWithEverything) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -733,10 +795,14 @@ TYPED_TEST(AdaGradSolverTest, TestAdaGradLeastSquaresUpdateWithEverything) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaGradSolverTest,
       TestAdaGradLeastSquaresUpdateWithEverythingShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -746,9 +812,13 @@ TYPED_TEST(AdaGradSolverTest,
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaGradSolverTest, TestLeastSquaresUpdateWithEverythingAccum) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -757,9 +827,13 @@ TYPED_TEST(AdaGradSolverTest, TestLeastSquaresUpdateWithEverythingAccum) {
   const int kIterSize = 2;
   this->CheckAccumulation(kLearningRate, kWeightDecay, kMomentum, kNumIters,
       kIterSize);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaGradSolverTest, TestLeastSquaresUpdateWithEverythingAccumShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -769,9 +843,13 @@ TYPED_TEST(AdaGradSolverTest, TestLeastSquaresUpdateWithEverythingAccumShare) {
   this->share_ = true;
   this->CheckAccumulation(kLearningRate, kWeightDecay, kMomentum, kNumIters,
       kIterSize);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaGradSolverTest, TestSnapshot) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -780,9 +858,13 @@ TYPED_TEST(AdaGradSolverTest, TestSnapshot) {
   for (int i = 1; i <= kNumIters; ++i) {
     this->TestSnapshot(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaGradSolverTest, TestSnapshotShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -792,6 +874,8 @@ TYPED_TEST(AdaGradSolverTest, TestSnapshotShare) {
   for (int i = 1; i <= kNumIters; ++i) {
     this->TestSnapshot(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 
@@ -808,24 +892,38 @@ class NesterovSolverTest : public GradientBasedSolverTest<TypeParam> {
 TYPED_TEST_CASE(NesterovSolverTest, TestDtypesAndDevices);
 
 TYPED_TEST(NesterovSolverTest, TestNesterovLeastSquaresUpdate) {
+  // HACK: disable this test which crashes
+#if 0
   this->TestLeastSquaresUpdate();
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(NesterovSolverTest, TestNesterovLeastSquaresUpdateLROneHundredth) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   this->TestLeastSquaresUpdate(kLearningRate);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(NesterovSolverTest, TestNesterovLeastSquaresUpdateWithWeightDecay) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
   this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(NesterovSolverTest,
            TestNesterovLeastSquaresUpdateWithWeightDecayMultiIter) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -834,9 +932,13 @@ TYPED_TEST(NesterovSolverTest,
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(NesterovSolverTest, TestNesterovLeastSquaresUpdateWithMomentum) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0;
@@ -845,9 +947,13 @@ TYPED_TEST(NesterovSolverTest, TestNesterovLeastSquaresUpdateWithMomentum) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(NesterovSolverTest, TestLeastSquaresUpdateWithMomentumMultiIter) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0;
@@ -856,9 +962,13 @@ TYPED_TEST(NesterovSolverTest, TestLeastSquaresUpdateWithMomentumMultiIter) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(NesterovSolverTest, TestNesterovLeastSquaresUpdateWithEverything) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -867,10 +977,14 @@ TYPED_TEST(NesterovSolverTest, TestNesterovLeastSquaresUpdateWithEverything) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(NesterovSolverTest,
            TestNesterovLeastSquaresUpdateWithEverythingShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -880,9 +994,13 @@ TYPED_TEST(NesterovSolverTest,
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(NesterovSolverTest, TestLeastSquaresUpdateWithEverythingAccum) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -891,9 +1009,13 @@ TYPED_TEST(NesterovSolverTest, TestLeastSquaresUpdateWithEverythingAccum) {
   const int kIterSize = 2;
   this->CheckAccumulation(kLearningRate, kWeightDecay, kMomentum, kNumIters,
       kIterSize);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(NesterovSolverTest, TestLeastSquaresUpdateWithEverythingAccumShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -903,9 +1025,13 @@ TYPED_TEST(NesterovSolverTest, TestLeastSquaresUpdateWithEverythingAccumShare) {
   this->share_ = true;
   this->CheckAccumulation(kLearningRate, kWeightDecay, kMomentum, kNumIters,
       kIterSize);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(NesterovSolverTest, TestSnapshot) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -914,9 +1040,13 @@ TYPED_TEST(NesterovSolverTest, TestSnapshot) {
   for (int i = 1; i <= kNumIters; ++i) {
     this->TestSnapshot(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(NesterovSolverTest, TestSnapshotShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -926,6 +1056,8 @@ TYPED_TEST(NesterovSolverTest, TestSnapshotShare) {
   for (int i = 1; i <= kNumIters; ++i) {
     this->TestSnapshot(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 template <typename TypeParam>
@@ -941,20 +1073,30 @@ class AdaDeltaSolverTest : public GradientBasedSolverTest<TypeParam> {
 TYPED_TEST_CASE(AdaDeltaSolverTest, TestDtypesAndDevices);
 
 TYPED_TEST(AdaDeltaSolverTest, TestAdaDeltaLeastSquaresUpdate) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.1;
   this->TestLeastSquaresUpdate(kLearningRate);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaDeltaSolverTest, TestAdaDeltaLeastSquaresUpdateWithWeightDecay) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.1;
   const Dtype kWeightDecay = 0.5;
   const Dtype kMomentum = 0.95;
   this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaDeltaSolverTest, TestAdaDeltaLeastSquaresUpdateWithHalfMomentum) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.1;
   const Dtype kWeightDecay = 0.0;
@@ -963,9 +1105,13 @@ TYPED_TEST(AdaDeltaSolverTest, TestAdaDeltaLeastSquaresUpdateWithHalfMomentum) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaDeltaSolverTest, TestAdaDeltaLeastSquaresUpdateWithMomentum) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.1;
   const Dtype kWeightDecay = 0.0;
@@ -974,9 +1120,13 @@ TYPED_TEST(AdaDeltaSolverTest, TestAdaDeltaLeastSquaresUpdateWithMomentum) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaDeltaSolverTest, TestLeastSquaresUpdateWithMomentumMultiIter) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.1;
   const Dtype kWeightDecay = 0.0;
@@ -985,9 +1135,13 @@ TYPED_TEST(AdaDeltaSolverTest, TestLeastSquaresUpdateWithMomentumMultiIter) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaDeltaSolverTest, TestAdaDeltaLeastSquaresUpdateWithEverything) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.1;
   const Dtype kWeightDecay = 0.1;
@@ -996,10 +1150,14 @@ TYPED_TEST(AdaDeltaSolverTest, TestAdaDeltaLeastSquaresUpdateWithEverything) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaDeltaSolverTest,
            TestAdaDeltaLeastSquaresUpdateWithEverythingShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.1;
   const Dtype kWeightDecay = 0.1;
@@ -1009,9 +1167,13 @@ TYPED_TEST(AdaDeltaSolverTest,
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaDeltaSolverTest, TestLeastSquaresUpdateWithEverythingAccum) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.1;
   const Dtype kWeightDecay = 0.1;
@@ -1020,9 +1182,13 @@ TYPED_TEST(AdaDeltaSolverTest, TestLeastSquaresUpdateWithEverythingAccum) {
   const int kIterSize = 2;
   this->CheckAccumulation(kLearningRate, kWeightDecay, kMomentum, kNumIters,
       kIterSize);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaDeltaSolverTest, TestLeastSquaresUpdateWithEverythingAccumShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.1;
   const Dtype kWeightDecay = 0.1;
@@ -1032,9 +1198,13 @@ TYPED_TEST(AdaDeltaSolverTest, TestLeastSquaresUpdateWithEverythingAccumShare) {
   this->share_ = true;
   this->CheckAccumulation(kLearningRate, kWeightDecay, kMomentum, kNumIters,
       kIterSize);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaDeltaSolverTest, TestSnapshot) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.1;
   const Dtype kWeightDecay = 0.1;
@@ -1043,9 +1213,13 @@ TYPED_TEST(AdaDeltaSolverTest, TestSnapshot) {
   for (int i = 1; i <= kNumIters; ++i) {
     this->TestSnapshot(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdaDeltaSolverTest, TestSnapshotShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.1;
   const Dtype kWeightDecay = 0.1;
@@ -1055,6 +1229,8 @@ TYPED_TEST(AdaDeltaSolverTest, TestSnapshotShare) {
   for (int i = 1; i <= kNumIters; ++i) {
     this->TestSnapshot(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 template <typename TypeParam>
@@ -1075,22 +1251,32 @@ class AdamSolverTest : public GradientBasedSolverTest<TypeParam> {
 TYPED_TEST_CASE(AdamSolverTest, TestDtypesAndDevices);
 
 TYPED_TEST(AdamSolverTest, TestAdamLeastSquaresUpdate) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0;
   const Dtype kMomentum = 0.9;
   this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdamSolverTest, TestAdamLeastSquaresUpdateWithWeightDecay) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
   const Dtype kMomentum = 0.9;
   this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdamSolverTest, TestAdamLeastSquaresUpdateWithEverything) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -1099,9 +1285,13 @@ TYPED_TEST(AdamSolverTest, TestAdamLeastSquaresUpdateWithEverything) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdamSolverTest, TestAdamLeastSquaresUpdateWithEverythingShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -1111,9 +1301,13 @@ TYPED_TEST(AdamSolverTest, TestAdamLeastSquaresUpdateWithEverythingShare) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdamSolverTest, TestLeastSquaresUpdateWithEverythingAccum) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -1122,9 +1316,13 @@ TYPED_TEST(AdamSolverTest, TestLeastSquaresUpdateWithEverythingAccum) {
   const int kIterSize = 2;
   this->CheckAccumulation(kLearningRate, kWeightDecay, kMomentum, kNumIters,
       kIterSize);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdamSolverTest, TestLeastSquaresUpdateWithEverythingAccumShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -1134,9 +1332,13 @@ TYPED_TEST(AdamSolverTest, TestLeastSquaresUpdateWithEverythingAccumShare) {
   this->share_ = true;
   this->CheckAccumulation(kLearningRate, kWeightDecay, kMomentum, kNumIters,
       kIterSize);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdamSolverTest, TestSnapshot) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -1145,9 +1347,13 @@ TYPED_TEST(AdamSolverTest, TestSnapshot) {
   for (int i = 1; i <= kNumIters; ++i) {
     this->TestSnapshot(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(AdamSolverTest, TestSnapshotShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -1157,6 +1363,8 @@ TYPED_TEST(AdamSolverTest, TestSnapshotShare) {
   for (int i = 1; i <= kNumIters; ++i) {
     this->TestSnapshot(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 template <typename TypeParam>
@@ -1175,13 +1383,19 @@ class RMSPropSolverTest : public GradientBasedSolverTest<TypeParam> {
 TYPED_TEST_CASE(RMSPropSolverTest, TestDtypesAndDevices);
 
 TYPED_TEST(RMSPropSolverTest, TestRMSPropLeastSquaresUpdateWithWeightDecay) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 1.0;
   const Dtype kWeightDecay = 0.5;
   this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(RMSPropSolverTest, TestRMSPropLeastSquaresUpdateWithRmsDecay) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.0;
@@ -1190,9 +1404,13 @@ TYPED_TEST(RMSPropSolverTest, TestRMSPropLeastSquaresUpdateWithRmsDecay) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(RMSPropSolverTest, TestRMSPropLeastSquaresUpdateWithEverything) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -1201,10 +1419,14 @@ TYPED_TEST(RMSPropSolverTest, TestRMSPropLeastSquaresUpdateWithEverything) {
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(RMSPropSolverTest,
       TestRMSPropLeastSquaresUpdateWithEverythingShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -1214,9 +1436,13 @@ TYPED_TEST(RMSPropSolverTest,
   for (int i = 0; i <= kNumIters; ++i) {
     this->TestLeastSquaresUpdate(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(RMSPropSolverTest, TestLeastSquaresUpdateWithEverythingAccum) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -1225,9 +1451,13 @@ TYPED_TEST(RMSPropSolverTest, TestLeastSquaresUpdateWithEverythingAccum) {
   const int kIterSize = 2;
   this->CheckAccumulation(kLearningRate, kWeightDecay, kMomentum, kNumIters,
       kIterSize);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(RMSPropSolverTest, TestLeastSquaresUpdateWithEverythingAccumShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -1237,9 +1467,13 @@ TYPED_TEST(RMSPropSolverTest, TestLeastSquaresUpdateWithEverythingAccumShare) {
   this->share_ = true;
   this->CheckAccumulation(kLearningRate, kWeightDecay, kMomentum, kNumIters,
       kIterSize);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(RMSPropSolverTest, TestSnapshot) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -1248,9 +1482,13 @@ TYPED_TEST(RMSPropSolverTest, TestSnapshot) {
   for (int i = 1; i <= kNumIters; ++i) {
     this->TestSnapshot(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(RMSPropSolverTest, TestSnapshotShare) {
+  // HACK: disable this test which crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const Dtype kLearningRate = 0.01;
   const Dtype kWeightDecay = 0.5;
@@ -1260,6 +1498,8 @@ TYPED_TEST(RMSPropSolverTest, TestSnapshotShare) {
   for (int i = 1; i <= kNumIters; ++i) {
     this->TestSnapshot(kLearningRate, kWeightDecay, kMomentum, i);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 }  // namespace caffe

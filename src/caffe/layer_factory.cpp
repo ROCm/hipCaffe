@@ -16,7 +16,7 @@
 #include "caffe/layers/tanh_layer.hpp"
 #include "caffe/proto/caffe.pb.h"
 
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
 #include "caffe/layers/cudnn_conv_layer.hpp"
 #include "caffe/layers/cudnn_lcn_layer.hpp"
 #include "caffe/layers/cudnn_lrn_layer.hpp"
@@ -39,7 +39,7 @@ shared_ptr<Layer<Dtype> > GetConvolutionLayer(
     const LayerParameter& param) {
   ConvolutionParameter conv_param = param.convolution_param();
   ConvolutionParameter_Engine engine = conv_param.engine();
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
   bool use_dilation = false;
   for (int i = 0; i < conv_param.dilation_size(); ++i) {
     if (conv_param.dilation(i) > 1) {
@@ -49,7 +49,7 @@ shared_ptr<Layer<Dtype> > GetConvolutionLayer(
 #endif
   if (engine == ConvolutionParameter_Engine_DEFAULT) {
     engine = ConvolutionParameter_Engine_CAFFE;
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
     if (!use_dilation) {
       engine = ConvolutionParameter_Engine_CUDNN;
     }
@@ -57,7 +57,7 @@ shared_ptr<Layer<Dtype> > GetConvolutionLayer(
   }
   if (engine == ConvolutionParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype> >(new ConvolutionLayer<Dtype>(param));
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
   } else if (engine == ConvolutionParameter_Engine_CUDNN) {
     if (use_dilation) {
       LOG(FATAL) << "CuDNN doesn't support the dilated convolution at Layer "
@@ -78,13 +78,13 @@ shared_ptr<Layer<Dtype> > GetPoolingLayer(const LayerParameter& param) {
   PoolingParameter_Engine engine = param.pooling_param().engine();
   if (engine == PoolingParameter_Engine_DEFAULT) {
     engine = PoolingParameter_Engine_CAFFE;
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
     engine = PoolingParameter_Engine_CUDNN;
 #endif
   }
   if (engine == PoolingParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype> >(new PoolingLayer<Dtype>(param));
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
   } else if (engine == PoolingParameter_Engine_CUDNN) {
     if (param.top_size() > 1) {
       LOG(INFO) << "cuDNN does not support multiple tops. "
@@ -115,7 +115,7 @@ shared_ptr<Layer<Dtype> > GetLRNLayer(const LayerParameter& param) {
   LRNParameter_Engine engine = param.lrn_param().engine();
 
   if (engine == LRNParameter_Engine_DEFAULT) {
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
     engine = LRNParameter_Engine_CUDNN;
 #else
     engine = LRNParameter_Engine_CAFFE;
@@ -124,15 +124,20 @@ shared_ptr<Layer<Dtype> > GetLRNLayer(const LayerParameter& param) {
 
   if (engine == LRNParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype> >(new LRNLayer<Dtype>(param));
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
   } else if (engine == LRNParameter_Engine_CUDNN) {
     LRNParameter lrn_param = param.lrn_param();
 
     if (lrn_param.norm_region() ==LRNParameter_NormRegion_WITHIN_CHANNEL) {
       return shared_ptr<Layer<Dtype> >(new CuDNNLCNLayer<Dtype>(param));
     } else {
+#ifdef USE_MIOPEN
+      if (param.lrn_param().local_size() > 16) {
+#endif
+#ifdef USE_CUDNN
       // local size is too big to be handled through cuDNN
       if (param.lrn_param().local_size() > CUDNN_LRN_MAX_N) {
+#endif
         return shared_ptr<Layer<Dtype> >(new LRNLayer<Dtype>(param));
       } else {
         return shared_ptr<Layer<Dtype> >(new CuDNNLRNLayer<Dtype>(param));
@@ -152,13 +157,13 @@ shared_ptr<Layer<Dtype> > GetReLULayer(const LayerParameter& param) {
   ReLUParameter_Engine engine = param.relu_param().engine();
   if (engine == ReLUParameter_Engine_DEFAULT) {
     engine = ReLUParameter_Engine_CAFFE;
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
     engine = ReLUParameter_Engine_CUDNN;
 #endif
   }
   if (engine == ReLUParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype> >(new ReLULayer<Dtype>(param));
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
   } else if (engine == ReLUParameter_Engine_CUDNN) {
     return shared_ptr<Layer<Dtype> >(new CuDNNReLULayer<Dtype>(param));
 #endif
@@ -175,13 +180,13 @@ shared_ptr<Layer<Dtype> > GetSigmoidLayer(const LayerParameter& param) {
   SigmoidParameter_Engine engine = param.sigmoid_param().engine();
   if (engine == SigmoidParameter_Engine_DEFAULT) {
     engine = SigmoidParameter_Engine_CAFFE;
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
     engine = SigmoidParameter_Engine_CUDNN;
 #endif
   }
   if (engine == SigmoidParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype> >(new SigmoidLayer<Dtype>(param));
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
   } else if (engine == SigmoidParameter_Engine_CUDNN) {
     return shared_ptr<Layer<Dtype> >(new CuDNNSigmoidLayer<Dtype>(param));
 #endif
@@ -198,13 +203,13 @@ shared_ptr<Layer<Dtype> > GetSoftmaxLayer(const LayerParameter& param) {
   SoftmaxParameter_Engine engine = param.softmax_param().engine();
   if (engine == SoftmaxParameter_Engine_DEFAULT) {
     engine = SoftmaxParameter_Engine_CAFFE;
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
     engine = SoftmaxParameter_Engine_CUDNN;
 #endif
   }
   if (engine == SoftmaxParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype> >(new SoftmaxLayer<Dtype>(param));
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
   } else if (engine == SoftmaxParameter_Engine_CUDNN) {
     return shared_ptr<Layer<Dtype> >(new CuDNNSoftmaxLayer<Dtype>(param));
 #endif
@@ -221,13 +226,13 @@ shared_ptr<Layer<Dtype> > GetTanHLayer(const LayerParameter& param) {
   TanHParameter_Engine engine = param.tanh_param().engine();
   if (engine == TanHParameter_Engine_DEFAULT) {
     engine = TanHParameter_Engine_CAFFE;
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
     engine = TanHParameter_Engine_CUDNN;
 #endif
   }
   if (engine == TanHParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype> >(new TanHLayer<Dtype>(param));
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
   } else if (engine == TanHParameter_Engine_CUDNN) {
     return shared_ptr<Layer<Dtype> >(new CuDNNTanHLayer<Dtype>(param));
 #endif

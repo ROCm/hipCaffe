@@ -11,7 +11,7 @@
 
 namespace caffe {
 
-#ifdef USE_CUDNN
+#ifdef USE_ACCMI
 /*
  * @brief cuDNN implementation of ConvolutionLayer.
  *        Fallback to ConvolutionLayer for CPU mode.
@@ -43,7 +43,25 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
+
   bool handles_setup_;
+
+#ifdef USE_MIOPEN
+  mlopenHandle_t* handle_;
+  hipStream_t*    stream_;
+
+  // algorithms for forward and backwards convolutions
+  mlopenConvFwdAlgorithm_t*        fwd_algo_;
+  mlopenConvBwdWeightsAlgorithm_t* bwd_weight_algo_;
+  mlopenConvBwdDataAlgorithm_t*    bwd_data_algo_;
+
+  vector<mlopenTensorDescriptor_t>      bottom_descs_, top_descs_;
+  mlopenTensorDescriptor_t              bias_desc_;
+  mlopenTensorDescriptor_t              filter_desc_;
+  vector<mlopenConvolutionDescriptor_t> conv_descs_;
+#endif
+
+#ifdef USE_CUDNN
   cudnnHandle_t* handle_;
   cudaStream_t*  stream_;
 
@@ -56,6 +74,8 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   cudnnTensorDescriptor_t    bias_desc_;
   cudnnFilterDescriptor_t      filter_desc_;
   vector<cudnnConvolutionDescriptor_t> conv_descs_;
+#endif
+
   int bottom_offset_, top_offset_, bias_offset_;
 
   size_t *workspace_fwd_sizes_;
