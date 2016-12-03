@@ -43,6 +43,7 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 #endif
 
 #include <hipblas.h>
+#include <hiprng.h>
 #ifdef USE_ACCMI
 #include "caffe/util/cudnn.hpp"
 #endif
@@ -69,14 +70,12 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
       << caffe::hipblasGetErrorString(status); \
   } while (0)
 
-// TODO: Get HIP equivalent
-/*#define CURAND_CHECK(condition) \
+#define HIPRNG_CHECK(condition) \
   do { \
-    curandStatus_t status = condition; \
-    CHECK_EQ(status, CURAND_STATUS_SUCCESS) << " " \
-      << caffe::curandGetErrorString(status); \
+    hiprngStatus_t status = condition; \
+    CHECK_EQ(status,HIPRNG_STATUS_SUCCESS) << " " \
+      << caffe::hiprngGetErrorString(status); \
   } while (0)
-*/
 
 // HIP: grid stride looping
 #define HIP_KERNEL_LOOP(i, n) \
@@ -85,13 +84,13 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
        i += hipBlockDim_x * hipGridDim_x)
 
 // HIP: check for error after kernel execution and exit loudly if there is one.
-//TODO: Get HIP equivalent
-//#define HIP_POST_KERNEL_CHECK HIP_CHECK(cudaPeekAtLastError())
+#define HIP_POST_KERNEL_CHECK HIP_CHECK(hipPeekAtLastError())
 
 namespace caffe {
 
 // HIP: library error reporting.
 const char* hipblasGetErrorString(hipblasStatus_t error);
+const char* hiprngGetErrorString(hiprngStatus_t error);
 // HIP: use 512 threads per block
 
 #ifdef __HIP_PLATFORM_NVCC__

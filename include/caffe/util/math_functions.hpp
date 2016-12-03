@@ -217,9 +217,9 @@ void caffe_gpu_rng_uniform(const int n, unsigned int* r);
 
 // caffe_gpu_rng_uniform with four arguments generates floats in the range
 // (a, b] (strictly greater than a, less than or equal to b) due to the
-// specification of curandGenerateUniform.  With a = 0, b = 1, just calls
-// curandGenerateUniform; with other limits will shift and scale the outputs
-// appropriately after calling curandGenerateUniform.
+// specification of hiprngGenerateUniform.  With a = 0, b = 1, just calls
+// hiprngGenerateUniform; with other limits will shift and scale the outputs
+// appropriately after calling hiprngGenerateUniform.
 template <typename Dtype>
 void caffe_gpu_rng_uniform(const int n, const Dtype a, const Dtype b, Dtype* r);
 
