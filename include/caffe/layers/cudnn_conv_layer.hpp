@@ -59,6 +59,8 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   mlopenTensorDescriptor_t              bias_desc_;
   mlopenTensorDescriptor_t              filter_desc_;
   vector<mlopenConvolutionDescriptor_t> conv_descs_;
+
+  int N_, C_, W_, H_;
 #endif
 
 #ifdef USE_CUDNN

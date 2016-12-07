@@ -146,6 +146,10 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
 #endif
   }
 
+#ifdef USE_MIOPEN
+  N_ = C_ = W_ = H_ = 0;
+#endif
+
   handles_setup_ = true;
 }
 
@@ -183,6 +187,25 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
   // Specify workspace limit for kernels directly until we have a
   // planning strategy and a rewrite of Caffe's GPU memory mangagement
   size_t workspace_limit_bytes = 8*1024*1024;
+#endif
+
+#ifdef USE_MIOPEN
+  bool doReshape = false;
+  if ((N_ != this->num_) ||
+      (C_ != this->channels_ / this->group_) ||
+      (H_ != height) ||
+      (W_ != width)) {
+    doReshape = true;
+    //LOG(INFO) << "doReshape\n";
+    N_ = this->num_;
+    C_ = this->channels_ / this->group_;
+    H_ = height;
+    W_ = width;
+  } else {
+    //LOG(INFO) << "NOT doReshape\n";
+  }
+
+  if (doReshape) {
 #endif
 
   for (int i = 0; i < bottom.size(); i++) {
@@ -369,6 +392,10 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
           bwd_data_algo_[i], &workspace_bwd_data_sizes_[i]) );
 #endif
   }
+
+#ifdef USE_MIOPEN
+  } // if (doReshape)
+#endif
 
   // reduce over all workspace sizes to get a maximum to allocate / reallocate
   size_t total_workspace_fwd = 0;
