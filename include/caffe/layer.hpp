@@ -469,6 +469,8 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
   Dtype loss = 0;
   Reshape(bottom, top);
   auto mode = Caffe::mode();
+  const char *CAFFE_DB_str = getenv("CAFFE_DB");
+  long int CAFFE_DB = CAFFE_DB_str ? strtoul(CAFFE_DB_str, nullptr, 0) : 0x0;
 
 // TODO - remove, debug code:
   std::vector<std::string> forceCpu;
@@ -476,13 +478,17 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
   if (CAFFE_FORCE_CPU) {
       tokenize(CAFFE_FORCE_CPU, ',', &forceCpu);
       for (auto o=forceCpu.begin(); o!=forceCpu.end(); o++) {
-          if (0 || (*o == type())) {
-              printf ("force CPU for layer %s\n", o->c_str());
+          if ((*o == type())) {
+              if (CAFFE_DB & 0x1) {
+                  printf ("force CPU for fwd layer %s\n", o->c_str());
+              }
               mode = Caffe::CPU;
           }
       }
   }
-  printf ("run layer %s mode=%s\n", type(), mode==Caffe::CPU ? "CPU" : "GPU");
+  if (CAFFE_DB & 0x1) {
+      printf ("run fwd layer %s mode=%s name=%s\n", type(), mode==Caffe::CPU ? "CPU" : "GPU", layer_param().name().c_str());
+  }
   switch (mode) {
   case Caffe::CPU:
     HIP_BEGIN_MARKER(type(), "CAFFE-fwd");
@@ -495,7 +501,7 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
       const Dtype* loss_weights = top[top_id]->cpu_diff();
       Dtype blob_loss  = caffe_cpu_dot(count, data, loss_weights);
       loss += blob_loss;
-      printf ("cpu: loss += %6.2f = %6.2f\n", blob_loss, loss);
+      //printf ("cpu: loss += %6.2f = %6.2f\n", blob_loss, loss);
     }
     break;
     HIP_END_MARKER();
@@ -512,7 +518,7 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
       Dtype blob_loss = 0;
       caffe_gpu_dot(count, data, loss_weights, &blob_loss);
       loss += blob_loss;
-      printf ("gpu: loss += %6.2f = %6.2f\n", blob_loss, loss);
+      //printf ("gpu: loss += %6.2f = %6.2f\n", blob_loss, loss);
     }
     HIP_END_MARKER();
 #endif
@@ -528,7 +534,28 @@ template <typename Dtype>
 inline void Layer<Dtype>::Backward(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down,
     const vector<Blob<Dtype>*>& bottom) {
-  switch (Caffe::mode()) {
+// TODO - remove, debug code:
+  const char *CAFFE_DB_str = getenv("CAFFE_DB");
+  long int CAFFE_DB = CAFFE_DB_str ? strtoul(CAFFE_DB_str, nullptr, 0) : 0x0;
+
+  auto mode = Caffe::mode();
+  std::vector<std::string> forceCpu;
+  const char *CAFFE_FORCE_CPU_BACK = getenv("CAFFE_FORCE_CPU_BACK");
+  if (CAFFE_FORCE_CPU_BACK) {
+      tokenize(CAFFE_FORCE_CPU_BACK, ',', &forceCpu);
+      for (auto o=forceCpu.begin(); o!=forceCpu.end(); o++) {
+          if ((*o == type())) {
+              if (CAFFE_DB & 0x2) {
+                  printf ("force CPU for bwd layer %s\n", o->c_str());
+              }
+              mode = Caffe::CPU;
+          }
+      }
+  }
+  if (CAFFE_DB & 0x2) {
+      printf ("run bwd layer %s mode=%s name=%s\n", type(), mode==Caffe::CPU ? "CPU" : "GPU", layer_param().name().c_str());
+  }
+  switch (mode) {
   case Caffe::CPU:
     HIP_BEGIN_MARKER(type(), "CAFFE-back");
     Backward_cpu(top, propagate_down, bottom);
