@@ -501,7 +501,7 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
       const Dtype* loss_weights = top[top_id]->cpu_diff();
       Dtype blob_loss  = caffe_cpu_dot(count, data, loss_weights);
       loss += blob_loss;
-      //printf ("cpu: loss += %6.2f = %6.2f\n", blob_loss, loss);
+      printf ("cpu: loss += %6.2f = %6.2f\n", blob_loss, loss);
     }
     break;
     HIP_END_MARKER();
