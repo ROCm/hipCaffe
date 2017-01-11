@@ -324,6 +324,7 @@ void P2PSync<Dtype>::on_start() {
 
 template<typename Dtype>
 void P2PSync<Dtype>::on_gradients_ready() {
+    HIP_SCOPED_MARKER(__func__, "Parallel")
 #ifndef CPU_ONLY
 #ifdef DEBUG
   int device;

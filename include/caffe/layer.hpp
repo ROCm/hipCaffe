@@ -489,9 +489,10 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
   if (CAFFE_DB & 0x1) {
       printf ("run fwd layer %s mode=%s name=%s\n", type(), mode==Caffe::CPU ? "CPU" : "GPU", layer_param().name().c_str());
   }
+  std::string layerName(type()); layerName += '.'; layerName += layer_param().name();
   switch (mode) {
   case Caffe::CPU:
-    HIP_BEGIN_MARKER(type(), "CAFFE-fwd");
+    HIP_BEGIN_MARKER(layerName.c_str() , "CAFFE-fwd");
     Forward_cpu(bottom, top);
     HIP_END_MARKER();
     for (int top_id = 0; top_id < top.size(); ++top_id) {
@@ -506,7 +507,7 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
     break;
     HIP_END_MARKER();
   case Caffe::GPU:
-    HIP_BEGIN_MARKER(type(), "CAFFE-fwd");
+    HIP_BEGIN_MARKER(layerName.c_str(),  "CAFFE-fwd");
     Forward_gpu(bottom, top);
     HIP_END_MARKER();
 #ifndef CPU_ONLY
@@ -555,14 +556,15 @@ inline void Layer<Dtype>::Backward(const vector<Blob<Dtype>*>& top,
   if (CAFFE_DB & 0x2) {
       printf ("run bwd layer %s mode=%s name=%s\n", type(), mode==Caffe::CPU ? "CPU" : "GPU", layer_param().name().c_str());
   }
+  std::string layerName(type()); layerName += '.'; layerName += layer_param().name();
   switch (mode) {
   case Caffe::CPU:
-    HIP_BEGIN_MARKER(type(), "CAFFE-back");
+    HIP_BEGIN_MARKER(layerName.c_str(),  "CAFFE-back");
     Backward_cpu(top, propagate_down, bottom);
     HIP_END_MARKER();
     break;
   case Caffe::GPU:
-    HIP_BEGIN_MARKER(type(), "CAFFE-back");
+    HIP_BEGIN_MARKER(layerName.c_str(),  "CAFFE-back");
     Backward_gpu(top, propagate_down, bottom);
     HIP_END_MARKER();
     break;
