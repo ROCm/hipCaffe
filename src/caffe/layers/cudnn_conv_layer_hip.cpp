@@ -103,14 +103,14 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 
 #ifdef USE_MIOPEN
 
-#if 0
-  LOG(INFO) << "CuDNNConvolutionLayer<Dtype>::Backward_gpu()\n";
-#endif
-#if 1
+#ifndef MIOPEN_BACKWARD
   // TBD
   // Fall back to standard Caffe
   ConvolutionLayer<Dtype>::Backward_gpu(top, propagate_down, bottom);
 #else
+#if 1
+  LOG(INFO) << "CuDNNConvolutionLayer<Dtype>::Backward_gpu()\n";
+#endif
   const Dtype* weight = NULL;
   Dtype* weight_diff = NULL;
   if (this->param_propagate_down_[0]) {

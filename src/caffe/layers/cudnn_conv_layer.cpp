@@ -49,11 +49,13 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   workspaceData = NULL;
   workspace = new void*[this->group_ * CUDNN_STREAMS_PER_GROUP];
 
+    printf ("  init handle (%p)\n", &handle_);
 #ifdef USE_MIOPEN
   for (size_t i = 0; i < bottom.size(); ++i) {
     // initialize all to default algorithms
     fwd_algo_[i] = mlopenConvolutionFwdAlgoDirect;
-    bwd_weight_algo_[i] = mlopenConvolutionBwdWeightsAlgoGEMM;
+    printf ("  init fwd_algo_[i] (%p) to %d\n", &fwd_algo_[i], fwd_algo_[i]);
+    bwd_weight_algo_[i] = mlopenConvolutionBwdWeightsAlgoDirect;
     bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgo_0;
 
     // default algorithms don't require workspace
@@ -249,7 +251,9 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         false                     // exhaustiveSearch
     ));
 
-    fwd_algo_[i] = perf.fwd_algo;
+    // TODO - currently overriding MLOpen fwd_algo to work around bug, will re-enable when fwd_algo is valid
+    //fwd_algo_[i] = perf.fwd_algo;
+    fwd_algo_[i] = mlopenConvolutionFwdAlgoDirect;
 #if 0
     workspace_fwd_sizes_[i] = perf.memory;
 #endif
@@ -258,7 +262,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     LOG(INFO) << "workspace_fwd_sizes_[" << i << "]:" << workspace_fwd_sizes_[i] << "\n";
 #endif
 
-#if 0
+#if MIOPEN_BACKWARD
     LOG(INFO) << "Before mlopenConvolutionBackwardWeightsGetWorkSpaceSize\n";
     // get workspace for backwards filter algorithm
     MIOPEN_CHECK(mlopenConvolutionBackwardWeightsGetWorkSpaceSize(
@@ -273,7 +277,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     LOG(INFO) << "workspace_bwd_filter_sizes_[" << i << "]:" << workspace_bwd_filter_sizes_[i] << "\n";
 #endif
 
-#if 0
+#if MIOPEN_BACKWARD
     const Dtype* top_diff = top[i]->gpu_diff();
     LOG(INFO) << "Before mlopenFindConvolutionBackwardWeightsAlgorithm\n";
     // choose backward algorithm for filter
@@ -300,7 +304,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     workspace_bwd_filter_sizes_[i] = perf.memory;
 #endif
 
-#if 0
+#if MIOPEN_BACKWARD
     Dtype* bottom_diff = bottom[i]->mutable_gpu_diff();
 
     LOG(INFO) << "Before mlopenFindConvolutionBackwardDataAlgorithm\n";
@@ -329,7 +333,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 #if 0
     workspace_bwd_data_sizes_[i] = perf.memory;
 #endif
-#if 0
+#if 1
     LOG(INFO) << "bwd_data_algo_[" << i << "]: " << bwd_data_algo_[i] << "\n";
     LOG(INFO) << "workspace_bwd_data_sizes_[" << i << "]: " << workspace_bwd_data_sizes_[i] << "\n";
 #endif
@@ -447,7 +451,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         workspace_bwd_data_sizes_[i] = 0;
 #ifdef USE_MIOPEN
         fwd_algo_[i] = mlopenConvolutionFwdAlgoDirect;
-        bwd_weight_algo_[i] = mlopenConvolutionBwdWeightsAlgoGEMM;
+        bwd_weight_algo_[i] = mlopenConvolutionBwdWeightsAlgoDirect;
         bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgo_0;
 #endif
 #ifdef USE_CUDNN
