@@ -11,6 +11,14 @@ namespace caffe {
 // bias, filter weights, and bottom data for each group independently
 #define CUDNN_STREAMS_PER_GROUP 3
 
+#ifdef __HIP_PLATFORM_HCC__
+#warning (Using 1 STREAM-per-group)
+// TODO - set to one for now to match MIOpen capabilities.
+#define CUDNN_STREAMS_PER_GROUP 1
+#else
+#define CUDNN_STREAMS_PER_GROUP 3
+#endif
+
 /**
  * TODO(dox) explain cuDNN interface
  */
