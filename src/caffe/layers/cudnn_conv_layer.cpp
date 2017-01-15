@@ -49,12 +49,10 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   workspaceData = NULL;
   workspace = new void*[this->group_ * CUDNN_STREAMS_PER_GROUP];
 
-    printf ("  init handle (%p)\n", &handle_);
 #ifdef USE_MIOPEN
   for (size_t i = 0; i < bottom.size(); ++i) {
     // initialize all to default algorithms
     fwd_algo_[i] = mlopenConvolutionFwdAlgoDirect;
-    printf ("  init fwd_algo_[i] (%p) to %d\n", &fwd_algo_[i], fwd_algo_[i]);
     bwd_weight_algo_[i] = mlopenConvolutionBwdWeightsAlgoDirect;
     bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgo_0;
 
