@@ -10,13 +10,7 @@ namespace caffe {
 // can use separate streams for calculating the gradient w.r.t.
 // bias, filter weights, and bottom data for each group independently
 
-#ifdef __HIP_PLATFORM_HCC__
-#warning (Using 1 STREAM-per-group)
-// TODO - set to one for now to match MIOpen capabilities.
-#define CUDNN_STREAMS_PER_GROUP 1
-#else
 #define CUDNN_STREAMS_PER_GROUP 3
-#endif
 
 /**
  * TODO(dox) explain cuDNN interface
@@ -233,7 +227,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 
 
 
-
+#ifdef USE_MIOPEN_BACKWARD_WEIGHT
     LOG(INFO) << "Before mlopenConvolutionBackwardWeightsGetWorkSpaceSize\n";
     // get workspace for backwards filter algorithm
     MIOPEN_CHECK(mlopenConvolutionBackwardWeightsGetWorkSpaceSize(
@@ -245,6 +239,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     ));
     LOG(INFO) << "After mlopenConvolutionBackwardWeightsGetWorkSpaceSize\n";
     LOG(INFO) << "workspace_bwd_filter_sizes_[" << i << "]:" << workspace_bwd_filter_sizes_[i] << "\n";
+#endif // USE_MIOPEN_BACKWARD_WEIGHT
 #endif
 
 
@@ -323,7 +318,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     total_workspace_bwd_filter = std::max(total_workspace_bwd_filter,
                                      workspace_bwd_filter_sizes_[i]);
   }
-#if 1
+#if 0
   LOG(INFO) << "total_workspace_fwd: " << total_workspace_fwd << "\n";
   LOG(INFO) << "total_workspace_bwd_data: " << total_workspace_bwd_data << "\n";
   LOG(INFO) << "total_workspace_bwd_filter: " << total_workspace_bwd_filter << "\n";
@@ -433,13 +428,13 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     LOG(INFO) << "workspace_fwd_sizes_[" << i << "]:" << workspace_fwd_sizes_[i] << "\n";
 #endif
 
-#ifdef USE_MIOPEN_BACKWARD
-
     const Dtype* top_diff = top[i]->gpu_diff();
+#ifdef USE_MIOPEN_BACKWARD_WEIGHT
+
     LOG(INFO) << "Before mlopenFindConvolutionBackwardWeightsAlgorithm\n";
     // choose backward algorithm for filter
     MIOPEN_CHECK(mlopenFindConvolutionBackwardWeightsAlgorithm(
-        handle_[0],               // handle
+        handle_[1],               // handle
         top_descs_[i],            // dyDesc
         top_diff,                 // *dy
         bottom_descs_[i],         // xDesc
@@ -460,13 +455,15 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     bwd_weight_algo_[i] = perf.bwd_weights_algo;
     LOG(INFO) << "  bwd_weight_algo_[" << i << "]: " << bwd_weight_algo_[i] << "\n";
     //workspace_bwd_filter_sizes_[i] = perf.memory; // TODO-MIOpen perf
+#endif
 
+#ifdef USE_MIOPEN_BACKWARD_DATA
     Dtype* bottom_diff = bottom[i]->mutable_gpu_diff();
 
     LOG(INFO) << "Before mlopenFindConvolutionBackwardDataAlgorithm\n";
     // choose backward algo for data
     MIOPEN_CHECK(mlopenFindConvolutionBackwardDataAlgorithm(
-        handle_[0],               // handle
+        handle_[2],               // handle
         top_descs_[i],            // dyDesc
         top_diff,                 // *dy
         filter_desc_,             // wDesc
@@ -488,11 +485,9 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgo_0;
 
     //workspace_bwd_data_sizes_[i] = perf.memory; // TODO
-#endif // USE_MIOPEN_BACKWARD
-#if 1
+#endif // USE_MIOPEN_BACKWARD_DATA
     LOG(INFO) << "bwd_data_algo_[" << i << "]: " << bwd_data_algo_[i] << "\n";
     LOG(INFO) << "workspace_bwd_data_sizes_[" << i << "]: " << workspace_bwd_data_sizes_[i] << "\n";
-#endif
 
 #endif // USE_MIOPEN
   }

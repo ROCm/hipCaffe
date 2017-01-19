@@ -108,9 +108,8 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   // Fall back to standard Caffe
   ConvolutionLayer<Dtype>::Backward_gpu(top, propagate_down, bottom);
 #else
-#if 1
-  LOG(INFO) << "CuDNNConvolutionLayer<Dtype>::Backward_gpu()\n";
-#endif
+
+  //LOG(INFO) << "CuDNNConvolutionLayer<Dtype>::Backward_gpu()\n";
   const Dtype* weight = NULL;
   Dtype* weight_diff = NULL;
   if (this->param_propagate_down_[0]) {
@@ -126,13 +125,19 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     // Backward through MIOpen in parallel over groups and gradients.
     for (int g = 0; g < this->group_; g++) {
       // Gradient w.r.t. bias.
+      //
+      assert(g==0); // MIOpen/CAFFE setup only works with one group.
+
       if (this->bias_term_ && this->param_propagate_down_[1]) {
-        this->backward_gpu_bias(bias_diff + bias_offset_ * g,
-                                top_diff + top_offset_ * g);
+          for (int n = 0; n < this->num_; ++n) {
+            this->backward_gpu_bias(bias_diff + bias_offset_ * g,
+                                top_diff + top_offset_ * g + n * this->top_dim_);
+          }
       }
 
       // Gradient w.r.t. weights.
-      if (this->param_propagate_down_[1]) {
+      if (this->param_propagate_down_[0]) {
+#ifdef USE_MIOPEN_BACKWARD_WEIGHT
         const Dtype* bottom_data = bottom[i]->gpu_data();
         MIOPEN_CHECK(mlopenConvolutionBackwardWeights(
             handle_[1 * this->group_ + g],          // handle
@@ -149,14 +154,25 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
             workspace[1 * this->group_ + g],        // *workSpace
             workspace_bwd_filter_sizes_[i]          // workSpaceSize
         ));
+#else
+        assert (g==0); // these equations do not account for g:
+        //LOG(INFO) << "CuDNNConvolutionLayer<Dtype>::Backward_gpu_weight fallback()\n";
+        const Dtype* bottom_data = bottom[i]->gpu_data();
+        for (int n = 0; n < this->num_; ++n) {
+          // gradient w.r.t. weight. Note that we will accumulate diffs.
+          this->weight_gpu_gemm(bottom_data + n * this->bottom_dim_,
+              top_diff + n * this->top_dim_, weight_diff);
+        }
+#endif
       }
 
       // Gradient w.r.t. bottom data.
       if (propagate_down[i]) {
+        Dtype* bottom_diff = bottom[i]->mutable_gpu_diff();
         if (weight == NULL) {
           weight = this->blobs_[0]->gpu_data();
         }
-        Dtype* bottom_diff = bottom[i]->mutable_gpu_diff();
+#ifdef USE_MIOPEN_BACKWARD_DATA
         MIOPEN_CHECK(mlopenConvolutionBackwardData(
             handle_[2 * this->group_ + g],     // handle
             miopen::dataType<Dtype>::one,      // *alpha
@@ -172,14 +188,21 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
             workspace[2 * this->group_ + g],  // workSpace
             workspace_bwd_data_sizes_[i]      // workSpaceSize
         ));
+        //printf ("mlopenConvolutionBackwardData\n");
+
+#else
+        // gradient w.r.t. bottom data, if necessary.
+          this->backward_gpu_gemm(top_diff + n * this->top_dim_, weight,
+              bottom_diff + n * this->bottom_dim_);
+#endif
       }
-    }
+    }// for g
 
     // Synchronize the work across groups.
-    hipDeviceSynchronize();
-  }
-#endif
-#endif
+    hipDeviceSynchronize(); // TODO - could optimize to avoid sync back to host?
+  } // for top.size();
+#endif // USE_MIOPEN_BACKWARD
+#endif // USE_MIOPEN
 
 #if USE_CUDNN
   const Dtype* weight = NULL;
