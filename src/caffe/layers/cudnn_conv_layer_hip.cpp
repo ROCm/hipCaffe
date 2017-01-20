@@ -126,7 +126,6 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     for (int g = 0; g < this->group_; g++) {
       // Gradient w.r.t. bias.
       //
-      assert(g==0); // MIOpen/CAFFE setup only works with one group.
 
       if (this->bias_term_ && this->param_propagate_down_[1]) {
           for (int n = 0; n < this->num_; ++n) {
@@ -155,7 +154,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
             workspace_bwd_filter_sizes_[i]          // workSpaceSize
         ));
 #else
-        assert (g==0); // these equations do not account for g:
+        assert (g==0); // these equations do not account for g: - do we need another loop?
         //LOG(INFO) << "CuDNNConvolutionLayer<Dtype>::Backward_gpu_weight fallback()\n";
         const Dtype* bottom_data = bottom[i]->gpu_data();
         for (int n = 0; n < this->num_; ++n) {
@@ -191,6 +190,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         //printf ("mlopenConvolutionBackwardData\n");
 
 #else
+        assert (g==0); // these equations do not account for g: - do we need another loop?
         // gradient w.r.t. bottom data, if necessary.
           this->backward_gpu_gemm(top_diff + n * this->top_dim_, weight,
               bottom_diff + n * this->bottom_dim_);

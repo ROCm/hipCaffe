@@ -391,6 +391,11 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
   // A second loop for USE_MIOPEN, after we have allocated a workspace:
   if (doReshape) {
   for (int i = 0; i < bottom.size(); i++) {
+   for (int g = 0; g < this->group_; g++) {
+       // Currently MIOpen requires calling Find* even if the kernel has already been found by another call 
+       // (ie a different group will find same kernels).
+       // In future might be able to optimize this so don't need to re-find the kernel and could
+       // thus only call Find on the group=0 handles:
 
     const Dtype* bottom_data = bottom[i]->gpu_data();
     Dtype* top_data = top[i]->mutable_gpu_data();
@@ -400,7 +405,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 
     // choose forward and backward algorithms + workspace(s)
     MIOPEN_CHECK(mlopenFindConvolutionForwardAlgorithm(
-        handle_[0],               // handle
+        handle_[0*this->group_ + g],               // handle
         bottom_descs_[i],         // xDesc
         bottom_data,              // *x
         filter_desc_,             // wDesc
@@ -434,7 +439,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     LOG(INFO) << "Before mlopenFindConvolutionBackwardWeightsAlgorithm\n";
     // choose backward algorithm for filter
     MIOPEN_CHECK(mlopenFindConvolutionBackwardWeightsAlgorithm(
-        handle_[1],               // handle
+        handle_[1*this->group_ + g],               // handle
         top_descs_[i],            // dyDesc
         top_diff,                 // *dy
         bottom_descs_[i],         // xDesc
@@ -463,7 +468,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     LOG(INFO) << "Before mlopenFindConvolutionBackwardDataAlgorithm\n";
     // choose backward algo for data
     MIOPEN_CHECK(mlopenFindConvolutionBackwardDataAlgorithm(
-        handle_[2],               // handle
+        handle_[2*this->group_ + g],               // handle
         top_descs_[i],            // dyDesc
         top_diff,                 // *dy
         filter_desc_,             // wDesc
@@ -490,7 +495,8 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     LOG(INFO) << "workspace_bwd_data_sizes_[" << i << "]: " << workspace_bwd_data_sizes_[i] << "\n";
 
 #endif // USE_MIOPEN
-  }
+   } // For g
+  } //for i
   } // doReshape
 
   // Tensor descriptor for bias.
