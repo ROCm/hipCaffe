@@ -47,6 +47,8 @@ void CuDNNPoolingLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   mlopenPoolingGetWorkSpaceSize(top_desc_, &totalSizeInBytes);
 
   if (totalSizeInBytes > workspaceSize) {
+    DLOG(INFO) << "Reallocating workspace storage " << this->layer_param().name() << "  " << totalSizeInBytes/1024.0/1024.0 << " MB\n";
+
     workspaceSize = totalSizeInBytes;
 
     hipFree(workspace);
