@@ -59,6 +59,8 @@ void CuDNNLCNLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
                             this->channels_*this->height_*this->width_;
 
   if (totalSizeInBytes > tempDataSize) {
+    // Note: reporting two reallocations because of the two hipMallocs below
+    DLOG(INFO) << "Reallocating temp storage " << this->layer_param().name() << "  " << totalSizeInBytes/1024.0/1024.0 << " MB\n";
     DLOG(INFO) << "Reallocating temp storage " << this->layer_param().name() << "  " << totalSizeInBytes/1024.0/1024.0 << " MB\n";
 
     tempDataSize = totalSizeInBytes;
