@@ -135,8 +135,6 @@ TYPED_TEST(EmbedLayerTest, TestForwardWithBias) {
 }
 
 TYPED_TEST(EmbedLayerTest, TestGradient) {
-  // HACK: disable this test as it crashes
-#if 0
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   EmbedParameter* embed_param = layer_param.mutable_embed_param();
@@ -154,13 +152,9 @@ TYPED_TEST(EmbedLayerTest, TestGradient) {
   this->blob_bottom_->mutable_cpu_data()[3] = 3;
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
       this->blob_top_vec_, -2);
-#endif
-  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(EmbedLayerTest, TestGradientWithBias) {
-  // HACK: disable this test as it crashes
-#if 0
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   EmbedParameter* embed_param = layer_param.mutable_embed_param();
@@ -179,8 +173,6 @@ TYPED_TEST(EmbedLayerTest, TestGradientWithBias) {
   this->blob_bottom_->mutable_cpu_data()[3] = 3;
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
       this->blob_top_vec_, -2);
-#endif
-  EXPECT_EQ(0, 1);
 }
 
 }  // namespace caffe

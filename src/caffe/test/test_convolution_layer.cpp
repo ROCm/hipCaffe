@@ -749,8 +749,6 @@ TYPED_TEST(ConvolutionLayerTest, TestDilatedGradient) {
 }
 
 TYPED_TEST(ConvolutionLayerTest, TestGradient3D) {
-  // HACK: disable this test which crashes
-#if 0
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   ConvolutionParameter* convolution_param =
@@ -776,8 +774,6 @@ TYPED_TEST(ConvolutionLayerTest, TestGradient3D) {
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
       this->blob_top_vec_);
-#endif
-  EXPECT_EQ(1, 0);
 }
 
 TYPED_TEST(ConvolutionLayerTest, Test1x1Gradient) {

@@ -159,8 +159,6 @@ TYPED_TEST(LRNLayerTest, TestForwardAcrossChannelsLargeRegion) {
 }
 
 TYPED_TEST(LRNLayerTest, TestGradientAcrossChannels) {
-  // HACK: disable this test as it crashes
-#if 0
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   LRNLayer<Dtype> layer(layer_param);
@@ -179,13 +177,9 @@ TYPED_TEST(LRNLayerTest, TestGradientAcrossChannels) {
   // }
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
       this->blob_top_vec_);
-#endif
-  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(LRNLayerTest, TestGradientAcrossChannelsLargeRegion) {
-  // HACK: disable this test as it crashes
-#if 0
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   layer_param.mutable_lrn_param()->set_local_size(15);
@@ -205,8 +199,6 @@ TYPED_TEST(LRNLayerTest, TestGradientAcrossChannelsLargeRegion) {
   // }
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
       this->blob_top_vec_);
-#endif
-  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(LRNLayerTest, TestSetupWithinChannel) {
