@@ -11,7 +11,8 @@ void CuDNNPoolingLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   PoolingLayer<Dtype>::LayerSetUp(bottom, top);
 
 #ifdef USE_MIOPEN
-  MIOPEN_CHECK(mlopenCreate(&handle_));
+  hipStream_t stream = nullptr;
+  MIOPEN_CHECK(mlopenCreateWithStream(&handle_, 1, &stream));
   miopen::createTensor4dDesc<Dtype>(&bottom_desc_);
   miopen::createTensor4dDesc<Dtype>(&top_desc_);
   miopen::createPoolingDesc<Dtype>(&pooling_desc_,

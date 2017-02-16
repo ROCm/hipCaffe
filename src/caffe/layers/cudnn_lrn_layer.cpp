@@ -11,7 +11,8 @@ void CuDNNLRNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   LRNLayer<Dtype>::LayerSetUp(bottom, top);
 
 #ifdef USE_MIOPEN
-  MIOPEN_CHECK(mlopenCreate(&handle_));
+  hipStream_t stream = nullptr;
+  MIOPEN_CHECK(mlopenCreateWithStream(&handle_, 1, &stream));
   MIOPEN_CHECK(mlopenCreateLRNDescriptor(&norm_desc_));
   miopen::createTensor4dDesc<Dtype>(&bottom_desc_);
   miopen::createTensor4dDesc<Dtype>(&top_desc_);
