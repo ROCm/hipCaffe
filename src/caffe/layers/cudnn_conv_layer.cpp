@@ -80,7 +80,11 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   for (int g = 0; g < this->group_ * CUDNN_STREAMS_PER_GROUP; g++) {
 #ifdef USE_MIOPEN
     HIP_CHECK(hipStreamCreate(&stream_[g]));
+#ifdef USE_MIOPEN_DEVELOP
     MIOPEN_CHECK(mlopenCreateWithStream(&handle_[g], 1, &stream_[g]));
+#else
+    MIOPEN_CHECK(mlopenCreate(&handle_[g], 1, &stream_[g]));
+#endif
 #endif
 
 #ifdef USE_CUDNN

@@ -11,8 +11,12 @@ void CuDNNReLULayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   ReLULayer<Dtype>::LayerSetUp(bottom, top);
 #ifdef USE_MIOPEN
   // initialize MIOpen
+#ifdef USE_MIOPEN_DEVELOP
   hipStream_t stream = nullptr;
   MIOPEN_CHECK(mlopenCreateWithStream(&handle_, 1, &stream));
+#else
+  MIOPEN_CHECK(mlopenCreate(&handle_));
+#endif
   miopen::createTensor4dDesc<Dtype>(&bottom_desc_);
   miopen::createTensor4dDesc<Dtype>(&top_desc_);
   miopen::createActivationDescriptor<Dtype>(&activ_desc_, mlopenActivationRELU);
