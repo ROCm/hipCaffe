@@ -2444,7 +2444,7 @@ TYPED_TEST(NetTest, TestReshape) {
     }
   }
   EXPECT_FALSE(same_spatial_shape);
-
+}
 
 TYPED_TEST(NetTest, TestSkipPropagateDown) {
   // check bottom_need_backward if propagate_down is true
