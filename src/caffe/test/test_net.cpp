@@ -2375,8 +2375,6 @@ TEST_F(FilterNetTest, TestFilterInOutByExcludeMultiRule) {
 }
 
 TYPED_TEST(NetTest, TestReshape) {
-  // HACK: disable this test as it crashes
-#if 0
   typedef typename TypeParam::Dtype Dtype;
   // We set up bottom blobs of two different sizes, switch between
   // them, check that forward and backward both run and the results
@@ -2446,9 +2444,7 @@ TYPED_TEST(NetTest, TestReshape) {
     }
   }
   EXPECT_FALSE(same_spatial_shape);
-#endif
-  EXPECT_EQ(0, 1);
-}
+
 
 TYPED_TEST(NetTest, TestSkipPropagateDown) {
   // check bottom_need_backward if propagate_down is true
