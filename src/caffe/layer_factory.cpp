@@ -131,13 +131,16 @@ shared_ptr<Layer<Dtype> > GetLRNLayer(const LayerParameter& param) {
     if (lrn_param.norm_region() ==LRNParameter_NormRegion_WITHIN_CHANNEL) {
       return shared_ptr<Layer<Dtype> >(new CuDNNLCNLayer<Dtype>(param));
     } else {
-#ifdef USE_MIOPEN
-      if (param.lrn_param().local_size() > 16) {
-#endif
-#ifdef USE_CUDNN
+      bool lrnCond = true;
+      // fixme: remove the USE_MIOPEN_LRN conditional when re-enabling
+      //   MIOpen's LRN kernels
+#if defined(USE_MIOPEN) && defined(USE_MIOPEN_LRN)
+      lrnCond = param.lrn_param().local_size() > 16;
+#elif defined(USE_CUDNN)
       // local size is too big to be handled through cuDNN
-      if (param.lrn_param().local_size() > CUDNN_LRN_MAX_N) {
+      lrnCond = param.lrn_param().local_size() > CUDNN_LRN_MAX_N;
 #endif
+      if (lrnCond) {
         return shared_ptr<Layer<Dtype> >(new LRNLayer<Dtype>(param));
       } else {
         return shared_ptr<Layer<Dtype> >(new CuDNNLRNLayer<Dtype>(param));
