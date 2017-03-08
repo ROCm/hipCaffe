@@ -55,7 +55,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
     // initialize all to default algorithms
     fwd_algo_[i] = mlopenConvolutionFwdAlgoDirect;
     bwd_weight_algo_[i] = mlopenConvolutionBwdWeightsAlgoDirect;
-    bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgo_0;
+    bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgoDirect;
 
     // default algorithms don't require workspace
     workspace_fwd_sizes_[i] = 0;
@@ -364,7 +364,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 #ifdef USE_MIOPEN_BACKWARD
         assert(0); // Don't have any backward algs that work without workspace memory
         bwd_weight_algo_[i] = mlopenConvolutionBwdWeightsAlgoDirect;
-        bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgo_0;
+        bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgoDirect;
 #endif
 #endif
 #ifdef USE_CUDNN
@@ -491,7 +491,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     LOG(INFO) << "After mlopenFindConvolutionBackwardDataAlgorithmi perf.memory=" << perf.memory << "\n";
 
     //bwd_data_algo_[i] = perf.bwd_data_algo; // TODO
-    bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgo_0;
+    bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgoDirect;
 
     //workspace_bwd_data_sizes_[i] = perf.memory; // TODO
 #endif // USE_MIOPEN_BACKWARD_DATA
