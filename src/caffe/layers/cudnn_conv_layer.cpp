@@ -102,7 +102,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   const int* kernel_shape_data = this->kernel_shape_.cpu_data();
   const int kernel_h = kernel_shape_data[0];
   const int kernel_w = kernel_shape_data[1];
-#ifdef USE_MIOPEN
+#ifdef USE_MIOPEN_FORWARD_CONV
   miopen::createFilterDesc<Dtype>(&filter_desc_,
       this->num_output_ / this->group_, this->channels_ / this->group_,
       kernel_h, kernel_w);
@@ -361,7 +361,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         workspace_bwd_data_sizes_[i] = 0;
 #ifdef USE_MIOPEN
         fwd_algo_[i] = mlopenConvolutionFwdAlgoDirect;
-#ifdef USE_MIOPEN_BACKWARD
+#ifdef USE_MIOPEN_BACKWARD_CONV
         assert(0); // Don't have any backward algs that work without workspace memory
         bwd_weight_algo_[i] = mlopenConvolutionBwdWeightsAlgoDirect;
         bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgoDirect;
@@ -407,6 +407,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     int ret_algo_count;
     mlopenConvAlgoPerf_t perf;
 
+#ifdef USE_MIOPEN_FORWARD_CONV
     // choose forward and backward algorithms + workspace(s)
     MIOPEN_CHECK(mlopenFindConvolutionForwardAlgorithm(
         handle_[0*this->group_ + g],               // handle
@@ -425,6 +426,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         0,                        // workSpaceSize
         false                     // exhaustiveSearch
     ));
+#endif
 
     // TODO - currently overriding MLOpen fwd_algo to work around bug, will re-enable when fwd_algo is valid
     //fwd_algo_[i] = perf.fwd_algo;
@@ -488,7 +490,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         max_workspace,            // workSpaceSize
         false                     // exhaustiveSearch
     ));
-    LOG(INFO) << "After mlopenFindConvolutionBackwardDataAlgorithmi perf.memory=" << perf.memory << "\n";
+    LOG(INFO) << "After mlopenFindConvolutionBackwardDataAlgorithm perf.memory=" << perf.memory << "\n";
 
     //bwd_data_algo_[i] = perf.bwd_data_algo; // TODO
     bwd_data_algo_[i] = mlopenConvolutionBwdDataAlgoDirect;

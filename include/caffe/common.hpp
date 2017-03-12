@@ -18,13 +18,20 @@
 
 #include "caffe/util/device_alternate.hpp"
 
+#ifdef USE_MIOPEN
+
+// #define USE_MIOPEN_FORWARD_CONV
+
 // Uncomment to enable use of MIOPEN backward prop
 //#define USE_MIOPEN_BACKWARD_BIAS
 //#define USE_MIOPEN_BACKWARD_WEIGHT
 //#define USE_MIOPEN_BACKWARD_DATA
 
 #if defined(USE_MIOPEN_BACKWARD_BIAS) or defined(USE_MIOPEN_BACKWARD_WEIGHT) or defined (USE_MIOPEN_BACKWARD_DATA)
-#define USE_MIOPEN_BACKWARD
+#define USE_MIOPEN_BACKWARD_CONV
+#endif
+
+
 #endif
 
 // Convert macro to string
