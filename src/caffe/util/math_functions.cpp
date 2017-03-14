@@ -1,4 +1,19 @@
+#ifdef _M_IX86_FP
+#define _M_IX86_FP_DEFINED
+#endif
+#ifdef __SSE2__
+#define __SSE2__DEFINED
+#endif
+#undef _M_IX86_FP
+#undef __SSE2__
 #include <boost/math/special_functions/next.hpp>
+#ifdef __SSE2__DEFINED
+#define __SSE2__
+#endif
+#ifdef _M_IX86_FP_DEFINED
+#define _M_IX86_FP
+#endif
+
 #include <boost/random.hpp>
 
 #include <limits>
