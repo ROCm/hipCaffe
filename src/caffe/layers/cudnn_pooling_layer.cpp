@@ -13,7 +13,7 @@ void CuDNNPoolingLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
 #ifdef USE_MIOPEN
 #ifdef USE_MIOPEN_DEVELOP
   hipStream_t stream = nullptr;
-  MIOPEN_CHECK(mlopenCreateWithStream(&handle_, 1, &stream));
+  MIOPEN_CHECK(mlopenCreateWithStream(&handle_, &stream));
 #else
   MIOPEN_CHECK(mlopenCreate(&handle_));
 #endif

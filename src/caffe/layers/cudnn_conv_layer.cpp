@@ -81,7 +81,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
 #ifdef USE_MIOPEN
     HIP_CHECK(hipStreamCreate(&stream_[g]));
 #ifdef USE_MIOPEN_DEVELOP
-    MIOPEN_CHECK(mlopenCreateWithStream(&handle_[g], 1, &stream_[g]));
+    MIOPEN_CHECK(mlopenCreateWithStream(&handle_[g], &stream_[g]));
 #else
     MIOPEN_CHECK(mlopenCreate(&handle_[g], 1, &stream_[g]));
 #endif
@@ -421,7 +421,6 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         1,                        // requestAlgoCount
         &ret_algo_count,          // returnedAlgoCount
         &perf,                    // perfResults
-        mlopenConvolutionFastest, // preference
         NULL,                     // workSpace
         0,                        // workSpaceSize
         false                     // exhaustiveSearch
@@ -456,7 +455,6 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         1,                        // requestAlgoCount
         &ret_algo_count,          // returnedAlgoCount
         &perf,                    // perfResults
-        mlopenConvolutionFastest, // preference
         workspace[0],             // workSpace
         max_workspace,            // workSpaceSize
         false                     // exhaustiveSearch
@@ -485,7 +483,6 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         1,                        // requestAlgoCount
         &ret_algo_count,          // returnedAlgoCount
         &perf,                    // perfResults
-        mlopenConvolutionFastest, // preference
         workspace[0],             // workSpace
         max_workspace,            // workSpaceSize
         false                     // exhaustiveSearch
