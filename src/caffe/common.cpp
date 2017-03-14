@@ -288,7 +288,7 @@ const char* hipblasGetErrorString(hipblasStatus_t error) {
 
 const char* hiprngGetErrorString(hiprngStatus_t error) {
   switch (error) {
-  case HIPRNG_STATUS_INVALID_STREAM_CREATOR:
+  case HIPRNG_INVALID_STREAM_CREATOR:
     return "HIPRNG_STATUS_INVALID_STREAM_CREATOR";
   case HIPRNG_STATUS_SUCCESS:
     return "HIPRNG_STATUS_SUCCESS";
