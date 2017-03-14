@@ -19,10 +19,7 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
 #if 0
   LOG(INFO) << "CuDNNConvolutionLayer<Dtype>::Forward_gpu()\n";
 #endif
-#if 0
-  // Fall back to standard Caffe
-  ConvolutionLayer<Dtype>::Forward_gpu(bottom, top);
-#else
+#ifdef USE_MIOPEN_FORWARD_CONV
   for (int i = 0; i < bottom.size(); ++i) {
     const Dtype* bottom_data = bottom[i]->gpu_data();
     Dtype* top_data = top[i]->mutable_gpu_data();
@@ -57,8 +54,11 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
     // Synchronize the work across groups.
     hipDeviceSynchronize();
   }
-#endif
-#endif
+#else // ! USE_MIOPEN_FORWARD_CONV
+  // Fall back to standard Caffe
+  ConvolutionLayer<Dtype>::Forward_gpu(bottom, top);
+#endif  // USE_MIOPEN_FORWARD_CONV
+#endif  // USE_MIOPEN
 
 #ifdef USE_CUDNN
   for (int i = 0; i < bottom.size(); ++i) {
@@ -103,7 +103,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 
 #ifdef USE_MIOPEN
 
-#ifndef USE_MIOPEN_BACKWARD
+#ifndef USE_MIOPEN_BACKWARD_CONV
   // TBD
   // Fall back to standard Caffe
   ConvolutionLayer<Dtype>::Backward_gpu(top, propagate_down, bottom);
@@ -201,7 +201,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     // Synchronize the work across groups.
     hipDeviceSynchronize(); // TODO - could optimize to avoid sync back to host?
   } // for top.size();
-#endif // USE_MIOPEN_BACKWARD
+#endif // USE_MIOPEN_BACKWARD_CONV
 #endif // USE_MIOPEN
 
 #if USE_CUDNN
