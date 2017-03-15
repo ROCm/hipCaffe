@@ -546,7 +546,9 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
 #endif
   }
 #ifdef USE_MIOPEN
+#ifdef USE_MIOPEN_FORWARD_CONV
   mlopenDestroyTensorDescriptor(filter_desc_);
+#endif
 #endif
 #ifdef USE_CUDNN
   cudnnDestroyFilterDescriptor(filter_desc_);
