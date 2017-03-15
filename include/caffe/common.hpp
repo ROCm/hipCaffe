@@ -20,7 +20,7 @@
 
 #ifdef USE_MIOPEN
 
-// #define USE_MIOPEN_FORWARD_CONV
+#define USE_MIOPEN_FORWARD_CONV
 
 // Uncomment to enable use of MIOPEN backward prop
 //#define USE_MIOPEN_BACKWARD_BIAS
