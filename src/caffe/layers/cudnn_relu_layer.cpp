@@ -13,7 +13,7 @@ void CuDNNReLULayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   // initialize MIOpen
 #ifdef USE_MIOPEN_DEVELOP
   hipStream_t stream = nullptr;
-  MIOPEN_CHECK(miopenCreateWithStream(&handle_, &stream));
+  MIOPEN_CHECK(miopenCreateWithStream(&handle_, stream));
 #else
   MIOPEN_CHECK(miopenCreate(&handle_));
 #endif

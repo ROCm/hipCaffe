@@ -81,7 +81,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
 #ifdef USE_MIOPEN
     HIP_CHECK(hipStreamCreate(&stream_[g]));
 #ifdef USE_MIOPEN_DEVELOP
-    MIOPEN_CHECK(miopenCreateWithStream(&handle_[g], &stream_[g]));
+    MIOPEN_CHECK(miopenCreateWithStream(&handle_[g], stream_[g]));
 #else
     MIOPEN_CHECK(miopenCreate(&handle_[g], 1, &stream_[g]));
 #endif
