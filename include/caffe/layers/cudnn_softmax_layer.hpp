@@ -35,9 +35,9 @@ class CuDNNSoftmaxLayer : public SoftmaxLayer<Dtype> {
 
   bool handles_setup_;
 #ifdef USE_MIOPEN
-  mlopenHandle_t             handle_;
-  mlopenTensorDescriptor_t bottom_desc_;
-  mlopenTensorDescriptor_t top_desc_;
+  miopenHandle_t             handle_;
+  miopenTensorDescriptor_t bottom_desc_;
+  miopenTensorDescriptor_t top_desc_;
 #endif
 
 #ifdef USE_CUDNN

@@ -12,7 +12,7 @@ void CuDNNPoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_data = top[0]->mutable_gpu_data();
 
 #ifdef USE_MIOPEN
-  MIOPEN_CHECK(mlopenPoolingForward(
+  MIOPEN_CHECK(miopenPoolingForward(
       handle_,                       // handle
       pooling_desc_,                 // poolDesc
       miopen::dataType<Dtype>::one,  // *alpha
@@ -48,7 +48,7 @@ void CuDNNPoolingLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
 
 #ifdef USE_MIOPEN
-  MIOPEN_CHECK(mlopenPoolingBackward(
+  MIOPEN_CHECK(miopenPoolingBackward(
       handle_,                       // handle
       pooling_desc_,                 // poolDesc
       miopen::dataType<Dtype>::one,  // *alpha

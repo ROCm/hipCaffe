@@ -3,36 +3,36 @@
 #ifdef USE_ACCMI
 
 #ifdef USE_MIOPEN
-#include <mlopen.h>
+#include <miopen.h>
 
 #include "caffe/common.hpp"
 #include "caffe/proto/caffe.pb.h"
 
 #define MIOPEN_CHECK(condition) \
   do { \
-    mlopenStatus_t status = condition; \
-    CHECK_EQ(status, mlopenStatusSuccess) << " "\
+    miopenStatus_t status = condition; \
+    CHECK_EQ(status, miopenStatusSuccess) << " "\
       << miopenGetErrorString(status); \
   } while (0)
 
-inline const char* miopenGetErrorString(mlopenStatus_t status) {
+inline const char* miopenGetErrorString(miopenStatus_t status) {
   switch (status) {
-  case mlopenStatusSuccess:
-    return "mlopenStatusSuccess";
-  case mlopenStatusNotInitialized:
-    return "mlopenStatusNotInitialized";
-  case mlopenStatusInvalidValue:
-    return "mlopenStatusInvalidValue";
-  case mlopenStatusBadParm:
-    return "mlopenStatusBadParm";
-  case mlopenStatusAllocFailed:
-    return "mlopenStatusAllocFailed";
-  case mlopenStatusInternalError:
-    return "mlopenStatusInternalError";
-  case mlopenStatusNotImplemented:
-    return "mlopenStatusNotImplemented";
-  case mlopenStatusUnknownError:
-    return "mlopenStatusUnknownError";
+  case miopenStatusSuccess:
+    return "miopenStatusSuccess";
+  case miopenStatusNotInitialized:
+    return "miopenStatusNotInitialized";
+  case miopenStatusInvalidValue:
+    return "miopenStatusInvalidValue";
+  case miopenStatusBadParm:
+    return "miopenStatusBadParm";
+  case miopenStatusAllocFailed:
+    return "miopenStatusAllocFailed";
+  case miopenStatusInternalError:
+    return "miopenStatusInternalError";
+  case miopenStatusNotImplemented:
+    return "miopenStatusNotImplemented";
+  case miopenStatusUnknownError:
+    return "miopenStatusUnknownError";
   }
   return "Unknown MIOpen status";
 }
@@ -44,33 +44,33 @@ namespace miopen {
 template <typename Dtype> class dataType;
 template<> class dataType<float>  {
  public:
-  static const mlopenDataType_t type = mlopenFloat;
+  static const miopenDataType_t type = miopenFloat;
   static float oneval, zeroval;
   static const void *one, *zero;
 };
 template<> class dataType<double> {
  public:
-  static const mlopenDataType_t type = mlopenDouble;
+  static const miopenDataType_t type = miopenDouble;
   static double oneval, zeroval;
   static const void *one, *zero;
 };
 
 template <typename Dtype>
-inline void createTensor4dDesc(mlopenTensorDescriptor_t* desc) {
-  MIOPEN_CHECK(mlopenCreateTensorDescriptor(desc));
+inline void createTensor4dDesc(miopenTensorDescriptor_t* desc) {
+  MIOPEN_CHECK(miopenCreateTensorDescriptor(desc));
 }
 
 template <typename Dtype>
-inline void setTensor4dDesc(mlopenTensorDescriptor_t* desc,
+inline void setTensor4dDesc(miopenTensorDescriptor_t* desc,
     int n, int c, int h, int w,
     int stride_n, int stride_c, int stride_h, int stride_w) {
   // MIOpen doesn't API to set stride_n, stride_c, stride_h, stride_w yet
-  MIOPEN_CHECK(mlopenSet4dTensorDescriptor(*desc, dataType<Dtype>::type,
+  MIOPEN_CHECK(miopenSet4dTensorDescriptor(*desc, dataType<Dtype>::type,
         n, c, h, w));
 }
 
 template <typename Dtype>
-inline void setTensor4dDesc(mlopenTensorDescriptor_t* desc,
+inline void setTensor4dDesc(miopenTensorDescriptor_t* desc,
     int n, int c, int h, int w) {
   const int stride_w = 1;
   const int stride_h = w * stride_w;
@@ -81,50 +81,50 @@ inline void setTensor4dDesc(mlopenTensorDescriptor_t* desc,
 }
 
 template <typename Dtype>
-inline void createFilterDesc(mlopenTensorDescriptor_t* desc,
+inline void createFilterDesc(miopenTensorDescriptor_t* desc,
     int n, int c, int h, int w) {
-  MIOPEN_CHECK(mlopenCreateTensorDescriptor(desc));
-  MIOPEN_CHECK(mlopenSet4dTensorDescriptor(*desc, dataType<Dtype>::type,
+  MIOPEN_CHECK(miopenCreateTensorDescriptor(desc));
+  MIOPEN_CHECK(miopenSet4dTensorDescriptor(*desc, dataType<Dtype>::type,
         n, c, h, w));
 }
 
 template <typename Dtype>
-inline void createConvolutionDesc(mlopenConvolutionDescriptor_t* conv) {
-  MIOPEN_CHECK(mlopenCreateConvolutionDescriptor(conv));
+inline void createConvolutionDesc(miopenConvolutionDescriptor_t* conv) {
+  MIOPEN_CHECK(miopenCreateConvolutionDescriptor(conv));
 }
 
 template <typename Dtype>
-inline void setConvolutionDesc(mlopenConvolutionDescriptor_t* conv,
-    mlopenTensorDescriptor_t bottom, mlopenTensorDescriptor_t filter,
+inline void setConvolutionDesc(miopenConvolutionDescriptor_t* conv,
+    miopenTensorDescriptor_t bottom, miopenTensorDescriptor_t filter,
     int pad_h, int pad_w, int stride_h, int stride_w) {
-  MIOPEN_CHECK(mlopenInitConvolutionDescriptor(*conv, mlopenCrossCorrelation,
+  MIOPEN_CHECK(miopenInitConvolutionDescriptor(*conv, miopenCrossCorrelation,
         pad_h, pad_w, stride_h, stride_w, 1, 1));
 }
 
 template <typename Dtype>
-inline void createPoolingDesc(mlopenPoolingDescriptor_t* pool_desc,
-    PoolingParameter_PoolMethod poolmethod, mlopenPoolingMode_t* mode,
+inline void createPoolingDesc(miopenPoolingDescriptor_t* pool_desc,
+    PoolingParameter_PoolMethod poolmethod, miopenPoolingMode_t* mode,
     int h, int w, int pad_h, int pad_w, int stride_h, int stride_w) {
   switch (poolmethod) {
   case PoolingParameter_PoolMethod_MAX:
-    *mode = mlopenPoolingMax;
+    *mode = miopenPoolingMax;
     break;
   case PoolingParameter_PoolMethod_AVE:
-    *mode = mlopenPoolingAverage;
+    *mode = miopenPoolingAverage;
     break;
   default:
     LOG(FATAL) << "Unknown pooling method.";
   }
-  MIOPEN_CHECK(mlopenCreatePoolingDescriptor(pool_desc));
-  MIOPEN_CHECK(mlopenSet2dPoolingDescriptor(*pool_desc, *mode,
+  MIOPEN_CHECK(miopenCreatePoolingDescriptor(pool_desc));
+  MIOPEN_CHECK(miopenSet2dPoolingDescriptor(*pool_desc, *mode,
         h, w, pad_h, pad_w, stride_h, stride_w));
 }
 
 template <typename Dtype>
-inline void createActivationDescriptor(mlopenActivationDescriptor_t* activ_desc,
-    mlopenActivationMode_t mode) {
-  MIOPEN_CHECK(mlopenCreateActivationDescriptor(activ_desc));
-  MIOPEN_CHECK(mlopenSetActivationDescriptor(*activ_desc, mode,
+inline void createActivationDescriptor(miopenActivationDescriptor_t* activ_desc,
+    miopenActivationMode_t mode) {
+  MIOPEN_CHECK(miopenCreateActivationDescriptor(activ_desc));
+  MIOPEN_CHECK(miopenSetActivationDescriptor(*activ_desc, mode,
                                            Dtype(0), Dtype(0), Dtype(0)));
 }
 

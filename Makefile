@@ -348,10 +348,10 @@ ifeq ($(USE_CUDNN), 1)
 	LIBRARY_DIRS += $(CUDNN_PATH)/lib64
 endif
 
-# MLOpen acceleration cofiguration.
+# MIOpen acceleration cofiguration.
 ifeq ($(USE_MIOPEN), 1)
-        LIBRARIES += MLOpen
-        COMMON_FLAGS += -DUSE_MIOPEN -DMLOPEN_BACKEND_HIP=1
+        LIBRARIES += MIOpen
+        COMMON_FLAGS += -DUSE_MIOPEN -DMIOPEN_BACKEND_HIP=1
 	COMMON_FLAGS += -DUSE_MIOPEN_DEVELOP
 	INCLUDE_DIRS += $(MIOPEN_PATH)/include
 	LIBRARY_DIRS += $(MIOPEN_PATH)/lib

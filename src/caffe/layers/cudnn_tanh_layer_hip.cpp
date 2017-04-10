@@ -11,7 +11,7 @@ void CuDNNTanHLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
 #ifdef USE_MIOPEN
-  MIOPEN_CHECK(mlopenActivationForward(
+  MIOPEN_CHECK(miopenActivationForward(
       this->handle_,                // handle
       activ_desc_,                  // activDesc
       miopen::dataType<Dtype>::one, // *alpha
@@ -58,7 +58,7 @@ void CuDNNTanHLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
 
 #ifdef USE_MIOPEN
-  MIOPEN_CHECK(mlopenActivationBackward(
+  MIOPEN_CHECK(miopenActivationBackward(
       this->handle_,                // handle
       activ_desc_,                  // activDesc
       miopen::dataType<Dtype>::one, // *alpha

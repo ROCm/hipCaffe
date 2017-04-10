@@ -14,14 +14,14 @@ void CuDNNSigmoidLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   // initialize MIOpen
 #ifdef USE_MIOPEN_DEVELOP
   hipStream_t stream = nullptr;
-  MIOPEN_CHECK(mlopenCreateWithStream(&handle_, &stream));
+  MIOPEN_CHECK(miopenCreateWithStream(&handle_, &stream));
 #else
-  MIOPEN_CHECK(mlopenCreate(&handle_));
+  MIOPEN_CHECK(miopenCreate(&handle_));
 #endif
   miopen::createTensor4dDesc<Dtype>(&bottom_desc_);
   miopen::createTensor4dDesc<Dtype>(&top_desc_);
   miopen::createActivationDescriptor<Dtype>(&activ_desc_,
-                                            mlopenActivationLOGISTIC);
+                                            miopenActivationLOGISTIC);
 #endif
 
 #ifdef USE_CUDNN
@@ -61,9 +61,9 @@ CuDNNSigmoidLayer<Dtype>::~CuDNNSigmoidLayer() {
   if (!handles_setup_) { return; }
 
 #ifdef USE_MIOPEN
-  mlopenDestroyTensorDescriptor(this->bottom_desc_);
-  mlopenDestroyTensorDescriptor(this->top_desc_);
-  mlopenDestroy(this->handle_);
+  miopenDestroyTensorDescriptor(this->bottom_desc_);
+  miopenDestroyTensorDescriptor(this->top_desc_);
+  miopenDestroy(this->handle_);
 #endif
 
 #ifdef USE_CUDNN

@@ -17,9 +17,9 @@ void CuDNNSoftmaxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   // Initialize MIOpen
 #ifdef USE_MIOPEN_DEVELOP
   hipStream_t stream = nullptr;
-  MIOPEN_CHECK(mlopenCreateWithStream(&handle_, &stream));
+  MIOPEN_CHECK(miopenCreateWithStream(&handle_, &stream));
 #else
-  MIOPEN_CHECK(mlopenCreate(&handle_));
+  MIOPEN_CHECK(miopenCreate(&handle_));
 #endif
   miopen::createTensor4dDesc<Dtype>(&bottom_desc_);
   miopen::createTensor4dDesc<Dtype>(&top_desc_);
@@ -59,9 +59,9 @@ CuDNNSoftmaxLayer<Dtype>::~CuDNNSoftmaxLayer() {
   if (!handles_setup_) { return; }
 
 #ifdef USE_MIOPEN
-  mlopenDestroyTensorDescriptor(bottom_desc_);
-  mlopenDestroyTensorDescriptor(top_desc_);
-  mlopenDestroy(handle_);
+  miopenDestroyTensorDescriptor(bottom_desc_);
+  miopenDestroyTensorDescriptor(top_desc_);
+  miopenDestroy(handle_);
 #endif
 
 #ifdef USE_CUDNN
