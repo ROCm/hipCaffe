@@ -27,7 +27,7 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
     // Foward through MIOpen in parallel over groups.
     for (int g = 0; g < this->group_; g++) {
       // Filters.
-      MIOPEN_CHECK(mlopenConvolutionForward(
+      MIOPEN_CHECK(miopenConvolutionForward(
           handle_[g],                        // handle
           miopen::dataType<Dtype>::one,      // *alpha
           bottom_descs_[i],                  // xDesc
@@ -138,7 +138,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
       if (this->param_propagate_down_[0]) {
 #ifdef USE_MIOPEN_BACKWARD_WEIGHT
         const Dtype* bottom_data = bottom[i]->gpu_data();
-        MIOPEN_CHECK(mlopenConvolutionBackwardWeights(
+        MIOPEN_CHECK(miopenConvolutionBackwardWeights(
             handle_[1 * this->group_ + g],          // handle
             miopen::dataType<Dtype>::one,           // *alpha
             top_descs_[i],                          // dyDesc
@@ -172,7 +172,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
           weight = this->blobs_[0]->gpu_data();
         }
 #ifdef USE_MIOPEN_BACKWARD_DATA
-        MIOPEN_CHECK(mlopenConvolutionBackwardData(
+        MIOPEN_CHECK(miopenConvolutionBackwardData(
             handle_[2 * this->group_ + g],     // handle
             miopen::dataType<Dtype>::one,      // *alpha
             top_descs_[i],                     // dyDesc
@@ -187,7 +187,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
             workspace[2 * this->group_ + g],  // workSpace
             workspace_bwd_data_sizes_[i]      // workSpaceSize
         ));
-        //printf ("mlopenConvolutionBackwardData\n");
+        //printf ("miopenConvolutionBackwardData\n");
 
 #else
         assert (g==0); // these equations do not account for g: - do we need another loop?

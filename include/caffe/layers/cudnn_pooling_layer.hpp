@@ -43,10 +43,10 @@ class CuDNNPoolingLayer : public PoolingLayer<Dtype> {
   bool handles_setup_;
 
 #ifdef USE_MIOPEN
-  mlopenHandle_t             handle_;
-  mlopenTensorDescriptor_t bottom_desc_, top_desc_;
-  mlopenPoolingDescriptor_t  pooling_desc_;
-  mlopenPoolingMode_t        mode_;
+  miopenHandle_t             handle_;
+  miopenTensorDescriptor_t bottom_desc_, top_desc_;
+  miopenPoolingDescriptor_t  pooling_desc_;
+  miopenPoolingMode_t        mode_;
 
   size_t workspaceSize;
   void* workspace;

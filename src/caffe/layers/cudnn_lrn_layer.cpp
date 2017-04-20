@@ -13,11 +13,11 @@ void CuDNNLRNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
 #ifdef USE_MIOPEN
 #ifdef USE_MIOPEN_DEVELOP
   hipStream_t stream = nullptr;
-  MIOPEN_CHECK(mlopenCreateWithStream(&handle_, &stream));
+  MIOPEN_CHECK(miopenCreateWithStream(&handle_, stream));
 #else
-  MIOPEN_CHECK(mlopenCreate(&handle_));
+  MIOPEN_CHECK(miopenCreate(&handle_));
 #endif
-  MIOPEN_CHECK(mlopenCreateLRNDescriptor(&norm_desc_));
+  MIOPEN_CHECK(miopenCreateLRNDescriptor(&norm_desc_));
   miopen::createTensor4dDesc<Dtype>(&bottom_desc_);
   miopen::createTensor4dDesc<Dtype>(&top_desc_);
 #endif
@@ -48,10 +48,10 @@ void CuDNNLRNLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
       this->channels_, this->height_, this->width_);
   miopen::setTensor4dDesc<Dtype>(&top_desc_, bottom[0]->num(),
       this->channels_, this->height_, this->width_);
-  MIOPEN_CHECK(mlopenSetLRNDescriptor(norm_desc_, mlopenLRNCrossChannel, size_, alpha_, beta_, k_));
+  MIOPEN_CHECK(miopenSetLRNDescriptor(norm_desc_, miopenLRNCrossChannel, size_, alpha_, beta_, k_));
 
   size_t totalSizeInBytes = 0;
-  mlopenLRNGetWorkSpaceSize(top_desc_, &totalSizeInBytes);
+  miopenLRNGetWorkSpaceSize(top_desc_, &totalSizeInBytes);
 
   if (totalSizeInBytes > workspaceSize) {
     DLOG(INFO) << "Reallocating workspace storage " << this->layer_param().name() << "  " << totalSizeInBytes/1024.0/1024.0 << " MB\n";
@@ -79,11 +79,11 @@ CuDNNLRNLayer<Dtype>::~CuDNNLRNLayer() {
   if (!handles_setup_) { return; }
 
 #ifdef USE_MIOPEN
-  mlopenDestroyTensorDescriptor(bottom_desc_);
-  mlopenDestroyTensorDescriptor(top_desc_);
+  miopenDestroyTensorDescriptor(bottom_desc_);
+  miopenDestroyTensorDescriptor(top_desc_);
 
   // destroy LRN handle
-  mlopenDestroy(handle_);
+  miopenDestroy(handle_);
 
   hipFree(workspace);
 #endif

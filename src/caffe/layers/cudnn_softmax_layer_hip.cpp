@@ -16,7 +16,7 @@ void CuDNNSoftmaxLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_data = top[0]->mutable_gpu_data();
 
 #ifdef USE_MIOPEN
-  MIOPEN_CHECK(mlopenSoftmaxForward(
+  MIOPEN_CHECK(miopenSoftmaxForward(
       handle_,                       // handle
       miopen::dataType<Dtype>::one,  // *alpha
       bottom_desc_,                  // xDesc
@@ -47,7 +47,7 @@ void CuDNNSoftmaxLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
 
 #ifdef USE_MIOPEN
-    MIOPEN_CHECK(mlopenSoftmaxBackward(
+    MIOPEN_CHECK(miopenSoftmaxBackward(
         handle_,                       // handle
         miopen::dataType<Dtype>::one,  // *alpha
         top_desc_,                     // yDesc
