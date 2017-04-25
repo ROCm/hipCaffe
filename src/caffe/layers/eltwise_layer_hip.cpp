@@ -7,7 +7,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void MaxForward(hipLaunchParm lp, const int nthreads, const Dtype* bottom_data_a,
+__global__ void MaxForward(const int nthreads, const Dtype* bottom_data_a,
     const Dtype* bottom_data_b, const int blob_idx, Dtype* top_data,
     int* mask) {
   HIP_KERNEL_LOOP(index, nthreads) {
@@ -56,22 +56,22 @@ void EltwiseLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     mask = max_idx_.mutable_gpu_data();
     // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-    hipLaunchKernel(MaxForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(MaxForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom[0]->gpu_data(), bottom[1]->gpu_data(), 0, top_data, mask);
 #else
     auto bot0_gpu_data = bottom[0]->gpu_data();
     auto bot1_gpu_data = bottom[1]->gpu_data();
-    hipLaunchKernel(MaxForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(MaxForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bot0_gpu_data, bot1_gpu_data, 0, top_data, mask);
 #endif
     for (int i = 2; i < bottom.size(); ++i) {
       // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-      hipLaunchKernel(MaxForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+      hipLaunchKernelGGL(MaxForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
           count, top_data, bottom[i]->gpu_data(), i-1, top_data, mask);
 #else
       auto boti_gpu_data = bottom[i]->gpu_data();
-      hipLaunchKernel(MaxForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+      hipLaunchKernelGGL(MaxForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
           count, top_data, boti_gpu_data, i-1, top_data, mask);
 #endif
     }
@@ -83,7 +83,7 @@ void EltwiseLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-__global__ void MaxBackward(hipLaunchParm lp, const int nthreads, const Dtype* top_diff,
+__global__ void MaxBackward(const int nthreads, const Dtype* top_diff,
     const int blob_idx, const int* mask, Dtype* bottom_diff) {
   HIP_KERNEL_LOOP(index, nthreads) {
     Dtype gradient = 0;
@@ -133,7 +133,7 @@ void EltwiseLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         break;
       case EltwiseParameter_EltwiseOp_MAX:
         mask = max_idx_.gpu_data();
-        hipLaunchKernel(MaxBackward<Dtype>,
+        hipLaunchKernelGGL(MaxBackward<Dtype>,
             dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
             count, top_diff, i, mask, bottom_diff);
         break;

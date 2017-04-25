@@ -18,7 +18,7 @@ __device__ Dtype tanh(const Dtype x) {
 }
 
 template <typename Dtype>
-__global__ void LSTMActsForward(hipLaunchParm lp, const int nthreads, const int dim,
+__global__ void LSTMActsForward(const int nthreads, const int dim,
                                 const Dtype* X, Dtype* X_acts) {
   HIP_KERNEL_LOOP(index, nthreads) {
     const int x_dim = 4 * dim;
@@ -32,7 +32,7 @@ __global__ void LSTMActsForward(hipLaunchParm lp, const int nthreads, const int 
 }
 
 template <typename Dtype>
-__global__ void LSTMUnitForward(hipLaunchParm lp, const int nthreads, const int dim,
+__global__ void LSTMUnitForward(const int nthreads, const int dim,
     const Dtype* C_prev, const Dtype* X, const Dtype* cont,
     Dtype* C, Dtype* H) {
   HIP_KERNEL_LOOP(index, nthreads) {
@@ -63,17 +63,17 @@ void LSTMUnitLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* H = top[1]->mutable_gpu_data();
   const int X_count = bottom[1]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(LSTMActsForward<Dtype>, dim3(CAFFE_GET_BLOCKS(X_count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL(LSTMActsForward<Dtype>, dim3(CAFFE_GET_BLOCKS(X_count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       X_count, hidden_dim_, X, X_acts);
   //HIP_POST_KERNEL_CHECK;
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(LSTMUnitForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL(LSTMUnitForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       count, hidden_dim_, C_prev, X_acts, cont, C, H);
   //HIP_POST_KERNEL_CHECK;
 }
 
 template <typename Dtype>
-__global__ void LSTMUnitBackward(hipLaunchParm lp, const int nthreads, const int dim,
+__global__ void LSTMUnitBackward(const int nthreads, const int dim,
     const Dtype* C_prev, const Dtype* X, const Dtype* C, const Dtype* H,
     const Dtype* cont, const Dtype* C_diff, const Dtype* H_diff,
     Dtype* C_prev_diff, Dtype* X_diff) {
@@ -106,7 +106,7 @@ __global__ void LSTMUnitBackward(hipLaunchParm lp, const int nthreads, const int
 }
 
 template <typename Dtype>
-__global__ void LSTMActsBackward(hipLaunchParm lp, const int nthreads, const int dim,
+__global__ void LSTMActsBackward(const int nthreads, const int dim,
     const Dtype* X_acts, const Dtype* X_acts_diff, Dtype* X_diff) {
   HIP_KERNEL_LOOP(index, nthreads) {
     const int x_dim = 4 * dim;
@@ -137,13 +137,13 @@ void LSTMUnitLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   const Dtype* H_diff = top[1]->gpu_diff();
   Dtype* C_prev_diff = bottom[0]->mutable_gpu_diff();
   Dtype* X_acts_diff = X_acts_.mutable_gpu_diff();
-  hipLaunchKernel(LSTMUnitBackward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
+  hipLaunchKernelGGL(LSTMUnitBackward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
       dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, count, hidden_dim_,
       C_prev, X_acts, C, H, cont, C_diff, H_diff, C_prev_diff, X_acts_diff);
   //HIP_POST_KERNEL_CHECK;
   const int X_count = bottom[1]->count();
   Dtype* X_diff = bottom[1]->mutable_gpu_diff();
-  hipLaunchKernel(LSTMActsBackward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
+  hipLaunchKernelGGL(LSTMActsBackward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
       dim3(CAFFE_GET_BLOCKS(X_count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       X_count, hidden_dim_, X_acts, X_acts_diff, X_diff);
   //HIP_POST_KERNEL_CHECK;

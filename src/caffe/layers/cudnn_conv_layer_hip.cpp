@@ -91,7 +91,7 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
     // Synchronize the work across groups, each of which went into its own
     // stream, by launching an empty kernel into the default (null) stream.
     // NOLINT_NEXT_LINE(whitespace/operators)
-    //hipLaunchKernel(HIP_KERNEL_NAME(sync_conv_groups), dim3(1), dim3(1), 0, 0, );
+    //hipLaunchKernelGGL(HIP_KERNEL_NAME(sync_conv_groups), dim3(1), dim3(1), 0, 0, );
     sync_conv_groups<<<1, 1>>>();
   }
 #endif
@@ -265,7 +265,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     // Synchronize the work across groups, each of which went into its own
     // stream, by launching an empty kernel into the default (null) stream.
     // NOLINT_NEXT_LINE(whitespace/operators)
-    //hipLaunchKernel(HIP_KERNEL_NAME(sync_conv_groups), dim3(1), dim3(1), 0, 0, );
+    //hipLaunchKernelGGL(HIP_KERNEL_NAME(sync_conv_groups), dim3(1), dim3(1), 0, 0, );
     sync_conv_groups<<<1, 1>>>();
   }
 #endif

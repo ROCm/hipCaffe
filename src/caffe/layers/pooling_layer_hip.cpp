@@ -8,7 +8,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void MaxPoolForward(hipLaunchParm lp, const int nthreads,
+__global__ void MaxPoolForward(const int nthreads,
     const Dtype* const bottom_data, const int num, const int channels,
     const int height, const int width, const int pooled_height,
     const int pooled_width, const int kernel_h, const int kernel_w,
@@ -47,7 +47,7 @@ __global__ void MaxPoolForward(hipLaunchParm lp, const int nthreads,
 }
 
 template <typename Dtype>
-__global__ void AvePoolForward(hipLaunchParm lp, const int nthreads,
+__global__ void AvePoolForward(const int nthreads,
     const Dtype* const bottom_data, const int num, const int channels,
     const int height, const int width, const int pooled_height,
     const int pooled_width, const int kernel_h, const int kernel_w,
@@ -80,7 +80,7 @@ __global__ void AvePoolForward(hipLaunchParm lp, const int nthreads,
 }
 
 template <typename Dtype>
-__global__ void StoPoolForwardTrain(hipLaunchParm lp, const int nthreads,
+__global__ void StoPoolForwardTrain(const int nthreads,
     const Dtype* const bottom_data,
     const int num, const int channels, const int height,
     const int width, const int pooled_height, const int pooled_width,
@@ -122,7 +122,7 @@ __global__ void StoPoolForwardTrain(hipLaunchParm lp, const int nthreads,
 
 
 template <typename Dtype>
-__global__ void StoPoolForwardTest(hipLaunchParm lp, const int nthreads,
+__global__ void StoPoolForwardTest(const int nthreads,
     const Dtype* const bottom_data,
     const int num, const int channels, const int height,
     const int width, const int pooled_height, const int pooled_width,
@@ -174,14 +174,14 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     }
     // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-    hipLaunchKernel(MaxPoolForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(MaxPoolForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, bottom[0]->num(), channels_,
         height_, width_, pooled_height_, pooled_width_, kernel_h_,
         kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data,
         mask, top_mask);
 #else
     auto bot0_num = bottom[0]->num();
-    hipLaunchKernel(MaxPoolForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(MaxPoolForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, bot0_num, channels_,
         height_, width_, pooled_height_, pooled_width_, kernel_h_,
         kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data,
@@ -193,13 +193,13 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     {
     // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-    hipLaunchKernel(AvePoolForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(AvePoolForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, bottom[0]->num(), channels_,
         height_, width_, pooled_height_, pooled_width_, kernel_h_,
         kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data);
 #else
     auto bot0_numB = bottom[0]->num();
-    hipLaunchKernel(AvePoolForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(AvePoolForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, bot0_numB, channels_,
         height_, width_, pooled_height_, pooled_width_, kernel_h_,
         kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data);
@@ -214,14 +214,14 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
                             rand_idx_.mutable_gpu_data());
       // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-      hipLaunchKernel(StoPoolForwardTrain<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
+      hipLaunchKernelGGL(StoPoolForwardTrain<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
                                    dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
           count, bottom_data, bottom[0]->num(), channels_,
           height_, width_, pooled_height_, pooled_width_, kernel_h_,
           kernel_w_, stride_h_, stride_w_,
           rand_idx_.mutable_gpu_data(), top_data);
 #else
-      hipLaunchKernel(StoPoolForwardTrain<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
+      hipLaunchKernelGGL(StoPoolForwardTrain<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
                                    dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
           count, bottom_data, bottom[0]->num(), channels_,
           height_, width_, pooled_height_, pooled_width_, kernel_h_,
@@ -231,14 +231,14 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     } else {
       // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-      hipLaunchKernel(StoPoolForwardTest<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
+      hipLaunchKernelGGL(StoPoolForwardTest<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
                                   dim3(CAFFE_HIP_NUM_THREADS),0, 0, 
           count, bottom_data, bottom[0]->num(), channels_,
           height_, width_, pooled_height_, pooled_width_, kernel_h_,
           kernel_w_, stride_h_, stride_w_, top_data);
 #else
       auto bot0_num = bottom[0]->num();
-      hipLaunchKernel(StoPoolForwardTest<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
+      hipLaunchKernelGGL(StoPoolForwardTest<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
                                   dim3(CAFFE_HIP_NUM_THREADS),0, 0, 
           count, bottom_data, bot0_num, channels_,
           height_, width_, pooled_height_, pooled_width_, kernel_h_,
@@ -254,7 +254,7 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
 
 template <typename Dtype>
-__global__ void MaxPoolBackward(hipLaunchParm lp, const int nthreads, const Dtype* const top_diff,
+__global__ void MaxPoolBackward(const int nthreads, const Dtype* const top_diff,
     const int* const mask, const Dtype* const top_mask, const int num,
     const int channels, const int height, const int width,
     const int pooled_height, const int pooled_width, const int kernel_h,
@@ -300,7 +300,7 @@ __global__ void MaxPoolBackward(hipLaunchParm lp, const int nthreads, const Dtyp
 }
 
 template <typename Dtype>
-__global__ void AvePoolBackward(hipLaunchParm lp, const int nthreads, const Dtype* const top_diff,
+__global__ void AvePoolBackward(const int nthreads, const Dtype* const top_diff,
     const int num, const int channels, const int height,
     const int width, const int pooled_height, const int pooled_width,
     const int kernel_h, const int kernel_w, const int stride_h,
@@ -337,7 +337,7 @@ __global__ void AvePoolBackward(hipLaunchParm lp, const int nthreads, const Dtyp
 
 
 template <typename Dtype>
-__global__ void StoPoolBackward(hipLaunchParm lp, const int nthreads,
+__global__ void StoPoolBackward(const int nthreads,
     const Dtype* const rand_idx, const Dtype* const top_diff,
     const int num, const int channels, const int height,
     const int width, const int pooled_height, const int pooled_width,
@@ -394,14 +394,14 @@ void PoolingLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     }
     // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-    hipLaunchKernel(MaxPoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(MaxPoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, mask, top_mask, top[0]->num(), channels_,
         height_, width_, pooled_height_, pooled_width_,
         kernel_h_, kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
         bottom_diff);
 #else
     auto top0_num = top[0]->num();
-    hipLaunchKernel(MaxPoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(MaxPoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, mask, top_mask, top0_num, channels_,
         height_, width_, pooled_height_, pooled_width_,
         kernel_h_, kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
@@ -414,13 +414,13 @@ void PoolingLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     {
     // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-    hipLaunchKernel(AvePoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(AvePoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, top[0]->num(), channels_,
         height_, width_, pooled_height_, pooled_width_, kernel_h_,
         kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, bottom_diff);
 #else
     auto top0_num = top[0]->num();
-    hipLaunchKernel(AvePoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(AvePoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, top0_num, channels_,
         height_, width_, pooled_height_, pooled_width_, kernel_h_,
         kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, bottom_diff);
@@ -431,14 +431,14 @@ void PoolingLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     {
     // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-    hipLaunchKernel(StoPoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(StoPoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, rand_idx_.gpu_data(), top_diff,
         top[0]->num(), channels_, height_, width_, pooled_height_,
         pooled_width_, kernel_h_, kernel_w_, stride_h_, stride_w_,
         bottom_diff);
 #else
     auto top0_num = top[0]->num();
-    hipLaunchKernel(StoPoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(StoPoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, rand_idx_.gpu_data(), top_diff,
         top0_num, channels_, height_, width_, pooled_height_,
         pooled_width_, kernel_h_, kernel_w_, stride_h_, stride_w_,

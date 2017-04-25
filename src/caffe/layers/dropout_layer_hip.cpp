@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void DropoutForward(hipLaunchParm lp, const int n, const Dtype* in,
+__global__ void DropoutForward(const int n, const Dtype* in,
     const unsigned int* mask, const unsigned int threshold, const float scale,
     Dtype* out) {
   HIP_KERNEL_LOOP(index, n) {
@@ -26,7 +26,7 @@ void DropoutLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     caffe_gpu_rng_uniform(count, mask);
     // set thresholds
     // NOLINT_NEXT_LINE(whitespace/operators)
-    hipLaunchKernel(DropoutForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(DropoutForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, mask, uint_thres_, scale_, top_data);
    // HIP_POST_KERNEL_CHECK;
   } else {
@@ -35,7 +35,7 @@ void DropoutLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-__global__ void DropoutBackward(hipLaunchParm lp, const int n, const Dtype* in_diff,
+__global__ void DropoutBackward(const int n, const Dtype* in_diff,
     const unsigned int* mask, const unsigned int threshold, const float scale,
     Dtype* out_diff) {
   HIP_KERNEL_LOOP(index, n) {
@@ -55,7 +55,7 @@ void DropoutLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
           static_cast<const unsigned int*>(rand_vec_.gpu_data());
       const int count = bottom[0]->count();
       // NOLINT_NEXT_LINE(whitespace/operators)
-      hipLaunchKernel(DropoutBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
+      hipLaunchKernelGGL(DropoutBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
         dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
         count, top_diff, mask, uint_thres_, scale_, bottom_diff);
       // HIP_POST_KERNEL_CHECK;

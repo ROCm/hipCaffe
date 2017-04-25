@@ -14,7 +14,7 @@ namespace caffe {
 
 // Forward declare kernel functions
 template <typename Dtype>
-__global__ void im2col_gpu_kernel(hipLaunchParm lp, const int n, const Dtype* data_im,
+__global__ void im2col_gpu_kernel(const int n, const Dtype* data_im,
     const int height, const int width, const int kernel_h, const int kernel_w,
     const int pad_h, const int pad_w,
     const int stride_h, const int stride_w,
@@ -23,7 +23,7 @@ __global__ void im2col_gpu_kernel(hipLaunchParm lp, const int n, const Dtype* da
     Dtype* data_col);
 
 template <typename Dtype, int num_axes>
-__global__ void im2col_nd_gpu_kernel(hipLaunchParm lp, const int n, const Dtype* data_im,
+__global__ void im2col_nd_gpu_kernel(const int n, const Dtype* data_im,
     const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
     const int* dilation, Dtype* data_col);
@@ -134,7 +134,7 @@ TYPED_TEST(Im2colKernelTest, Test2D) {
       int grid_dim = default_grid_dim/grid_div;
       // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-      hipLaunchKernel(im2col_gpu_kernel<TypeParam>, dim3(grid_dim), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+      hipLaunchKernelGGL(im2col_gpu_kernel<TypeParam>, dim3(grid_dim), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         num_kernels, bottom_data + this->blob_bottom_->offset(n),
         this->height_, this->width_, this->kernel_size_, this->kernel_size_,
         this->pad_, this->pad_, this->stride_, this->stride_,
@@ -143,7 +143,7 @@ TYPED_TEST(Im2colKernelTest, Test2D) {
         top_data + this->blob_top_->offset(n));
 #else 
       auto blobb = this->blob_bottom_->offset(n);
-      hipLaunchKernel(im2col_gpu_kernel<TypeParam>, dim3(grid_dim), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+      hipLaunchKernelGGL(im2col_gpu_kernel<TypeParam>, dim3(grid_dim), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         num_kernels, bottom_data + blobb,
         this->height_, this->width_, this->kernel_size_, this->kernel_size_,
         this->pad_, this->pad_, this->stride_, this->stride_,
@@ -201,7 +201,7 @@ TYPED_TEST(Im2colKernelTest, TestND) {
       TypeParam* top_data_gpu = this->blob_top_->mutable_gpu_data();
       // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX 
-      hipLaunchKernel(im2col_nd_gpu_kernel<TypeParam, 2>, dim3(grid_dim), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+      hipLaunchKernelGGL(im2col_nd_gpu_kernel<TypeParam, 2>, dim3(grid_dim), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
           num_kernels, bottom_data_gpu + this->blob_bottom_->offset(n),
           this->blob_bottom_->gpu_shape() + 1, this->blob_top_->gpu_shape() + 1,
           this->blob_kernel_shape_->gpu_data(), this->blob_pad_->gpu_data(),
@@ -216,7 +216,7 @@ TYPED_TEST(Im2colKernelTest, TestND) {
       auto stride = this->blob_stride_->gpu_data();
       auto dilation = this->blob_dilation_->gpu_data();
       auto data_col = top_data_gpu + this->blob_top_->offset(n);
-      hipLaunchKernel(im2col_nd_gpu_kernel<TypeParam, 2>, dim3(grid_dim), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+      hipLaunchKernelGGL(im2col_nd_gpu_kernel<TypeParam, 2>, dim3(grid_dim), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
 											num_kernels, data_im, im_shape, col_shape, kernel_shape, pad, stride, dilation, data_col);
 #endif
       //HIP_POST_KERNEL_CHECK;

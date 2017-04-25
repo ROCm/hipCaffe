@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void LRNFillScale(hipLaunchParm lp, const int nthreads, const Dtype* const in,
+__global__ void LRNFillScale(const int nthreads, const Dtype* const in,
     const int num, const int channels, const int height,
     const int width, const int size, const Dtype alpha_over_size,
     const Dtype k, Dtype* const scale) {
@@ -69,7 +69,7 @@ void LRNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
 // TODO: check if it would be faster to just put it into the previous kernel.
 template <typename Dtype>
-__global__ void LRNComputeOutput(hipLaunchParm lp, const int nthreads, const Dtype* const in,
+__global__ void LRNComputeOutput(const int nthreads, const Dtype* const in,
     const Dtype* const scale, const Dtype negative_beta, Dtype* const out) {
   HIP_KERNEL_LOOP(index, nthreads) {
     out[index] = in[index] * pow(scale[index], negative_beta);
@@ -87,13 +87,13 @@ void LRNLayer<Dtype>::CrossChannelForward_gpu(
   // go through all the channels.
   int n_threads = num_ * height_ * width_;
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(LRNFillScale, dim3(CAFFE_GET_BLOCKS(n_threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL(LRNFillScale, dim3(CAFFE_GET_BLOCKS(n_threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       n_threads, bottom_data, num_, channels_, height_, width_, size_,
       alpha_ / size_, k_, scale_data);
   //HIP_POST_KERNEL_CHECK;
   n_threads = bottom[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(LRNComputeOutput, dim3(CAFFE_GET_BLOCKS(n_threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL(LRNComputeOutput, dim3(CAFFE_GET_BLOCKS(n_threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       n_threads, bottom_data, scale_data, -beta_, top_data);
   //HIP_POST_KERNEL_CHECK;
 }
@@ -119,7 +119,7 @@ void LRNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 }
 
 template <typename Dtype>
-__global__ void LRNComputeDiff(hipLaunchParm lp, const int nthreads,
+__global__ void LRNComputeDiff(const int nthreads,
     const Dtype* const bottom_data, const Dtype* const top_data,
     const Dtype* const scale, const Dtype* const top_diff,
     const int num, const int channels, const int height,
@@ -183,7 +183,7 @@ void LRNLayer<Dtype>::CrossChannelBackward_gpu(
   int n_threads = num_ * height_ * width_;
   // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-  hipLaunchKernel(LRNComputeDiff, dim3(CAFFE_GET_BLOCKS(n_threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL(LRNComputeDiff, dim3(CAFFE_GET_BLOCKS(n_threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       n_threads, bottom[0]->gpu_data(), top[0]->gpu_data(),
       scale_.gpu_data(), top[0]->gpu_diff(), num_, channels_, height_, width_,
       size_, -beta_, Dtype(2. * alpha_ * beta_ / size_),
@@ -194,7 +194,7 @@ void LRNLayer<Dtype>::CrossChannelBackward_gpu(
   auto scale_gpu_data = scale_.gpu_data();
   auto top_gpu_diff = top[0]->gpu_diff();
   auto bot_mut_gpu_diff = bottom[0]->mutable_gpu_diff();
-  hipLaunchKernel( LRNComputeDiff, dim3(CAFFE_GET_BLOCKS(n_threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL( LRNComputeDiff, dim3(CAFFE_GET_BLOCKS(n_threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       n_threads, bot_gpu_data, top_gpu_data, 
       scale_gpu_data, top_gpu_diff, num_, channels_, height_, width_,
       size_, -beta_, Dtype(2. * alpha_ * beta_ / size_),

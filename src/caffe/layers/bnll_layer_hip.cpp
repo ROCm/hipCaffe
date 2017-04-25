@@ -8,7 +8,7 @@ namespace caffe {
 const float kBNLL_THRESHOLD = 50.;
 
 template <typename Dtype>
-__global__ void BNLLForward(hipLaunchParm lp, const int n, const Dtype* in, Dtype* out) {
+__global__ void BNLLForward(const int n, const Dtype* in, Dtype* out) {
   HIP_KERNEL_LOOP(index, n) {
     out[index] = in[index] > 0 ?
         in[index] + log(1. + exp(-in[index])) :
@@ -23,13 +23,13 @@ void BNLLLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_data = top[0]->mutable_gpu_data();
   const int count = bottom[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(BNLLForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL(BNLLForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       count, bottom_data, top_data);
   //HIP_POST_KERNEL_CHECK;
 }
 
 template <typename Dtype>
-__global__ void BNLLBackward(hipLaunchParm lp, const int n, const Dtype* in_diff,
+__global__ void BNLLBackward(const int n, const Dtype* in_diff,
     const Dtype* in_data, Dtype* out_diff) {
   HIP_KERNEL_LOOP(index, n) {
     Dtype expval = exp(min(in_data[index], Dtype(kBNLL_THRESHOLD)));
@@ -47,7 +47,7 @@ void BNLLLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
     const int count = bottom[0]->count();
     // NOLINT_NEXT_LINE(whitespace/operators)
-    hipLaunchKernel(BNLLBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(BNLLBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, bottom_data, bottom_diff);
     //HIP_POST_KERNEL_CHECK;
   }

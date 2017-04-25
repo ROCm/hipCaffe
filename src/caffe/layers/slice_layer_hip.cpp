@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void Slice(hipLaunchParm lp, const int nthreads, const Dtype* in_data,
+__global__ void Slice(const int nthreads, const Dtype* in_data,
     const bool forward, const int num_slices, const int slice_size,
     const int bottom_slice_axis, const int top_slice_axis,
     const int offset_slice_axis, Dtype* out_data) {
@@ -37,7 +37,7 @@ void SliceLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     const int top_slice_axis = top[i]->shape(slice_axis_);
     const int top_slice_size = top_slice_axis * slice_size_;
     const int nthreads = top_slice_size * num_slices_;
-    hipLaunchKernel(Slice<Dtype>,   // NOLINT_NEXT_LINE(whitespace/operators)
+    hipLaunchKernelGGL(Slice<Dtype>,   // NOLINT_NEXT_LINE(whitespace/operators)
         dim3(CAFFE_GET_BLOCKS(nthreads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         nthreads, bottom_data, kForward, num_slices_, slice_size_,
         bottom_slice_axis, top_slice_axis, offset_slice_axis, top_data);
@@ -58,7 +58,7 @@ void SliceLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const int top_slice_axis = top[i]->shape(slice_axis_);
     const int top_slice_size = top_slice_axis * slice_size_;
     const int nthreads = top_slice_size * num_slices_;
-    hipLaunchKernel(Slice<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
+    hipLaunchKernelGGL(Slice<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
         dim3(CAFFE_GET_BLOCKS(nthreads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         nthreads, top_diff, kForward, num_slices_, slice_size_,
         bottom_slice_axis, top_slice_axis, offset_slice_axis, bottom_diff);

@@ -4,7 +4,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void NesterovUpdate(hipLaunchParm lp, int N, Dtype* g, Dtype* h,
+__global__ void NesterovUpdate(int N, Dtype* g, Dtype* h,
     Dtype momentum, Dtype local_rate) {
   HIP_KERNEL_LOOP(i, N) {
     float hi = h[i];
@@ -15,7 +15,7 @@ __global__ void NesterovUpdate(hipLaunchParm lp, int N, Dtype* g, Dtype* h,
 template <typename Dtype>
 void nesterov_update_gpu(int N, Dtype* g, Dtype* h, Dtype momentum,
     Dtype local_rate) {
-  hipLaunchKernel(NesterovUpdate<Dtype>, // NOLINT_NEXT_LINE(whitespace/operators)
+  hipLaunchKernelGGL(NesterovUpdate<Dtype>, // NOLINT_NEXT_LINE(whitespace/operators)
       dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, g, h, momentum, local_rate);
 }

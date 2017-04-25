@@ -4,7 +4,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void AdaGradUpdate(hipLaunchParm lp, int N, Dtype* g, Dtype* h, Dtype delta,
+__global__ void AdaGradUpdate(int N, Dtype* g, Dtype* h, Dtype delta,
     Dtype local_rate) {
   HIP_KERNEL_LOOP(i, N) {
     float gi = g[i];
@@ -15,7 +15,7 @@ __global__ void AdaGradUpdate(hipLaunchParm lp, int N, Dtype* g, Dtype* h, Dtype
 template <typename Dtype>
 void adagrad_update_gpu(int N, Dtype* g, Dtype* h, Dtype delta,
     Dtype local_rate) {
-  hipLaunchKernel(AdaGradUpdate<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
+  hipLaunchKernelGGL(AdaGradUpdate<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
       dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, g, h, delta, local_rate);
 }

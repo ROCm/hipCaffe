@@ -8,7 +8,7 @@
 namespace caffe {
 
 template<typename Dtype>
-__global__ void BRForward(hipLaunchParm lp, const int count, const int inner_dim, const Dtype* in,
+__global__ void BRForward(const int count, const int inner_dim, const Dtype* in,
                           const Dtype* permut, Dtype* out) {
   HIP_KERNEL_LOOP(index, count) {
     int n = index / (inner_dim);
@@ -28,7 +28,7 @@ void BatchReindexLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   int threads = top[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-  hipLaunchKernel(BRForward, dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, top[0]->count(), bottom[0]->count() / bottom[0]->shape(0), bottom[0]->gpu_data(), bottom[1]->gpu_data(), top[0]->mutable_gpu_data());
+  hipLaunchKernelGGL(BRForward, dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, top[0]->count(), bottom[0]->count() / bottom[0]->shape(0), bottom[0]->gpu_data(), bottom[1]->gpu_data(), top[0]->mutable_gpu_data());
 #else
   auto top0_count = top[0]->count();
   auto bot0_count = bottom[0]->count(); 
@@ -36,13 +36,13 @@ void BatchReindexLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   auto bot0_gpu_data = bottom[0]->gpu_data();
   auto bot1_gpu_data = bottom[1]->gpu_data(); 
   auto top0_mut_gpu_data = top[0]->mutable_gpu_data();
-  hipLaunchKernel(BRForward, dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, top0_count, bot0_count / bot0_shape, bot0_gpu_data, bot1_gpu_data, top0_mut_gpu_data);
+  hipLaunchKernelGGL(BRForward, dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, top0_count, bot0_count / bot0_shape, bot0_gpu_data, bot1_gpu_data, top0_mut_gpu_data);
 #endif
   //HIP_POST_KERNEL_CHECK;
 }
 
 template<typename Dtype>
-__global__ void BRBackward(hipLaunchParm lp, const int count, const int inner_dim,
+__global__ void BRBackward(const int count, const int inner_dim,
                            const Dtype* in, const Dtype* top_indexes,
                            const Dtype* begins, const Dtype* counts,
                            Dtype* out) {
@@ -103,7 +103,7 @@ void BatchReindexLayer<Dtype>::Backward_gpu(
   int threads = bottom[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-  hipLaunchKernel(BRBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
+  hipLaunchKernelGGL(BRBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       bottom[0]->count(), bottom[0]->count() / bottom[0]->shape(0),
       top[0]->gpu_diff(), top_indexes.gpu_data(), begins.gpu_data(),
       counts.gpu_data(), bottom[0]->mutable_gpu_diff());
@@ -115,7 +115,7 @@ void BatchReindexLayer<Dtype>::Backward_gpu(
       auto begins_gpu_data= begins.gpu_data();
       auto counts_gpu_data = counts.gpu_data();
       auto bot0_mut_gpu_diff = bottom[0]->mutable_gpu_diff();
-  hipLaunchKernel(BRBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
+  hipLaunchKernelGGL(BRBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       bot0_count, bot0_count / bot0_shape,
       top0_gpu_diff, top_idx_gpu_data, begins_gpu_data,
       counts_gpu_data, bot0_mut_gpu_diff);

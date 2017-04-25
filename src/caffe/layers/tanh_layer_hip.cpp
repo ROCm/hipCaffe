@@ -8,7 +8,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void TanHForward(hipLaunchParm lp, const int n, const Dtype* in, Dtype* out) {
+__global__ void TanHForward(const int n, const Dtype* in, Dtype* out) {
   HIP_KERNEL_LOOP(index, n) {
     out[index] = tanh(in[index]);
   }
@@ -21,13 +21,13 @@ void TanHLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_data = top[0]->mutable_gpu_data();
   const int count = bottom[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(TanHForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
+  hipLaunchKernelGGL(TanHForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       count, bottom_data, top_data);
   //HIP_POST_KERNEL_CHECK;
 }
 
 template <typename Dtype>
-__global__ void TanHBackward(hipLaunchParm lp, const int n, const Dtype* in_diff,
+__global__ void TanHBackward(const int n, const Dtype* in_diff,
     const Dtype* out_data, Dtype* out_diff) {
   HIP_KERNEL_LOOP(index, n) {
     Dtype tanhx = out_data[index];
@@ -45,7 +45,7 @@ void TanHLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
     const int count = bottom[0]->count();
     // NOLINT_NEXT_LINE(whitespace/operators)
-   hipLaunchKernel(TanHBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
+   hipLaunchKernelGGL(TanHBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
         count, top_diff, top_data, bottom_diff);
     //HIP_POST_KERNEL_CHECK;
   }

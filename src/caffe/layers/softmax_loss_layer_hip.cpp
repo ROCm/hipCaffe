@@ -8,7 +8,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void SoftmaxLossForwardGPU(hipLaunchParm lp, const int nthreads,
+__global__ void SoftmaxLossForwardGPU(const int nthreads,
           const Dtype* prob_data, const Dtype* label, Dtype* loss,
           const int num, const int dim, const int spatial_dim,
           const bool has_ignore_label_, const int ignore_label_,
@@ -44,7 +44,7 @@ void SoftmaxWithLossLayer<Dtype>::Forward_gpu(
   // to avoid having to allocate additional GPU memory.
   Dtype* counts = prob_.mutable_gpu_diff();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(SoftmaxLossForwardGPU<Dtype>, dim3(CAFFE_GET_BLOCKS(nthreads)),
+  hipLaunchKernelGGL(SoftmaxLossForwardGPU<Dtype>, dim3(CAFFE_GET_BLOCKS(nthreads)),
       dim3(CAFFE_HIP_NUM_THREADS), 0, 0, nthreads, prob_data, label, loss_data,
       outer_num_, dim, inner_num_, has_ignore_label_, ignore_label_, counts);
   Dtype loss;
@@ -64,7 +64,7 @@ void SoftmaxWithLossLayer<Dtype>::Forward_gpu(
 }
 
 template <typename Dtype>
-__global__ void SoftmaxLossBackwardGPU(hipLaunchParm lp, const int nthreads, const Dtype* top,
+__global__ void SoftmaxLossBackwardGPU(const int nthreads, const Dtype* top,
           const Dtype* label, Dtype* bottom_diff, const int num, const int dim,
           const int spatial_dim, const bool has_ignore_label_,
           const int ignore_label_, Dtype* counts) {
@@ -106,7 +106,7 @@ void SoftmaxWithLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     // we use to to avoid allocating new GPU memory.
     Dtype* counts = prob_.mutable_gpu_diff();
     // NOLINT_NEXT_LINE(whitespace/operators)
-    hipLaunchKernel(SoftmaxLossBackwardGPU<Dtype>, dim3(CAFFE_GET_BLOCKS(nthreads)),
+    hipLaunchKernelGGL(SoftmaxLossBackwardGPU<Dtype>, dim3(CAFFE_GET_BLOCKS(nthreads)),
         dim3(CAFFE_HIP_NUM_THREADS), 0, 0, nthreads, top_data, label, bottom_diff,
         outer_num_, dim, inner_num_, has_ignore_label_, ignore_label_, counts);
 

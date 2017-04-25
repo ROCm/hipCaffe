@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void ReLUForward(hipLaunchParm lp, const int n, const Dtype* in, Dtype* out,
+__global__ void ReLUForward(const int n, const Dtype* in, Dtype* out,
     Dtype negative_slope) {
   HIP_KERNEL_LOOP(index, n) {
     out[index] = in[index] > 0 ? in[index] : in[index] * negative_slope;
@@ -21,7 +21,7 @@ void ReLULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const int count = bottom[0]->count();
   Dtype negative_slope = this->layer_param_.relu_param().negative_slope();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(ReLUForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL(ReLUForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       count, bottom_data, top_data, negative_slope);
   //HIP_POST_KERNEL_CHECK;
   // << " count: " << count << " bottom_data: "
@@ -32,7 +32,7 @@ void ReLULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-__global__ void ReLUBackward(hipLaunchParm lp, const int n, const Dtype* in_diff,
+__global__ void ReLUBackward(const int n, const Dtype* in_diff,
     const Dtype* in_data, Dtype* out_diff, Dtype negative_slope) {
   HIP_KERNEL_LOOP(index, n) {
     out_diff[index] = in_diff[index] * ((in_data[index] > 0)
@@ -51,7 +51,7 @@ void ReLULayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const int count = bottom[0]->count();
     Dtype negative_slope = this->layer_param_.relu_param().negative_slope();
     // NOLINT_NEXT_LINE(whitespace/operators)
-    hipLaunchKernel(ReLUBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(ReLUBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, bottom_data, bottom_diff, negative_slope);
     //HIP_POST_KERNEL_CHECK;
   }

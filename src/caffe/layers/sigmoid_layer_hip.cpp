@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void SigmoidForward(hipLaunchParm lp, const int n, const Dtype* in, Dtype* out) {
+__global__ void SigmoidForward(const int n, const Dtype* in, Dtype* out) {
   HIP_KERNEL_LOOP(index, n) {
     out[index] = 1. / (1. + exp(-in[index]));
   }
@@ -19,7 +19,7 @@ void SigmoidLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_data = top[0]->mutable_gpu_data();
   const int count = bottom[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(SigmoidForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL(SigmoidForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       count, bottom_data, top_data);
   //HIP_POST_KERNEL_CHECK;
   // << " count: " << count << " bottom_data: "
@@ -30,7 +30,7 @@ void SigmoidLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-__global__ void SigmoidBackward(hipLaunchParm lp, const int n, const Dtype* in_diff,
+__global__ void SigmoidBackward(const int n, const Dtype* in_diff,
     const Dtype* out_data, Dtype* out_diff) {
   HIP_KERNEL_LOOP(index, n) {
     const Dtype sigmoid_x = out_data[index];
@@ -48,7 +48,7 @@ void SigmoidLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
     const int count = bottom[0]->count();
     // NOLINT_NEXT_LINE(whitespace/operators)
-    hipLaunchKernel(SigmoidBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(SigmoidBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, top_data, bottom_diff);
     //HIP_POST_KERNEL_CHECK;
   }

@@ -7,7 +7,7 @@ namespace caffe {
 // Copy (one line per thread) from one array to another, with arbitrary
 // strides in the last two dimensions.
 template <typename Dtype>
-__global__ void copy_kernel(hipLaunchParm lp, const int n, const int height, const int width,
+__global__ void copy_kernel(const int n, const int height, const int width,
     const int src_outer_stride, const int src_inner_stride,
     const int dest_outer_stride, const int dest_inner_stride,
     const Dtype* src, Dtype* dest) {
@@ -66,7 +66,7 @@ void CropLayer<Dtype>::crop_copy_gpu(const vector<Blob<Dtype>*>& bottom,
       Dtype* top_data = top[0]->mutable_gpu_data() +
           top[0]->offset(indices);
       // NOLINT_NEXT_LINE(whitespace/operators)
-      hipLaunchKernel(copy_kernel, dim3(CAFFE_GET_BLOCKS(lines)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+      hipLaunchKernelGGL(copy_kernel, dim3(CAFFE_GET_BLOCKS(lines)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
           lines, height, width,
           src_outer_stride, src_inner_stride,
           dest_outer_stride, dest_inner_stride,
@@ -78,7 +78,7 @@ void CropLayer<Dtype>::crop_copy_gpu(const vector<Blob<Dtype>*>& bottom,
       Dtype* bottom_diff = bottom[0]->mutable_gpu_diff() +
           bottom[0]->offset(ind_off);
       // NOLINT_NEXT_LINE(whitespace/operators)
-      hipLaunchKernel(copy_kernel, dim3(CAFFE_GET_BLOCKS(lines)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+      hipLaunchKernelGGL(copy_kernel, dim3(CAFFE_GET_BLOCKS(lines)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
           lines, height, width,
           dest_outer_stride, dest_inner_stride,
           src_outer_stride, src_inner_stride,
