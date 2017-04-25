@@ -8,7 +8,7 @@ namespace caffe {
 const float kBNLL_THRESHOLD = 50.;
 
 template <typename Dtype>
-__global__ void BNLLForward(hipLaunchParm lp, const int n, const Dtype* in, Dtype* out) {
+__global__ void BNLLForward(const int n, const Dtype* in, Dtype* out) {
   HIP_KERNEL_LOOP(index, n) {
     out[index] = in[index] > 0 ?
         in[index] + log(1. + exp(-in[index])) :
@@ -29,7 +29,7 @@ void BNLLLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-__global__ void BNLLBackward(hipLaunchParm lp, const int n, const Dtype* in_diff,
+__global__ void BNLLBackward(const int n, const Dtype* in_diff,
     const Dtype* in_data, Dtype* out_diff) {
   HIP_KERNEL_LOOP(index, n) {
     Dtype expval = exp(min(in_data[index], Dtype(kBNLL_THRESHOLD)));

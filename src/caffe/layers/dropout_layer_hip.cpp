@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void DropoutForward(hipLaunchParm lp, const int n, const Dtype* in,
+__global__ void DropoutForward(const int n, const Dtype* in,
     const unsigned int* mask, const unsigned int threshold, const float scale,
     Dtype* out) {
   HIP_KERNEL_LOOP(index, n) {
@@ -35,7 +35,7 @@ void DropoutLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-__global__ void DropoutBackward(hipLaunchParm lp, const int n, const Dtype* in_diff,
+__global__ void DropoutBackward(const int n, const Dtype* in_diff,
     const unsigned int* mask, const unsigned int threshold, const float scale,
     Dtype* out_diff) {
   HIP_KERNEL_LOOP(index, n) {

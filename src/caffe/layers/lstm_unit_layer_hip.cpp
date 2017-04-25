@@ -18,7 +18,7 @@ __device__ Dtype tanh(const Dtype x) {
 }
 
 template <typename Dtype>
-__global__ void LSTMActsForward(hipLaunchParm lp, const int nthreads, const int dim,
+__global__ void LSTMActsForward(const int nthreads, const int dim,
                                 const Dtype* X, Dtype* X_acts) {
   HIP_KERNEL_LOOP(index, nthreads) {
     const int x_dim = 4 * dim;
@@ -32,7 +32,7 @@ __global__ void LSTMActsForward(hipLaunchParm lp, const int nthreads, const int 
 }
 
 template <typename Dtype>
-__global__ void LSTMUnitForward(hipLaunchParm lp, const int nthreads, const int dim,
+__global__ void LSTMUnitForward(const int nthreads, const int dim,
     const Dtype* C_prev, const Dtype* X, const Dtype* cont,
     Dtype* C, Dtype* H) {
   HIP_KERNEL_LOOP(index, nthreads) {
@@ -73,7 +73,7 @@ void LSTMUnitLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-__global__ void LSTMUnitBackward(hipLaunchParm lp, const int nthreads, const int dim,
+__global__ void LSTMUnitBackward(const int nthreads, const int dim,
     const Dtype* C_prev, const Dtype* X, const Dtype* C, const Dtype* H,
     const Dtype* cont, const Dtype* C_diff, const Dtype* H_diff,
     Dtype* C_prev_diff, Dtype* X_diff) {
@@ -106,7 +106,7 @@ __global__ void LSTMUnitBackward(hipLaunchParm lp, const int nthreads, const int
 }
 
 template <typename Dtype>
-__global__ void LSTMActsBackward(hipLaunchParm lp, const int nthreads, const int dim,
+__global__ void LSTMActsBackward(const int nthreads, const int dim,
     const Dtype* X_acts, const Dtype* X_acts_diff, Dtype* X_diff) {
   HIP_KERNEL_LOOP(index, nthreads) {
     const int x_dim = 4 * dim;

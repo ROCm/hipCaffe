@@ -4,7 +4,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void AdaGradUpdate(hipLaunchParm lp, int N, Dtype* g, Dtype* h, Dtype delta,
+__global__ void AdaGradUpdate(int N, Dtype* g, Dtype* h, Dtype delta,
     Dtype local_rate) {
   HIP_KERNEL_LOOP(i, N) {
     float gi = g[i];

@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void LRNFillScale(hipLaunchParm lp, const int nthreads, const Dtype* const in,
+__global__ void LRNFillScale(const int nthreads, const Dtype* const in,
     const int num, const int channels, const int height,
     const int width, const int size, const Dtype alpha_over_size,
     const Dtype k, Dtype* const scale) {
@@ -69,7 +69,7 @@ void LRNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
 // TODO: check if it would be faster to just put it into the previous kernel.
 template <typename Dtype>
-__global__ void LRNComputeOutput(hipLaunchParm lp, const int nthreads, const Dtype* const in,
+__global__ void LRNComputeOutput(const int nthreads, const Dtype* const in,
     const Dtype* const scale, const Dtype negative_beta, Dtype* const out) {
   HIP_KERNEL_LOOP(index, nthreads) {
     out[index] = in[index] * pow(scale[index], negative_beta);
@@ -119,7 +119,7 @@ void LRNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 }
 
 template <typename Dtype>
-__global__ void LRNComputeDiff(hipLaunchParm lp, const int nthreads,
+__global__ void LRNComputeDiff(const int nthreads,
     const Dtype* const bottom_data, const Dtype* const top_data,
     const Dtype* const scale, const Dtype* const top_diff,
     const int num, const int channels, const int height,

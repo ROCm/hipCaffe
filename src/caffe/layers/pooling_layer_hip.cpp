@@ -8,7 +8,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void MaxPoolForward(hipLaunchParm lp, const int nthreads,
+__global__ void MaxPoolForward(const int nthreads,
     const Dtype* const bottom_data, const int num, const int channels,
     const int height, const int width, const int pooled_height,
     const int pooled_width, const int kernel_h, const int kernel_w,
@@ -47,7 +47,7 @@ __global__ void MaxPoolForward(hipLaunchParm lp, const int nthreads,
 }
 
 template <typename Dtype>
-__global__ void AvePoolForward(hipLaunchParm lp, const int nthreads,
+__global__ void AvePoolForward(const int nthreads,
     const Dtype* const bottom_data, const int num, const int channels,
     const int height, const int width, const int pooled_height,
     const int pooled_width, const int kernel_h, const int kernel_w,
@@ -80,7 +80,7 @@ __global__ void AvePoolForward(hipLaunchParm lp, const int nthreads,
 }
 
 template <typename Dtype>
-__global__ void StoPoolForwardTrain(hipLaunchParm lp, const int nthreads,
+__global__ void StoPoolForwardTrain(const int nthreads,
     const Dtype* const bottom_data,
     const int num, const int channels, const int height,
     const int width, const int pooled_height, const int pooled_width,
@@ -122,7 +122,7 @@ __global__ void StoPoolForwardTrain(hipLaunchParm lp, const int nthreads,
 
 
 template <typename Dtype>
-__global__ void StoPoolForwardTest(hipLaunchParm lp, const int nthreads,
+__global__ void StoPoolForwardTest(const int nthreads,
     const Dtype* const bottom_data,
     const int num, const int channels, const int height,
     const int width, const int pooled_height, const int pooled_width,
@@ -254,7 +254,7 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
 
 template <typename Dtype>
-__global__ void MaxPoolBackward(hipLaunchParm lp, const int nthreads, const Dtype* const top_diff,
+__global__ void MaxPoolBackward(const int nthreads, const Dtype* const top_diff,
     const int* const mask, const Dtype* const top_mask, const int num,
     const int channels, const int height, const int width,
     const int pooled_height, const int pooled_width, const int kernel_h,
@@ -300,7 +300,7 @@ __global__ void MaxPoolBackward(hipLaunchParm lp, const int nthreads, const Dtyp
 }
 
 template <typename Dtype>
-__global__ void AvePoolBackward(hipLaunchParm lp, const int nthreads, const Dtype* const top_diff,
+__global__ void AvePoolBackward(const int nthreads, const Dtype* const top_diff,
     const int num, const int channels, const int height,
     const int width, const int pooled_height, const int pooled_width,
     const int kernel_h, const int kernel_w, const int stride_h,
@@ -337,7 +337,7 @@ __global__ void AvePoolBackward(hipLaunchParm lp, const int nthreads, const Dtyp
 
 
 template <typename Dtype>
-__global__ void StoPoolBackward(hipLaunchParm lp, const int nthreads,
+__global__ void StoPoolBackward(const int nthreads,
     const Dtype* const rand_idx, const Dtype* const top_diff,
     const int num, const int channels, const int height,
     const int width, const int pooled_height, const int pooled_width,

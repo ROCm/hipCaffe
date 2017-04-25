@@ -250,7 +250,7 @@ void caffe_gpu_scale(const int n, const Dtype alpha, const Dtype *x, Dtype* y);
 
 #define DEFINE_AND_INSTANTIATE_GPU_UNARY_FUNC(name, operation) \
 template<typename Dtype> \
-__global__ void name##_kernel(hipLaunchParm lp, const int n, const Dtype* x, Dtype* y) { \
+__global__ void name##_kernel(const int n, const Dtype* x, Dtype* y) { \
   HIP_KERNEL_LOOP(index, n) { \
     operation; \
   } \

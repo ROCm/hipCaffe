@@ -7,7 +7,7 @@ namespace caffe {
 // Copy (one line per thread) from one array to another, with arbitrary
 // strides in the last two dimensions.
 template <typename Dtype>
-__global__ void copy_kernel(hipLaunchParm lp, const int n, const int height, const int width,
+__global__ void copy_kernel(const int n, const int height, const int width,
     const int src_outer_stride, const int src_inner_stride,
     const int dest_outer_stride, const int dest_inner_stride,
     const Dtype* src, Dtype* dest) {

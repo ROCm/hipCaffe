@@ -8,7 +8,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void TanHForward(hipLaunchParm lp, const int n, const Dtype* in, Dtype* out) {
+__global__ void TanHForward(const int n, const Dtype* in, Dtype* out) {
   HIP_KERNEL_LOOP(index, n) {
     out[index] = tanh(in[index]);
   }
@@ -27,7 +27,7 @@ void TanHLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-__global__ void TanHBackward(hipLaunchParm lp, const int n, const Dtype* in_diff,
+__global__ void TanHBackward(const int n, const Dtype* in_diff,
     const Dtype* out_data, Dtype* out_diff) {
   HIP_KERNEL_LOOP(index, n) {
     Dtype tanhx = out_data[index];

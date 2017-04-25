@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void Slice(hipLaunchParm lp, const int nthreads, const Dtype* in_data,
+__global__ void Slice(const int nthreads, const Dtype* in_data,
     const bool forward, const int num_slices, const int slice_size,
     const int bottom_slice_axis, const int top_slice_axis,
     const int offset_slice_axis, Dtype* out_data) {

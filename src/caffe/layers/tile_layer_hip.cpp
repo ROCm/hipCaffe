@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void Tile(hipLaunchParm lp, const int nthreads, const Dtype* bottom_data,
+__global__ void Tile(const int nthreads, const Dtype* bottom_data,
     const int tile_size, const int num_tiles, const int bottom_tile_axis,
     Dtype* top_data) {
   HIP_KERNEL_LOOP(index, nthreads) {
@@ -31,7 +31,7 @@ void TileLayer<Dtype>::Forward_gpu(
 }
 
 template <typename Dtype>
-__global__ void TileBackward(hipLaunchParm lp, const int nthreads, const Dtype* top_diff,
+__global__ void TileBackward(const int nthreads, const Dtype* top_diff,
     const int tile_size, const int num_tiles, const int bottom_tile_axis,
     Dtype* bottom_diff) {
   HIP_KERNEL_LOOP(index, nthreads) {

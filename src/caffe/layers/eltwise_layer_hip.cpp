@@ -7,7 +7,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void MaxForward(hipLaunchParm lp, const int nthreads, const Dtype* bottom_data_a,
+__global__ void MaxForward(const int nthreads, const Dtype* bottom_data_a,
     const Dtype* bottom_data_b, const int blob_idx, Dtype* top_data,
     int* mask) {
   HIP_KERNEL_LOOP(index, nthreads) {
@@ -83,7 +83,7 @@ void EltwiseLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-__global__ void MaxBackward(hipLaunchParm lp, const int nthreads, const Dtype* top_diff,
+__global__ void MaxBackward(const int nthreads, const Dtype* top_diff,
     const int blob_idx, const int* mask, Dtype* bottom_diff) {
   HIP_KERNEL_LOOP(index, nthreads) {
     Dtype gradient = 0;

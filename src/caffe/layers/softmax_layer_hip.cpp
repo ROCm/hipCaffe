@@ -8,7 +8,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void kernel_channel_max(hipLaunchParm lp, const int num, const int channels,
+__global__ void kernel_channel_max(const int num, const int channels,
     const int spatial_dim, const Dtype* data, Dtype* out) {
   HIP_KERNEL_LOOP(index, num * spatial_dim) {
     int n = index / spatial_dim;
@@ -22,7 +22,7 @@ __global__ void kernel_channel_max(hipLaunchParm lp, const int num, const int ch
 }
 
 template <typename Dtype>
-__global__ void kernel_channel_subtract(hipLaunchParm lp, const int count,
+__global__ void kernel_channel_subtract(const int count,
     const int num, const int channels,
     const int spatial_dim, const Dtype* channel_max, Dtype* data) {
   HIP_KERNEL_LOOP(index, count) {
@@ -33,14 +33,14 @@ __global__ void kernel_channel_subtract(hipLaunchParm lp, const int count,
 }
 
 template <typename Dtype>
-__global__ void kernel_exp(hipLaunchParm lp, const int count, const Dtype* data, Dtype* out) {
+__global__ void kernel_exp(const int count, const Dtype* data, Dtype* out) {
   HIP_KERNEL_LOOP(index, count) {
     out[index] = exp(data[index]);
   }
 }
 
 template <typename Dtype>
-__global__ void kernel_channel_sum(hipLaunchParm lp, const int num, const int channels,
+__global__ void kernel_channel_sum(const int num, const int channels,
     const int spatial_dim, const Dtype* data, Dtype* channel_sum) {
   HIP_KERNEL_LOOP(index, num * spatial_dim) {
     int n = index / spatial_dim;
@@ -54,7 +54,7 @@ __global__ void kernel_channel_sum(hipLaunchParm lp, const int num, const int ch
 }
 
 template <typename Dtype>
-__global__ void kernel_channel_div(hipLaunchParm lp, const int count,
+__global__ void kernel_channel_div(const int count,
     const int num, const int channels,
     const int spatial_dim, const Dtype* channel_sum, Dtype* data) {
   HIP_KERNEL_LOOP(index, count) {
@@ -65,7 +65,7 @@ __global__ void kernel_channel_div(hipLaunchParm lp, const int count,
 }
 
 template <typename Dtype>
-__global__ void kernel_channel_dot(hipLaunchParm lp, const int num, const int channels,
+__global__ void kernel_channel_dot(const int num, const int channels,
     const int spatial_dim, const Dtype* data_1, const Dtype* data_2,
     Dtype* channel_dot) {
   HIP_KERNEL_LOOP(index, num * spatial_dim) {

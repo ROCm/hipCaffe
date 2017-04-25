@@ -7,7 +7,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void ScaleForward(hipLaunchParm lp, const int n, const Dtype* in,
+__global__ void ScaleForward(const int n, const Dtype* in,
     const Dtype* scale, const int scale_dim, const int inner_dim,
     Dtype* out) {
   HIP_KERNEL_LOOP(index, n) {
@@ -17,7 +17,7 @@ __global__ void ScaleForward(hipLaunchParm lp, const int n, const Dtype* in,
 }
 
 template <typename Dtype>
-__global__ void ScaleBiasForward(hipLaunchParm lp, const int n, const Dtype* in,
+__global__ void ScaleBiasForward(const int n, const Dtype* in,
     const Dtype* scale, const Dtype* bias,
     const int scale_dim, const int inner_dim, Dtype* out) {
   HIP_KERNEL_LOOP(index, n) {

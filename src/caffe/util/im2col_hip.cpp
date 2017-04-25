@@ -7,7 +7,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void im2col_gpu_kernel(hipLaunchParm lp, const int n, const Dtype* data_im,
+__global__ void im2col_gpu_kernel(const int n, const Dtype* data_im,
     const int height, const int width, const int kernel_h, const int kernel_w,
     const int pad_h, const int pad_w,
     const int stride_h, const int stride_w,
@@ -71,7 +71,7 @@ template void im2col_gpu<double>(const double* data_im, const int channels,
     const int dilation_h, const int dilation_w, double* data_col);
 
 template <typename Dtype, int num_axes>
-__global__ void im2col_nd_gpu_kernel(hipLaunchParm lp, const int n, const Dtype* data_im,
+__global__ void im2col_nd_gpu_kernel(const int n, const Dtype* data_im,
     const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
     const int* dilation, Dtype* data_col) {
@@ -242,7 +242,7 @@ template void im2col_nd_gpu<double>(const double* data_im,
     const int* dilation, double* data_col);
 
 template <typename Dtype>
-__global__ void col2im_gpu_kernel(hipLaunchParm lp, const int n, const Dtype* data_col,
+__global__ void col2im_gpu_kernel(const int n, const Dtype* data_col,
     const int height, const int width, const int channels,
     const int kernel_h, const int kernel_w,
     const int pad_h, const int pad_w,
@@ -315,7 +315,7 @@ template void col2im_gpu<double>(const double* data_col, const int channels,
     double* data_im);
 
 template <typename Dtype, int num_axes>
-__global__ void col2im_nd_gpu_kernel(hipLaunchParm lp, const int n, const Dtype* data_col,
+__global__ void col2im_nd_gpu_kernel(const int n, const Dtype* data_col,
     const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
     const int* dilation, Dtype* data_im) {

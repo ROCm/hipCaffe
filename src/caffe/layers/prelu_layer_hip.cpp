@@ -8,7 +8,7 @@ namespace caffe {
 
 // HIP kernele for forward
 template <typename Dtype>
-__global__ void PReLUForward(hipLaunchParm lp, const int n, const int channels, const int dim,
+__global__ void PReLUForward(const int n, const int channels, const int dim,
     const Dtype* in, Dtype* out, const Dtype* slope_data,
     const int div_factor) {
   HIP_KERNEL_LOOP(index, n) {
@@ -19,7 +19,7 @@ __global__ void PReLUForward(hipLaunchParm lp, const int n, const int channels, 
 
 // HIP kernel for bottom backward
 template <typename Dtype>
-__global__ void PReLUBackward(hipLaunchParm lp, const int n, const int channels, const int dim,
+__global__ void PReLUBackward(const int n, const int channels, const int dim,
     const Dtype* in_diff, const Dtype* in_data, Dtype* out_diff,
     const Dtype* slope_data, const int div_factor) {
   HIP_KERNEL_LOOP(index, n) {
@@ -31,7 +31,7 @@ __global__ void PReLUBackward(hipLaunchParm lp, const int n, const int channels,
 
 // HIP kernel for element-wise parameter backward
 template <typename Dtype>
-__global__ void PReLUParamBackward(hipLaunchParm lp, const int n,
+__global__ void PReLUParamBackward(const int n,
     const int rows, const int rowPitch, const Dtype* in_diff,
     const Dtype* in_data, Dtype* out_diff) {
   HIP_KERNEL_LOOP(index, n) {

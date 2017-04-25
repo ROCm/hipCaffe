@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void Concat(hipLaunchParm lp, const int nthreads, const Dtype* in_data,
+__global__ void Concat(const int nthreads, const Dtype* in_data,
     const bool forward, const int num_concats, const int concat_size,
     const int top_concat_axis, const int bottom_concat_axis,
     const int offset_concat_axis, Dtype* out_data) {

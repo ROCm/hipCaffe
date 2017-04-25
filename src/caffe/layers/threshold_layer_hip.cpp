@@ -5,7 +5,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void ThresholdForward(hipLaunchParm lp, const int n, const Dtype threshold,
+__global__ void ThresholdForward(const int n, const Dtype threshold,
     const Dtype* in, Dtype* out) {
   HIP_KERNEL_LOOP(index, n) {
     out[index] = in[index] > threshold ? 1 : 0;

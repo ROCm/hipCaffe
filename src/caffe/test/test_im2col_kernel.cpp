@@ -14,7 +14,7 @@ namespace caffe {
 
 // Forward declare kernel functions
 template <typename Dtype>
-__global__ void im2col_gpu_kernel(hipLaunchParm lp, const int n, const Dtype* data_im,
+__global__ void im2col_gpu_kernel(const int n, const Dtype* data_im,
     const int height, const int width, const int kernel_h, const int kernel_w,
     const int pad_h, const int pad_w,
     const int stride_h, const int stride_w,
@@ -23,7 +23,7 @@ __global__ void im2col_gpu_kernel(hipLaunchParm lp, const int n, const Dtype* da
     Dtype* data_col);
 
 template <typename Dtype, int num_axes>
-__global__ void im2col_nd_gpu_kernel(hipLaunchParm lp, const int n, const Dtype* data_im,
+__global__ void im2col_nd_gpu_kernel(const int n, const Dtype* data_im,
     const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
     const int* dilation, Dtype* data_col);

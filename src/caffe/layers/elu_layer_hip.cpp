@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void ELUForward(hipLaunchParm lp, const int n, const Dtype* in, Dtype* out,
+__global__ void ELUForward(const int n, const Dtype* in, Dtype* out,
     Dtype alpha) {
   HIP_KERNEL_LOOP(index, n) {
     out[index] = in[index] > 0 ? in[index] :
@@ -28,7 +28,7 @@ void ELULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-__global__ void ELUBackward(hipLaunchParm lp, const int n, const Dtype* in_diff,
+__global__ void ELUBackward(const int n, const Dtype* in_diff,
     const Dtype* out_data, const Dtype* in_data,
     Dtype* out_diff, Dtype alpha) {
   HIP_KERNEL_LOOP(index, n) {

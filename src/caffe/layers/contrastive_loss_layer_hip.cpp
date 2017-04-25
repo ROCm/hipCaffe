@@ -51,7 +51,7 @@ void ContrastiveLossLayer<Dtype>::Forward_gpu(
 }
 
 template <typename Dtype>
-__global__ void CLLBackward(hipLaunchParm lp, const int count, const int channels,
+__global__ void CLLBackward(const int count, const int channels,
     const Dtype margin, const bool legacy_version, const Dtype alpha,
     const Dtype* y, const Dtype* diff, const Dtype* dist_sq,
     Dtype *bottom_diff) {

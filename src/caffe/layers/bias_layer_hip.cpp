@@ -7,7 +7,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void BiasForward(hipLaunchParm lp, const int n, const Dtype* in,
+__global__ void BiasForward(const int n, const Dtype* in,
     const Dtype* bias, const int bias_dim, const int inner_dim,
     Dtype* out) {
   HIP_KERNEL_LOOP(index, n) {

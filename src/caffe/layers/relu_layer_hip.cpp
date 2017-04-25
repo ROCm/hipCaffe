@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void ReLUForward(hipLaunchParm lp, const int n, const Dtype* in, Dtype* out,
+__global__ void ReLUForward(const int n, const Dtype* in, Dtype* out,
     Dtype negative_slope) {
   HIP_KERNEL_LOOP(index, n) {
     out[index] = in[index] > 0 ? in[index] : in[index] * negative_slope;
@@ -32,7 +32,7 @@ void ReLULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-__global__ void ReLUBackward(hipLaunchParm lp, const int n, const Dtype* in_diff,
+__global__ void ReLUBackward(const int n, const Dtype* in_diff,
     const Dtype* in_data, Dtype* out_diff, Dtype negative_slope) {
   HIP_KERNEL_LOOP(index, n) {
     out_diff[index] = in_diff[index] * ((in_data[index] > 0)

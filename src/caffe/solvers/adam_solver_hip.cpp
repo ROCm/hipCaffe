@@ -4,7 +4,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void AdamUpdate(hipLaunchParm lp, int N, Dtype* g, Dtype* m, Dtype* v,
+__global__ void AdamUpdate(int N, Dtype* g, Dtype* m, Dtype* v,
     Dtype beta1, Dtype beta2, Dtype eps_hat, Dtype corrected_local_rate) {
   HIP_KERNEL_LOOP(i, N) {
     float gi = g[i];

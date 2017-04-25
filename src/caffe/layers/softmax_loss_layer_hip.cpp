@@ -8,7 +8,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void SoftmaxLossForwardGPU(hipLaunchParm lp, const int nthreads,
+__global__ void SoftmaxLossForwardGPU(const int nthreads,
           const Dtype* prob_data, const Dtype* label, Dtype* loss,
           const int num, const int dim, const int spatial_dim,
           const bool has_ignore_label_, const int ignore_label_,
@@ -64,7 +64,7 @@ void SoftmaxWithLossLayer<Dtype>::Forward_gpu(
 }
 
 template <typename Dtype>
-__global__ void SoftmaxLossBackwardGPU(hipLaunchParm lp, const int nthreads, const Dtype* top,
+__global__ void SoftmaxLossBackwardGPU(const int nthreads, const Dtype* top,
           const Dtype* label, Dtype* bottom_diff, const int num, const int dim,
           const int spatial_dim, const bool has_ignore_label_,
           const int ignore_label_, Dtype* counts) {
