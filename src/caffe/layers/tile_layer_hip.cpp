@@ -25,7 +25,7 @@ void TileLayer<Dtype>::Forward_gpu(
   Dtype* top_data = top[0]->mutable_gpu_data();
   const int bottom_tile_axis = bottom[0]->shape(axis_);
   const int nthreads = top[0]->count();
-  hipLaunchKernel(Tile<Dtype>,   //) NOLINT_NEXT_LINE(whitespace/operators)
+  hipLaunchKernelGGL(Tile<Dtype>,   //) NOLINT_NEXT_LINE(whitespace/operators)
       dim3(CAFFE_GET_BLOCKS(nthreads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       nthreads, bottom_data, inner_dim_, tiles_, bottom_tile_axis, top_data);
 }
@@ -56,7 +56,7 @@ void TileLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   const int bottom_tile_axis = bottom[0]->shape(axis_);
   const int tile_size = inner_dim_ / bottom_tile_axis;
   const int nthreads = bottom[0]->count();
-  hipLaunchKernel(TileBackward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
+  hipLaunchKernelGGL(TileBackward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
       dim3(CAFFE_GET_BLOCKS(nthreads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       nthreads, top_diff, tile_size, tiles_, bottom_tile_axis, bottom_diff);
 }

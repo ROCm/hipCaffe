@@ -258,13 +258,13 @@ __global__ void name##_kernel(const int n, const Dtype* x, Dtype* y) { \
 template <> \
 void caffe_gpu_##name<float>(const int n, const float* x, float* y) { \
   /* NOLINT_NEXT_LINE(whitespace/operators) */ \
-  hipLaunchKernel(HIP_KERNEL_NAME(name##_kernel<float>), dim3(CAFFE_GET_BLOCKS(n)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, \
+  hipLaunchKernelGGL(HIP_KERNEL_NAME(name##_kernel<float>), dim3(CAFFE_GET_BLOCKS(n)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, \
       n, x, y); \
 } \
 template <> \
 void caffe_gpu_##name<double>(const int n, const double* x, double* y) { \
   /* NOLINT_NEXT_LINE(whitespace/operators) */ \
-  hipLaunchKernel(HIP_KERNEL_NAME(name##_kernel<double>), dim3(CAFFE_GET_BLOCKS(n)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, \
+  hipLaunchKernelGGL(HIP_KERNEL_NAME(name##_kernel<double>), dim3(CAFFE_GET_BLOCKS(n)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, \
       n, x, y); \
 }
 

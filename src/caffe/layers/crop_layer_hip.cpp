@@ -66,7 +66,7 @@ void CropLayer<Dtype>::crop_copy_gpu(const vector<Blob<Dtype>*>& bottom,
       Dtype* top_data = top[0]->mutable_gpu_data() +
           top[0]->offset(indices);
       // NOLINT_NEXT_LINE(whitespace/operators)
-      hipLaunchKernel(copy_kernel, dim3(CAFFE_GET_BLOCKS(lines)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+      hipLaunchKernelGGL(copy_kernel, dim3(CAFFE_GET_BLOCKS(lines)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
           lines, height, width,
           src_outer_stride, src_inner_stride,
           dest_outer_stride, dest_inner_stride,
@@ -78,7 +78,7 @@ void CropLayer<Dtype>::crop_copy_gpu(const vector<Blob<Dtype>*>& bottom,
       Dtype* bottom_diff = bottom[0]->mutable_gpu_diff() +
           bottom[0]->offset(ind_off);
       // NOLINT_NEXT_LINE(whitespace/operators)
-      hipLaunchKernel(copy_kernel, dim3(CAFFE_GET_BLOCKS(lines)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+      hipLaunchKernelGGL(copy_kernel, dim3(CAFFE_GET_BLOCKS(lines)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
           lines, height, width,
           dest_outer_stride, dest_inner_stride,
           src_outer_stride, src_inner_stride,

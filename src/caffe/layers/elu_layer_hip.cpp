@@ -22,7 +22,7 @@ void ELULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const int count = bottom[0]->count();
   Dtype alpha = this->layer_param_.elu_param().alpha();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(ELUForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL(ELUForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       count, bottom_data, top_data, alpha);
   //HIP_POST_KERNEL_CHECK;
 }
@@ -49,7 +49,7 @@ void ELULayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const int count = bottom[0]->count();
     Dtype alpha = this->layer_param_.elu_param().alpha();
     // NOLINT_NEXT_LINE(whitespace/operators)
-    hipLaunchKernel(ELUBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+    hipLaunchKernelGGL(ELUBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, top_data, bottom_data, bottom_diff, alpha);
     //HIP_POST_KERNEL_CHECK;
   }

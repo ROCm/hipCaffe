@@ -44,7 +44,7 @@ void SoftmaxWithLossLayer<Dtype>::Forward_gpu(
   // to avoid having to allocate additional GPU memory.
   Dtype* counts = prob_.mutable_gpu_diff();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(SoftmaxLossForwardGPU<Dtype>, dim3(CAFFE_GET_BLOCKS(nthreads)),
+  hipLaunchKernelGGL(SoftmaxLossForwardGPU<Dtype>, dim3(CAFFE_GET_BLOCKS(nthreads)),
       dim3(CAFFE_HIP_NUM_THREADS), 0, 0, nthreads, prob_data, label, loss_data,
       outer_num_, dim, inner_num_, has_ignore_label_, ignore_label_, counts);
   Dtype loss;
@@ -106,7 +106,7 @@ void SoftmaxWithLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     // we use to to avoid allocating new GPU memory.
     Dtype* counts = prob_.mutable_gpu_diff();
     // NOLINT_NEXT_LINE(whitespace/operators)
-    hipLaunchKernel(SoftmaxLossBackwardGPU<Dtype>, dim3(CAFFE_GET_BLOCKS(nthreads)),
+    hipLaunchKernelGGL(SoftmaxLossBackwardGPU<Dtype>, dim3(CAFFE_GET_BLOCKS(nthreads)),
         dim3(CAFFE_HIP_NUM_THREADS), 0, 0, nthreads, top_data, label, bottom_diff,
         outer_num_, dim, inner_num_, has_ignore_label_, ignore_label_, counts);
 

@@ -60,7 +60,7 @@ void PReLULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   }
 
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(PReLUForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL(PReLUForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       count, channels, dim, bottom_data, top_data, slope_data, div_factor);
   //HIP_POST_KERNEL_CHECK;
 }
@@ -91,7 +91,7 @@ void PReLULayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     // compute element-wise diff
     // NOLINT_NEXT_LINE(whitespace/operators)
 #ifdef DISABLE_HIP_LAUNCH_FIX
-    hipLaunchKernel(PReLUParamBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(cdim)),
+    hipLaunchKernelGGL(PReLUParamBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(cdim)),
       dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       cdim, bottom[0]->num(), top[0]->offset(1), top_diff ,
       bottom_data ,
@@ -100,7 +100,7 @@ void PReLULayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     auto bot0_num = bottom[0]->num();
     auto top0_offset = top[0]->offset(1);
     auto bb = backward_buff_.mutable_gpu_diff();
-    hipLaunchKernel(PReLUParamBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(cdim)),
+    hipLaunchKernelGGL(PReLUParamBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(cdim)),
       dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       cdim, bot0_num, top0_offset, top_diff ,
       bottom_data ,
@@ -124,7 +124,7 @@ void PReLULayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const Dtype* slope_data = this->blobs_[0]->gpu_data();
     int div_factor = channel_shared_ ? channels : 1;
     // NOLINT_NEXT_LINE(whitespace/operators)
-    hipLaunchKernel(PReLUBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
+    hipLaunchKernelGGL(PReLUBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
         dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
         count, channels, dim, top_diff, bottom_data, bottom_diff, slope_data,
         div_factor);

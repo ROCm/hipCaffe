@@ -15,7 +15,7 @@ __global__ void RMSPropUpdate(int N, Dtype* g, Dtype* h,
 template <typename Dtype>
 void rmsprop_update_gpu(int N, Dtype* g, Dtype* h, Dtype rms_decay,
     Dtype delta, Dtype local_rate) {
-  hipLaunchKernel(RMSPropUpdate<Dtype>,   // NOLINT_NEXT_LINE(whitespace/operators)
+  hipLaunchKernelGGL(RMSPropUpdate<Dtype>,   // NOLINT_NEXT_LINE(whitespace/operators)
       dim3(CAFFE_GET_BLOCKS(N)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       N, g, h, rms_decay, delta, local_rate);
 }

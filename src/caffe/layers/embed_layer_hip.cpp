@@ -41,7 +41,7 @@ void EmbedLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_data = top[0]->mutable_gpu_data();
   const Dtype* weight = this->blobs_[0]->gpu_data();
   const int count = top[0]->count();
-  hipLaunchKernel(EmbedForward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
+  hipLaunchKernelGGL(EmbedForward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
       dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       count, bottom_data, weight, M_, N_, K_, top_data);
   if (bias_term_) {
@@ -60,7 +60,7 @@ void EmbedLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const Dtype* top_diff = top[0]->gpu_diff();
     const Dtype* bottom_data = bottom[0]->gpu_data();
     Dtype* weight_diff = this->blobs_[0]->mutable_gpu_diff();
-    hipLaunchKernel(EmbedBackward<Dtype>,  
+    hipLaunchKernelGGL(EmbedBackward<Dtype>,  
         dim3(CAFFE_GET_BLOCKS(top_count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         top_count, bottom_data, top_diff, M_, N_, K_, weight_diff);
   }

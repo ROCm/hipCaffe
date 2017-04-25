@@ -63,11 +63,11 @@ void LSTMUnitLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* H = top[1]->mutable_gpu_data();
   const int X_count = bottom[1]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(LSTMActsForward<Dtype>, dim3(CAFFE_GET_BLOCKS(X_count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL(LSTMActsForward<Dtype>, dim3(CAFFE_GET_BLOCKS(X_count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       X_count, hidden_dim_, X, X_acts);
   //HIP_POST_KERNEL_CHECK;
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(LSTMUnitForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
+  hipLaunchKernelGGL(LSTMUnitForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       count, hidden_dim_, C_prev, X_acts, cont, C, H);
   //HIP_POST_KERNEL_CHECK;
 }
@@ -137,13 +137,13 @@ void LSTMUnitLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   const Dtype* H_diff = top[1]->gpu_diff();
   Dtype* C_prev_diff = bottom[0]->mutable_gpu_diff();
   Dtype* X_acts_diff = X_acts_.mutable_gpu_diff();
-  hipLaunchKernel(LSTMUnitBackward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
+  hipLaunchKernelGGL(LSTMUnitBackward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
       dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, count, hidden_dim_,
       C_prev, X_acts, C, H, cont, C_diff, H_diff, C_prev_diff, X_acts_diff);
   //HIP_POST_KERNEL_CHECK;
   const int X_count = bottom[1]->count();
   Dtype* X_diff = bottom[1]->mutable_gpu_diff();
-  hipLaunchKernel(LSTMActsBackward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
+  hipLaunchKernelGGL(LSTMActsBackward<Dtype>,  // NOLINT_NEXT_LINE(whitespace/operators)
       dim3(CAFFE_GET_BLOCKS(X_count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
       X_count, hidden_dim_, X_acts, X_acts_diff, X_diff);
   //HIP_POST_KERNEL_CHECK;
