@@ -6,7 +6,7 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void SigmoidCrossEntropyLossForwardGPU(hipLaunchParm lp,const int nthreads,
+__global__ void SigmoidCrossEntropyLossForwardGPU(const int nthreads,
           const Dtype* input_data, const Dtype* target, Dtype* loss,
           const bool has_ignore_label_, const int ignore_label_,
           Dtype* counts) {
@@ -25,7 +25,7 @@ __global__ void SigmoidCrossEntropyLossForwardGPU(hipLaunchParm lp,const int nth
 }
 
 template <typename Dtype>
-__global__ void SigmoidCrossEntropyLossIgnoreDiffGPU(hipLaunchParm lp,const int count,
+__global__ void SigmoidCrossEntropyLossIgnoreDiffGPU(const int count,
     const int ignore_label, const Dtype* target, Dtype* diff) {
   HIP_KERNEL_LOOP(i, count) {
     const int target_value = static_cast<int>(target[i]);
@@ -54,7 +54,7 @@ void SigmoidCrossEntropyLossLayer<Dtype>::Forward_gpu(
   Dtype* count_data = bottom[1]->mutable_gpu_diff();
   Dtype valid_count;
   // NOLINT_NEXT_LINE(whitespace/operators)
-  hipLaunchKernel(HIP_KERNEL_NAME(SigmoidCrossEntropyLossForwardGPU<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, count, input_data, target, loss_data,
+  hipLaunchKernelGGL(HIP_KERNEL_NAME(SigmoidCrossEntropyLossForwardGPU<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, count, input_data, target, loss_data,
       has_ignore_label_, ignore_label_, count_data);
   // Only launch another CUDA kernel if we actually need the valid count.
   if (normalization_ == LossParameter_NormalizationMode_VALID &&
@@ -88,7 +88,7 @@ void SigmoidCrossEntropyLossLayer<Dtype>::Backward_gpu(
     // Zero out gradient of ignored targets.
     if (has_ignore_label_) {
       // NOLINT_NEXT_LINE(whitespace/operators)
-      hipLaunchKernel(HIP_KERNEL_NAME(SigmoidCrossEntropyLossIgnoreDiffGPU<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, count, ignore_label_, target, bottom_diff);
+      hipLaunchKernelGGL(HIP_KERNEL_NAME(SigmoidCrossEntropyLossIgnoreDiffGPU<Dtype>), dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, count, ignore_label_, target, bottom_diff);
     }
     // Scale down gradient
     Dtype loss_weight = top[0]->cpu_diff()[0] / normalizer_;
