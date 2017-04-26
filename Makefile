@@ -175,8 +175,12 @@ endif
 HIP_LIB_DIR += /usr/local/cuda/lib64
 
 ifneq (, $(findstring hcc, $(HIP_PLATFORM)))
+ifeq ($(USE_ROCBLAS), 1)
+	HIP_LIBS := hipblas-hcc hiprng
+else
 	#HIP_LIBS := hip_hcc hcblas
 	HIP_LIBS := hipblas hiprng
+endif
 else ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
 	HIP_LIBS := cudart cublas curand
 endif
@@ -355,6 +359,11 @@ ifeq ($(USE_MIOPEN), 1)
 	COMMON_FLAGS += -DUSE_MIOPEN_DEVELOP
 	INCLUDE_DIRS += $(MIOPEN_PATH)/include
 	LIBRARY_DIRS += $(MIOPEN_PATH)/lib
+endif
+
+# rocBLAS cofiguration.
+ifeq ($(USE_ROCBLAS), 1)
+	COMMON_FLAGS += -DUSE_ROCBLAS
 endif
 
 # configure IO libraries
