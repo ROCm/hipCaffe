@@ -452,5 +452,4 @@ int main(int argc, char** argv) {
   }
 }
 
-#include "caffe/data_reader_hack.inl"
 
