@@ -50,4 +50,3 @@ int main(int argc, char** argv) {
   return !success;
 }
 
-#include "caffe/data_reader_hack.inl"

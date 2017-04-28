@@ -264,4 +264,3 @@ int main(int argc, char** argv) {
 }
 #endif  // USE_OPENCV
 
-#include "caffe/data_reader_hack.inl"

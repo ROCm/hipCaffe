@@ -128,4 +128,3 @@ int main(int argc, char** argv) {
 }
 #endif  // USE_LEVELDB
 
-#include "caffe/data_reader_hack.inl"

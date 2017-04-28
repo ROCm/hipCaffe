@@ -146,4 +146,3 @@ int main(int argc, char** argv) {
 }
 #endif  // USE_LEVELDB and USE_LMDB
 
-#include "caffe/data_reader_hack.inl"
