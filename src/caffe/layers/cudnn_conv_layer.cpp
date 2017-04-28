@@ -497,10 +497,10 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     LOG(INFO) << "bwd_data_algo_[" << i << "]: " << bwd_data_algo_[i] << "\n";
     LOG(INFO) << "workspace_bwd_data_sizes_[" << i << "]: " << workspace_bwd_data_sizes_[i] << "\n";
 
-#endif // USE_MIOPEN
    } // For g
   } //for i
   } // doReshape
+#endif // USE_MIOPEN
 
   // Tensor descriptor for bias.
   if (this->bias_term_) {
