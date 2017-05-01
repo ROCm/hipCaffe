@@ -347,6 +347,8 @@ TYPED_TEST(ConvolutionLayerTest, Test0DConvolution) {
 }
 
 TYPED_TEST(ConvolutionLayerTest, TestSimple3DConvolution) {
+  // HACK: disable this test as it crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   this->blob_bottom_vec_.push_back(this->blob_bottom_2_);
   this->blob_top_vec_.push_back(this->blob_top_2_);
@@ -391,9 +393,13 @@ TYPED_TEST(ConvolutionLayerTest, TestSimple3DConvolution) {
   for (int i = 0; i < this->blob_top_->count(); ++i) {
     EXPECT_NEAR(top_data[i], ref_top_data[i], 1e-4);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(ConvolutionLayerTest, TestDilated3DConvolution) {
+  // HACK: disable this test as it crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   this->blob_bottom_vec_.push_back(this->blob_bottom_2_);
   this->blob_top_vec_.push_back(this->blob_top_2_);
@@ -438,6 +444,8 @@ TYPED_TEST(ConvolutionLayerTest, TestDilated3DConvolution) {
   for (int i = 0; i < this->blob_top_->count(); ++i) {
     EXPECT_NEAR(top_data[i], ref_top_data[i], 1e-4);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(ConvolutionLayerTest, Test1x1Convolution) {
@@ -589,6 +597,8 @@ TYPED_TEST(ConvolutionLayerTest, TestSobelConvolution) {
 }
 
 TYPED_TEST(ConvolutionLayerTest, TestNDAgainst2D) {
+  // HACK: disable this test as it crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const int kernel_h = 11;
   const int kernel_w = 13;
@@ -704,6 +714,8 @@ TYPED_TEST(ConvolutionLayerTest, TestNDAgainst2D) {
     EXPECT_EQ(backward_weight_result_2d.cpu_diff()[i],
               backward_weight_result_nd.cpu_diff()[i]);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(ConvolutionLayerTest, TestGradient) {
@@ -749,6 +761,8 @@ TYPED_TEST(ConvolutionLayerTest, TestDilatedGradient) {
 }
 
 TYPED_TEST(ConvolutionLayerTest, TestGradient3D) {
+  // HACK: disable this test as it crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   ConvolutionParameter* convolution_param =
@@ -774,6 +788,8 @@ TYPED_TEST(ConvolutionLayerTest, TestGradient3D) {
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
       this->blob_top_vec_);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(ConvolutionLayerTest, Test1x1Gradient) {

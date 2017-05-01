@@ -155,6 +155,8 @@ TYPED_TEST(DeconvolutionLayerTest, TestGradient) {
 }
 
 TYPED_TEST(DeconvolutionLayerTest, TestNDAgainst2D) {
+  // HACK: disable this test as it crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   const int kernel_h = 11;
   const int kernel_w = 13;
@@ -270,9 +272,13 @@ TYPED_TEST(DeconvolutionLayerTest, TestNDAgainst2D) {
     EXPECT_EQ(backward_weight_result_2d.cpu_diff()[i],
               backward_weight_result_nd.cpu_diff()[i]);
   }
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(DeconvolutionLayerTest, TestGradient3D) {
+  // HACK: disable this test as it crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   vector<int> bottom_shape(5);
   bottom_shape[0] = this->blob_bottom_vec_[0]->shape(0);
@@ -299,6 +305,8 @@ TYPED_TEST(DeconvolutionLayerTest, TestGradient3D) {
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
       this->blob_top_vec_);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 }  // namespace caffe

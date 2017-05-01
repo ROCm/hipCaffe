@@ -109,6 +109,8 @@ TYPED_TEST(Im2colLayerTest, TestDilatedGradient) {
 }
 
 TYPED_TEST(Im2colLayerTest, TestGradientForceND) {
+  // HACK: disable this test as it crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   ConvolutionParameter* convolution_param =
@@ -120,9 +122,13 @@ TYPED_TEST(Im2colLayerTest, TestGradientForceND) {
   GradientChecker<Dtype> checker(1e-2, 1e-2);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
       this->blob_top_vec_);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(Im2colLayerTest, TestDilatedGradientForceND) {
+  // HACK: disable this test as it crashes
+#if 0
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   ConvolutionParameter* convolution_param =
@@ -141,6 +147,8 @@ TYPED_TEST(Im2colLayerTest, TestDilatedGradientForceND) {
   GradientChecker<Dtype> checker(1e-2, 1e-2);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
                                   this->blob_top_vec_);
+#endif
+  EXPECT_EQ(0, 1);
 }
 
 TYPED_TEST(Im2colLayerTest, TestRect) {
