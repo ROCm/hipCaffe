@@ -1,9 +1,9 @@
-# HIP backend Implementation for Caffe #
+# HIP Port of Caffe #
 
 
 ## Introduction ##
 
-This repository hosts the HIP backend implementation project for  [Caffe](https://github.com/BVLC/caffe). To know what HIP is please refer [here](https://github.com/GPUOpen-ProfessionalCompute-Tools/HIP). Caffe framework currently has a CUDA backend support targeting NVidia devices.  The goal of this project is to develop  HIP based codes targeting modern AMD devices. This project mainly targets the linux platform 
+This repository hosts the HIP port of [Caffe](https://github.com/BVLC/caffe). For details on HIP, please refer [here](https://github.com/GPUOpen-ProfessionalCompute-Tools/HIP). This HIP-ported framework is able to target both AMD ROCm and Nvidia CUDA devices from the same source code. Hardware-specific optimized library calls are also supported within this codebase.
 
 ## Prerequisites ##
 
@@ -15,60 +15,39 @@ This repository hosts the HIP backend implementation project for  [Caffe](https:
 
 * For ROCm software requirements, see [here](https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md#the-latest-rocm-platform---rocm-15)
 
-## Installation Flow ##
+## Installation ##
 
-A. ROCm Installation (If not done so far)
+### ROCm Installation ###
 
-B. Pre-requisites Installation
+To Know more about ROCM  refer https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md
 
-C. hipCaffe Build
-
-D. Unit Testing
-
-E. Simple Workload Examples
-
-
-## Installation Steps in Detail ##
-
-### A. ROCm Installation ##
-
-  To Know more about ROCM  refer https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md
-
-  a. Installing Debian ROCM repositories
-     
-  Before proceeding, make sure to completely uninstall any pre-release ROCm packages
-     
-  Refer https://github.com/RadeonOpenCompute/ROCm#removing-pre-release-packages for instructions to remove pre-release ROCM packages
-     
-  Steps to install rocm package are 
-     
-      * wget -qO - http://packages.amd.com/rocm/apt/debian/rocm.gpg.key | sudo apt-key add -
+Installing ROCm Debian packages:  
+  
+      wget -qO - http://packages.amd.com/rocm/apt/debian/rocm.gpg.key | sudo apt-key add -
       
-      * sudo sh -c 'echo deb [arch=amd64] http://packages.amd.com/rocm/apt/debian/ xenial main > /etc/apt/sources.list.d/rocm.list'
+      sudo sh -c 'echo deb [arch=amd64] http://packages.amd.com/rocm/apt/debian/ xenial main > /etc/apt/sources.list.d/rocm.list'
      
-      * sudo apt-get update
+      sudo apt-get update
       
-      * sudo apt-get install rocm rocm-opencl rocm-opencl-dev
+      sudo apt-get install rocm rocm-opencl rocm-opencl-dev
       
-      * Reboot the system
-      
-  b. Then, verify the installation
+      sudo reboot
 
-  Double-check your kernel (at a minimum, you should see "kfd" in the name):
+Then, verify the installation. Double-check your kernel (at a minimum, you should see "kfd" in the name):
 
-      * uname -r
+      uname -r
 
-  To verify that the ROCm stack completed successfully you can execute to HSA vector_copy sample application:
+In addition, check that you can run the simple HSA vector_copy sample application:
 
-      * cd /opt/rocm/hsa/sample
+      cd /opt/rocm/hsa/sample
         
-      * make
+      make
        
-      * ./vector_copy
+      ./vector_copy
 
-### B. Pre-requisites Installation ###
+### Pre-requisites Installation ###
 
-a. Support libraries 
+Install Caffe dependencies:
 
     apt-get update && apt-get install \
         pkg-config \
@@ -78,7 +57,7 @@ a. Support libraries
     	libsnappy-dev \
     	libhdf5-serial-dev \
     	libatlas-base-dev \
-	libboost-all-dev \
+    	libboost-all-dev \
     	libgflags-dev \
     	libgoogle-glog-dev \
     	liblmdb-dev \
@@ -87,48 +66,49 @@ a. Support libraries
     	libfftw3-dev \
     	libelf-dev
 
-b. ROCm libraries
+Install ROCm libraries:  
 
-       *  wget https://bitbucket.org/multicoreware/hipcaffe/downloads/hcblas-hipblas-0c1e60d-Linux.deb
+    wget https://bitbucket.org/multicoreware/hipcaffe/downloads/hcblas-hipblas-0c1e60d-Linux.deb
 
-       * sudo dpkg -i hcblas-hipblas-0c1e60d-Linux.deb
- (hcblas gets installed under /opt/rocm/hcblas path)
+    sudo dpkg -i hcblas-hipblas-0c1e60d-Linux.deb
 
       
-### C. hipCaffe Build Steps ###
+### hipCaffe Build Steps ###
+
+You may need to modify the Makefile.config file for your own installation.  Then, build it:  
   
-       * make 
+    make 
 
-       * make test
+    make test
 
-To improve build time, one could as well invoke make -j <number of threads>
+To improve build time, consider invoking parallel make with the "-j <num procs>" flag.
 
 
-## D. Unit Testing ##
+## Unit Testing ##
 
 After done with A, B and C, Now its time to test. Run the following commands to perform unit testing of different components of Caffe.
 
-       * ./build/test/test_all.testbin
+       ./build/test/test_all.testbin
 
-## E. Example Workloads ##
+## Example Workloads ##
 
 ### MNIST training ###
 
 Steps:
 
-       * ./data/mnist/get_mnist.sh
+       ./data/mnist/get_mnist.sh
 
-       * ./examples/mnist/create_mnist.sh
+       ./examples/mnist/create_mnist.sh
        
-       * ./examples/mnist/train_lenet.sh
+       ./examples/mnist/train_lenet.sh
 
 ### CIFAR-10 training ###
 
 Steps:  
 
-       * ./data/cifar10/get_cifar10.sh
+       ./data/cifar10/get_cifar10.sh
        
-       * ./examples/cifar10/create_cifar10.sh
+       ./examples/cifar10/create_cifar10.sh
        
-       * ./build/tools/caffe train --solver=examples/cifar10/cifar10_quick_solver.prototxt
+       ./build/tools/caffe train --solver=examples/cifar10/cifar10_quick_solver.prototxt
        
