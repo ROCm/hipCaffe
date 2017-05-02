@@ -182,7 +182,7 @@ else
 	HIP_LIBS := hipblas hiprng
 endif
 else ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
-	HIP_LIBS := cudart cublas curand
+	HIP_LIBS := hipblas hiprng cudart cublas curand
 endif
 
 INCLUDE_DIRS += $(BUILD_INCLUDE_DIR) ./src ./include
@@ -440,7 +440,7 @@ LIBRARY_DIRS += $(LIB_BUILD_DIR)
 
 # Automatic dependency generation (nvcc is handled separately)
 ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
-	CXXFLAGS += -MMD -MP $(shell hipconfig -C)
+	CXXFLAGS += -MMD -MP $(shell hipconfig -C) -std=c++11
 endif
 
 # Complete build flags.
@@ -456,6 +456,9 @@ endif
 # mex may invoke an older gcc that is too liberal with -Wuninitalized
 MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
 LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS) $(shell hipconfig -C)
+ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
+       LINKFLAGS += -std=c++11
+endif
 
 USE_PKG_CONFIG ?= 0
 ifeq ($(USE_PKG_CONFIG), 1)
