@@ -50,7 +50,8 @@ template<> class dataType<float>  {
 };
 template<> class dataType<double> {
  public:
-  static const miopenDataType_t type = miopenDouble;
+  dataType<double>() { assert(0); };
+  static const miopenDataType_t type = miopenFloat; //TODO-miopenDouble;
   static double oneval, zeroval;
   static const void *one, *zero;
 };
