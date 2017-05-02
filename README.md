@@ -1,113 +1,37 @@
-# hipCaffe: the HIP Port of Caffe #
+# Caffe
 
+[![Build Status](https://travis-ci.org/BVLC/caffe.svg?branch=master)](https://travis-ci.org/BVLC/caffe)
+[![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
-## Introduction ##
+Caffe is a deep learning framework made with expression, speed, and modularity in mind.
+It is developed by the Berkeley Vision and Learning Center ([BVLC](http://bvlc.eecs.berkeley.edu)) and community contributors.
 
-This repository hosts the HIP port of [Caffe](https://github.com/BVLC/caffe) (or hipCaffe, for short). For details on HIP, please refer [here](https://github.com/GPUOpen-ProfessionalCompute-Tools/HIP). This HIP-ported framework is able to target both AMD ROCm and Nvidia CUDA devices from the same source code. Hardware-specific optimized library calls are also supported within this codebase.
+Check out the [project site](http://caffe.berkeleyvision.org) for all the details like
 
-## Prerequisites ##
+- [DIY Deep Learning for Vision with Caffe](https://docs.google.com/presentation/d/1UeKXVgRvvxg9OUdh_UiC5G71UMscNPlvArsWER41PsU/edit#slide=id.p)
+- [Tutorial Documentation](http://caffe.berkeleyvision.org/tutorial/)
+- [BVLC reference models](http://caffe.berkeleyvision.org/model_zoo.html) and the [community model zoo](https://github.com/BVLC/caffe/wiki/Model-Zoo)
+- [Installation instructions](http://caffe.berkeleyvision.org/installation.html)
 
-### Hardware Requirements ###
+and step-by-step examples.
 
-* For ROCm hardware requirements, see [here](https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md#supported-cpus)
+[![Join the chat at https://gitter.im/BVLC/caffe](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/BVLC/caffe?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-### Software and Driver Requirements ###
+Please join the [caffe-users group](https://groups.google.com/forum/#!forum/caffe-users) or [gitter chat](https://gitter.im/BVLC/caffe) to ask questions and talk about methods and models.
+Framework development discussions and thorough bug reports are collected on [Issues](https://github.com/BVLC/caffe/issues).
 
-* For ROCm software requirements, see [here](https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md#the-latest-rocm-platform---rocm-15)
+Happy brewing!
 
-## Installation ##
+## License and Citation
 
-### AMD ROCm Installation ###
+Caffe is released under the [BSD 2-Clause license](https://github.com/BVLC/caffe/blob/master/LICENSE).
+The BVLC reference models are released for unrestricted use.
 
-For further background information on ROCm, refer [here](https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md)
+Please cite Caffe in your publications if it helps your research:
 
-Installing ROCm Debian packages:  
-  
-      wget -qO - http://packages.amd.com/rocm/apt/debian/rocm.gpg.key | sudo apt-key add -
-      
-      sudo sh -c 'echo deb [arch=amd64] http://packages.amd.com/rocm/apt/debian/ xenial main > /etc/apt/sources.list.d/rocm.list'
-     
-      sudo apt-get update
-      
-      sudo apt-get install rocm rocm-opencl rocm-opencl-dev
-      
-      sudo reboot
-
-Then, verify the installation. Double-check your kernel (at a minimum, you should see "kfd" in the name):
-
-      uname -r
-
-In addition, check that you can run the simple HSA vector_copy sample application:
-
-      cd /opt/rocm/hsa/sample
-        
-      make
-       
-      ./vector_copy
-
-### Pre-requisites Installation ###
-
-Install Caffe dependencies:
-
-    apt-get update && apt-get install \
-    	pkg-config \
-    	protobuf-compiler \
-    	libprotobuf-dev \
-    	libleveldb-dev \
-    	libsnappy-dev \
-    	libhdf5-serial-dev \
-    	libatlas-base-dev \
-    	libboost-all-dev \
-    	libgflags-dev \
-    	libgoogle-glog-dev \
-    	liblmdb-dev \
-    	python-numpy python-scipy python3-dev python-yaml python-pip \
-    	libopencv-dev \
-    	libfftw3-dev \
-    	libelf-dev
-
-Install the necessary ROCm compute libraries:  
-
-
-    TODO
-
-      
-### hipCaffe Build Steps ###
-
-You may need to modify the Makefile.config file for your own installation.  Then, build it:  
-  
-    make 
-
-To improve build time, consider invoking parallel make with the "-j$(nproc)" flag.
-
-
-## Unit Testing ##
-
-Run the following commands to perform unit testing of different components of Caffe.
-
-    make test
-    
-    ./build/test/test_all.testbin
-
-## Example Workloads ##
-
-### MNIST training ###
-
-Steps:
-
-       ./data/mnist/get_mnist.sh
-
-       ./examples/mnist/create_mnist.sh
-       
-       ./examples/mnist/train_lenet.sh
-
-### CIFAR-10 training ###
-
-Steps:  
-
-       ./data/cifar10/get_cifar10.sh
-       
-       ./examples/cifar10/create_cifar10.sh
-       
-       ./build/tools/caffe train --solver=examples/cifar10/cifar10_quick_solver.prototxt
-       
+    @article{jia2014caffe,
+      Author = {Jia, Yangqing and Shelhamer, Evan and Donahue, Jeff and Karayev, Sergey and Long, Jonathan and Girshick, Ross and Guadarrama, Sergio and Darrell, Trevor},
+      Journal = {arXiv preprint arXiv:1408.5093},
+      Title = {Caffe: Convolutional Architecture for Fast Feature Embedding},
+      Year = {2014}
+    }
