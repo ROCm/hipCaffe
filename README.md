@@ -1,85 +1,36 @@
-# ** HIP backend Implementation for Caffe ** #
+# HIP backend Implementation for Caffe #
 
 
-##Introduction: ##
+## Introduction ##
 
 This repository hosts the HIP backend implementation project for  [Caffe](https://github.com/BVLC/caffe). To know what HIP is please refer [here](https://github.com/GPUOpen-ProfessionalCompute-Tools/HIP). Caffe framework currently has a CUDA backend support targeting NVidia devices.  The goal of this project is to develop  HIP based codes targeting modern AMD devices. This project mainly targets the linux platform 
 
-##Prerequisites: ##
+## Prerequisites ##
 
-**Hardware Requirements:**
+### Hardware Requirements ###
 
-* CPU: mainstream brand, Better if with >=4 Cores Intel Haswell based CPU 
-* System Memory >= 4GB (Better if >10GB for NN application over multiple GPUs)
-* Hard Drive > 200GB (Better if SSD or NVMe driver  for NN application over multiple GPUs)
-* Minimum GPU Memory (Global) > 2GB
+* For ROCm hardware requirements, see [here](https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md#supported-cpus)
 
-**GPU SDK and driver Requirements:**
+### Software and Driver Requirements ###
 
-* dGPUs: AMD R9 Fury X, R9 Fury, R9 Nano
-* APUs: AMD APU Kaveri or Carrizo
+* For ROCm software requirements, see [here](https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md#the-latest-rocm-platform---rocm-15)
 
-**System software requirements:**
+## Installation Flow ##
 
-* Ubuntu 14.04 trusty
-* GCC 4.6 and later
-* CPP 4.6 and later (come with GCC package)
-* python 2.7 and later
-* HCC 0.9 from [here](https://bitbucket.org/multicoreware/hcc/downloads/hcc-0.9.16041-0be508d-ff03947-5a1009a-Linux.deb)
-
-
-**Tools and Misc Requirements:**
-
-* git 1.9 and later
-* cmake 2.6 and later (2.6 and 2.8 are tested)
-
-
-## Tested Environment so far: 
-
-This section enumerates the list of tested combinations of Hardware and system software
-
-**GPU Cards tested:**
-
-* Radeon R9 Nano
-* Radeon R9 FuryX 
-* Radeon R9 Fury 
-* Kaveri and Carizo APU
-
-**Driver versions tested**  
-
-* Boltzmann Early Release Driver for dGPU
-
-   ROCM 1.2 Release : https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md
-     
-* Traditional HSA driver for APU (Kaveri)
-
-**Desktop System Tested**
-
-* Supermicro SYS-7048GR-TR  Tower 4 R9 Nano
-* ASUS X99-E WS motherboard with 4 R9 Nano
-* Gigabyte GA-X79S 2 AMD R9 Nano
-
-**Server System Tested**
-
-* Supermicro SYS 2028GR-THT  6 R9 NANO
-* Supermicro SYS-1028GQ-TRT 4 R9 NANO
-* Supermicro SYS-7048GR-TR Tower 4 R9 NANO
- 
-
-## Installation Flow: 
-
-A. ROCM 1.2 Installation (If not done so far)
+A. ROCm Installation (If not done so far)
 
 B. Pre-requisites Installation
 
-C. HipCaffe Build
+C. hipCaffe Build
 
 D. Unit Testing
 
+E. Simple Workload Examples
 
-## Installation Steps in detail:
 
-### A. ROCM 1.2 Installation: 
+## Installation Steps in Detail ##
+
+### A. ROCm Installation ##
 
   To Know more about ROCM  refer https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md
 
@@ -93,43 +44,62 @@ D. Unit Testing
      
       * wget -qO - http://packages.amd.com/rocm/apt/debian/rocm.gpg.key | sudo apt-key add -
       
-      * sudo sh -c 'echo deb [arch=amd64] http://packages.amd.com/rocm/apt/debian/ trusty main > /etc/apt/sources.list.d/rocm.list'
+      * sudo sh -c 'echo deb [arch=amd64] http://packages.amd.com/rocm/apt/debian/ xenial main > /etc/apt/sources.list.d/rocm.list'
      
       * sudo apt-get update
       
-      * sudo apt-get install rocm
+      * sudo apt-get install rocm rocm-opencl rocm-opencl-dev
       
       * Reboot the system
       
-  b. Once Reboot, verify the installation
-    
+  b. Then, verify the installation
+
+  Double-check your kernel (at a minimum, you should see "kfd" in the name):
+
+      * uname -r
+
   To verify that the ROCm stack completed successfully you can execute to HSA vector_copy sample application:
 
-       * cd /opt/rocm/hsa/sample
+      * cd /opt/rocm/hsa/sample
         
-       * make
+      * make
        
-       * ./vector_copy
+      * ./vector_copy
 
-### B. Pre-requisites Installation: 
+### B. Pre-requisites Installation ###
 
 a. Support libraries 
 
-          sudo apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev protobuf-compiler libatlas-base-dev libblas-dev libgflags-dev libgoogle-glog-dev liblmdb-dev libboost-all-dev python-h5py
+    apt-get update && apt-get install \
+        pkg-config \
+    	protobuf-compiler \
+    	libprotobuf-dev \
+    	libleveldb-dev \
+    	libsnappy-dev \
+    	libhdf5-serial-dev \
+    	libatlas-base-dev \
+	libboost-all-dev \
+    	libgflags-dev \
+    	libgoogle-glog-dev \
+    	liblmdb-dev \
+    	python-numpy python-scipy python3-dev python-yaml python-pip \
+    	libopencv-dev \
+    	libfftw3-dev \
+    	libelf-dev
 
-b. HcBLAS library
- 
-        *  wget https://bitbucket.org/multicoreware/hipcaffe/downloads/hcblas-hipblas-0c1e60d-Linux.deb
+b. ROCm libraries
 
-        * sudo dpkg -i hcblas-hipblas-0c1e60d-Linux.deb
+       *  wget https://bitbucket.org/multicoreware/hipcaffe/downloads/hcblas-hipblas-0c1e60d-Linux.deb
+
+       * sudo dpkg -i hcblas-hipblas-0c1e60d-Linux.deb
  (hcblas gets installed under /opt/rocm/hcblas path)
 
       
-### C. Hicaffe Build Steps:
+### C. hipCaffe Build Steps ###
   
-    * make 
+       * make 
 
-    * make test
+       * make test
 
 To improve build time, one could as well invoke make -j <number of threads>
 
@@ -138,4 +108,27 @@ To improve build time, one could as well invoke make -j <number of threads>
 
 After done with A, B and C, Now its time to test. Run the following commands to perform unit testing of different components of Caffe.
 
-             ./build/test/test_all.testbin
+       * ./build/test/test_all.testbin
+
+## E. Example Workloads ##
+
+### MNIST training ###
+
+Steps:
+
+       * ./data/mnist/get_mnist.sh
+
+       * ./examples/mnist/create_mnist.sh
+       
+       * ./examples/mnist/train_lenet.sh
+
+### CIFAR-10 training ###
+
+Steps:  
+
+       * ./data/cifar10/get_cifar10.sh
+       
+       * ./examples/cifar10/create_cifar10.sh
+       
+       * ./build/tools/caffe train --solver=examples/cifar10/cifar10_quick_solver.prototxt
+       
