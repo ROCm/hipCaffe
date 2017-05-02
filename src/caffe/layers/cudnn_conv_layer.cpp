@@ -230,9 +230,19 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         stride_h, stride_w);
 
 
+    LOG(INFO) << "Before miopenConvolution*GetWorkSpaceSize\n";
+#ifdef USE_MIOPEN_FORWARD_CONV
+    MIOPEN_CHECK(miopenConvolutionForwardGetWorkSpaceSize(
+        filter_desc_,                   // wDesc
+        bottom_descs_[i],               // xDesc
+        top_descs_[i],                  // yDesc
+        conv_descs_[i],                 // convDesc
+        &workspace_fwd_sizes_[i]        // workSpaceSize
+    ));
+
+#endif // USE_MIOPEN_FORWARD_CONV
 
 #ifdef USE_MIOPEN_BACKWARD_WEIGHT
-    LOG(INFO) << "Before miopenConvolutionBackwardWeightsGetWorkSpaceSize\n";
     // get workspace for backwards filter algorithm
     MIOPEN_CHECK(miopenConvolutionBackwardWeightsGetWorkSpaceSize(
         top_descs_[i],                  // dyDesc
@@ -241,10 +251,9 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         filter_desc_,                   // dwDesc
         &workspace_bwd_filter_sizes_[i] // workSpaceSize
     ));
-    LOG(INFO) << "After miopenConvolutionBackwardWeightsGetWorkSpaceSize\n";
-    LOG(INFO) << "workspace_bwd_filter_sizes_[" << i << "]:" << workspace_bwd_filter_sizes_[i] << "\n";
 #endif // USE_MIOPEN_BACKWARD_WEIGHT
-#endif
+#endif // USE_MIOPEN
+    LOG(INFO) << "After miopenConvolution*GetWorkSpaceSize\n";
 
 
 
@@ -322,24 +331,23 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     total_workspace_bwd_filter = std::max(total_workspace_bwd_filter,
                                      workspace_bwd_filter_sizes_[i]);
   }
-#if 0
-  LOG(INFO) << "total_workspace_fwd: " << total_workspace_fwd << "\n";
-  LOG(INFO) << "total_workspace_bwd_data: " << total_workspace_bwd_data << "\n";
-  LOG(INFO) << "total_workspace_bwd_filter: " << total_workspace_bwd_filter << "\n";
-#endif
 
   // get max over all operations
   size_t max_workspace = std::max(total_workspace_fwd,
                              total_workspace_bwd_data);
   max_workspace = std::max(max_workspace, total_workspace_bwd_filter);
-#if 0
-  LOG(INFO) << "max_workspace: " << max_workspace << "\n";
-#endif
+
   // ensure all groups have enough workspace
   size_t total_max_workspace = max_workspace *
                                (this->group_ * CUDNN_STREAMS_PER_GROUP);
-#if 0
-  LOG(INFO) << "total_max_workspace: " << total_max_workspace << "\n";
+
+
+#if 1
+  LOG(INFO) << "  total_workspace_fwd: " << total_workspace_fwd << "\n";
+  LOG(INFO) << "  total_workspace_bwd_data: " << total_workspace_bwd_data << "\n";
+  LOG(INFO) << "  total_workspace_bwd_filter: " << total_workspace_bwd_filter << "\n";
+  LOG(INFO) << "  max_workspace: " << max_workspace << "\n";
+  LOG(INFO) << "  total_max_workspace: " << total_max_workspace << "\n";
 #endif
 
   // this is the total amount of storage needed over all groups + streams
@@ -362,7 +370,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 #ifdef USE_MIOPEN
         fwd_algo_[i] = miopenConvolutionFwdAlgoDirect;
 #ifdef USE_MIOPEN_BACKWARD_CONV
-        assert(0); // Don't have any backward algs that work without workspace memory
+        assert(0); // TODO - Don't have any backward algs that work without workspace memory
         bwd_weight_algo_[i] = miopenConvolutionBwdWeightsAlgoDirect;
         bwd_data_algo_[i] = miopenConvolutionBwdDataAlgoDirect;
 #endif
@@ -427,12 +435,8 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     ));
 #endif
 
-    // TODO - currently overriding MIOpen fwd_algo to work around bug, will re-enable when fwd_algo is valid
-    //fwd_algo_[i] = perf.fwd_algo;
-    fwd_algo_[i] = miopenConvolutionFwdAlgoDirect;
-#if 0
+    fwd_algo_[i] = perf.fwd_algo;
     workspace_fwd_sizes_[i] = perf.memory; // TODO
-#endif
 #if 0
     LOG(INFO) << "fwd_algo_[" << i << "]: " << fwd_algo_[i] << "\n";
     LOG(INFO) << "workspace_fwd_sizes_[" << i << "]:" << workspace_fwd_sizes_[i] << "\n";
@@ -462,8 +466,8 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     LOG(INFO) << "After miopenFindConvolutionBackwardWeightsAlgorithm\n";
 
     bwd_weight_algo_[i] = perf.bwd_weights_algo;
+    workspace_bwd_filter_sizes_[i] = perf.memory; // TODO-MIOpen perf
     LOG(INFO) << "  bwd_weight_algo_[" << i << "]: " << bwd_weight_algo_[i] << "\n";
-    //workspace_bwd_filter_sizes_[i] = perf.memory; // TODO-MIOpen perf
 #endif
 
 #ifdef USE_MIOPEN_BACKWARD_DATA
@@ -489,10 +493,8 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     ));
     LOG(INFO) << "After miopenFindConvolutionBackwardDataAlgorithm perf.memory=" << perf.memory << "\n";
 
-    //bwd_data_algo_[i] = perf.bwd_data_algo; // TODO
-    bwd_data_algo_[i] = miopenConvolutionBwdDataAlgoDirect;
-
-    //workspace_bwd_data_sizes_[i] = perf.memory; // TODO
+    bwd_data_algo_[i] = perf.bwd_data_algo;
+    workspace_bwd_data_sizes_[i] = perf.memory;
 #endif // USE_MIOPEN_BACKWARD_DATA
     LOG(INFO) << "bwd_data_algo_[" << i << "]: " << bwd_data_algo_[i] << "\n";
     LOG(INFO) << "workspace_bwd_data_sizes_[" << i << "]: " << workspace_bwd_data_sizes_[i] << "\n";
