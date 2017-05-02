@@ -1,9 +1,9 @@
-# HIP Port of Caffe #
+# hipCaffe: the HIP Port of Caffe #
 
 
 ## Introduction ##
 
-This repository hosts the HIP port of [Caffe](https://github.com/BVLC/caffe). For details on HIP, please refer [here](https://github.com/GPUOpen-ProfessionalCompute-Tools/HIP). This HIP-ported framework is able to target both AMD ROCm and Nvidia CUDA devices from the same source code. Hardware-specific optimized library calls are also supported within this codebase.
+This repository hosts the HIP port of [Caffe](https://github.com/BVLC/caffe) (or hipCaffe, for short). For details on HIP, please refer [here](https://github.com/GPUOpen-ProfessionalCompute-Tools/HIP). This HIP-ported framework is able to target both AMD ROCm and Nvidia CUDA devices from the same source code. Hardware-specific optimized library calls are also supported within this codebase.
 
 ## Prerequisites ##
 
@@ -17,9 +17,9 @@ This repository hosts the HIP port of [Caffe](https://github.com/BVLC/caffe). Fo
 
 ## Installation ##
 
-### ROCm Installation ###
+### AMD ROCm Installation ###
 
-To Know more about ROCM  refer https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md
+For further background information on ROCm, refer [here](https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md)
 
 Installing ROCm Debian packages:  
   
@@ -50,7 +50,7 @@ In addition, check that you can run the simple HSA vector_copy sample applicatio
 Install Caffe dependencies:
 
     apt-get update && apt-get install \
-        pkg-config \
+    	pkg-config \
     	protobuf-compiler \
     	libprotobuf-dev \
     	libleveldb-dev \
@@ -66,11 +66,10 @@ Install Caffe dependencies:
     	libfftw3-dev \
     	libelf-dev
 
-Install ROCm libraries:  
+Install the necessary ROCm compute libraries:  
 
-    wget https://bitbucket.org/multicoreware/hipcaffe/downloads/hcblas-hipblas-0c1e60d-Linux.deb
 
-    sudo dpkg -i hcblas-hipblas-0c1e60d-Linux.deb
+    TODO
 
       
 ### hipCaffe Build Steps ###
@@ -79,16 +78,16 @@ You may need to modify the Makefile.config file for your own installation.  Then
   
     make 
 
-    make test
-
-To improve build time, consider invoking parallel make with the "-j <num procs>" flag.
+To improve build time, consider invoking parallel make with the "-j$(nproc)" flag.
 
 
 ## Unit Testing ##
 
-After done with A, B and C, Now its time to test. Run the following commands to perform unit testing of different components of Caffe.
+Run the following commands to perform unit testing of different components of Caffe.
 
-       ./build/test/test_all.testbin
+    make test
+    
+    ./build/test/test_all.testbin
 
 ## Example Workloads ##
 
