@@ -173,38 +173,22 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       mask = max_idx_.mutable_gpu_data();
     }
     // NOLINT_NEXT_LINE(whitespace/operators)
-#ifdef DISABLE_HIP_LAUNCH_FIX
-    hipLaunchKernelGGL(MaxPoolForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
-        count, bottom_data, bottom[0]->num(), channels_,
-        height_, width_, pooled_height_, pooled_width_, kernel_h_,
-        kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data,
-        mask, top_mask);
-#else
     auto bot0_num = bottom[0]->num();
     hipLaunchKernelGGL(MaxPoolForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, bot0_num, channels_,
         height_, width_, pooled_height_, pooled_width_, kernel_h_,
         kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data,
         mask, top_mask);
-#endif
     }
     break;
   case PoolingParameter_PoolMethod_AVE:
     {
     // NOLINT_NEXT_LINE(whitespace/operators)
-#ifdef DISABLE_HIP_LAUNCH_FIX
-    hipLaunchKernelGGL(AvePoolForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
-        count, bottom_data, bottom[0]->num(), channels_,
-        height_, width_, pooled_height_, pooled_width_, kernel_h_,
-        kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data);
-#else
     auto bot0_numB = bottom[0]->num();
     hipLaunchKernelGGL(AvePoolForward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, bottom_data, bot0_numB, channels_,
         height_, width_, pooled_height_, pooled_width_, kernel_h_,
         kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data);
-#endif
-
     }
     break;
   case PoolingParameter_PoolMethod_STOCHASTIC:
@@ -213,37 +197,20 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       caffe_gpu_rng_uniform(count, Dtype(0), Dtype(1),
                             rand_idx_.mutable_gpu_data());
       // NOLINT_NEXT_LINE(whitespace/operators)
-#ifdef DISABLE_HIP_LAUNCH_FIX
       hipLaunchKernelGGL(StoPoolForwardTrain<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
                                    dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
           count, bottom_data, bottom[0]->num(), channels_,
           height_, width_, pooled_height_, pooled_width_, kernel_h_,
           kernel_w_, stride_h_, stride_w_,
           rand_idx_.mutable_gpu_data(), top_data);
-#else
-      hipLaunchKernelGGL(StoPoolForwardTrain<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
-                                   dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
-          count, bottom_data, bottom[0]->num(), channels_,
-          height_, width_, pooled_height_, pooled_width_, kernel_h_,
-          kernel_w_, stride_h_, stride_w_,
-          rand_idx_.mutable_gpu_data(), top_data);
-#endif
     } else {
       // NOLINT_NEXT_LINE(whitespace/operators)
-#ifdef DISABLE_HIP_LAUNCH_FIX
-      hipLaunchKernelGGL(StoPoolForwardTest<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
-                                  dim3(CAFFE_HIP_NUM_THREADS),0, 0, 
-          count, bottom_data, bottom[0]->num(), channels_,
-          height_, width_, pooled_height_, pooled_width_, kernel_h_,
-          kernel_w_, stride_h_, stride_w_, top_data);
-#else
       auto bot0_num = bottom[0]->num();
       hipLaunchKernelGGL(StoPoolForwardTest<Dtype>, dim3(CAFFE_GET_BLOCKS(count)),
                                   dim3(CAFFE_HIP_NUM_THREADS),0, 0, 
           count, bottom_data, bot0_num, channels_,
           height_, width_, pooled_height_, pooled_width_, kernel_h_,
           kernel_w_, stride_h_, stride_w_, top_data);
-#endif
     }
     break;
   default:
@@ -393,57 +360,34 @@ void PoolingLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
       mask = max_idx_.gpu_data();
     }
     // NOLINT_NEXT_LINE(whitespace/operators)
-#ifdef DISABLE_HIP_LAUNCH_FIX
-    hipLaunchKernelGGL(MaxPoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
-        count, top_diff, mask, top_mask, top[0]->num(), channels_,
-        height_, width_, pooled_height_, pooled_width_,
-        kernel_h_, kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
-        bottom_diff);
-#else
     auto top0_num = top[0]->num();
     hipLaunchKernelGGL(MaxPoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, mask, top_mask, top0_num, channels_,
         height_, width_, pooled_height_, pooled_width_,
         kernel_h_, kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
         bottom_diff);
-#endif
     }
 
     break;
   case PoolingParameter_PoolMethod_AVE:
     {
     // NOLINT_NEXT_LINE(whitespace/operators)
-#ifdef DISABLE_HIP_LAUNCH_FIX
-    hipLaunchKernelGGL(AvePoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
-        count, top_diff, top[0]->num(), channels_,
-        height_, width_, pooled_height_, pooled_width_, kernel_h_,
-        kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, bottom_diff);
-#else
     auto top0_num = top[0]->num();
     hipLaunchKernelGGL(AvePoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, top_diff, top0_num, channels_,
         height_, width_, pooled_height_, pooled_width_, kernel_h_,
         kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, bottom_diff);
-#endif
     }
     break;
   case PoolingParameter_PoolMethod_STOCHASTIC:
     {
     // NOLINT_NEXT_LINE(whitespace/operators)
-#ifdef DISABLE_HIP_LAUNCH_FIX
-    hipLaunchKernelGGL(StoPoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
-        count, rand_idx_.gpu_data(), top_diff,
-        top[0]->num(), channels_, height_, width_, pooled_height_,
-        pooled_width_, kernel_h_, kernel_w_, stride_h_, stride_w_,
-        bottom_diff);
-#else
     auto top0_num = top[0]->num();
     hipLaunchKernelGGL(StoPoolBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(count)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
         count, rand_idx_.gpu_data(), top_diff,
         top0_num, channels_, height_, width_, pooled_height_,
         pooled_width_, kernel_h_, kernel_w_, stride_h_, stride_w_,
         bottom_diff);
-#endif
     }
     break;
   default:
