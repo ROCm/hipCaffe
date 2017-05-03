@@ -69,7 +69,7 @@ Install Caffe dependencies:
 Install the necessary ROCm compute libraries:  
 
 
-    TODO
+    sudo apt-get install rocm-libs
 
       
 ### hipCaffe Build Steps ###
