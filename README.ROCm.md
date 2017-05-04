@@ -71,6 +71,12 @@ Install the necessary ROCm compute libraries:
 
     sudo apt-get install rocm-libs
 
+Add a few symbolic links:
+
+    cd /opt/rocm/hcrng/lib  && sudo ln -s libhiprng_hcc.so  libhiprng.so
+
+    cd /opt/rocm/hcblas/lib && sudo ln -s libhipblas_hcc.so libhipblas.so
+
       
 ### hipCaffe Build Steps ###
 
