@@ -30,6 +30,8 @@ Installing ROCm Debian packages:
       sudo apt-get update
       
       sudo apt-get install rocm rocm-opencl rocm-opencl-dev
+
+      echo 'export PATH=/opt/rocm/bin:$PATH' >> $HOME/.bashrc && source $HOME/.bashrc
       
       sudo reboot
 
@@ -49,7 +51,7 @@ In addition, check that you can run the simple HSA vector_copy sample applicatio
 
 Install Caffe dependencies:
 
-    apt-get update && apt-get install \
+    sudo apt-get install \
     	pkg-config \
     	protobuf-compiler \
     	libprotobuf-dev \
@@ -68,7 +70,6 @@ Install Caffe dependencies:
 
 Install the necessary ROCm compute libraries:  
 
-
     sudo apt-get install rocm-libs
 
 Add a few symbolic links:
@@ -80,8 +81,14 @@ Add a few symbolic links:
       
 ### hipCaffe Build Steps ###
 
-You may need to modify the Makefile.config file for your own installation.  Then, build it:  
-  
+Clone hipCaffe:
+
+    git clone https://github.com/ROCmSoftwarePlatform/hipCaffe.git
+
+    cd hipCaffe
+
+You may need to modify the Makefile.config file for your own installation.  Then, build it:
+
     make 
 
 To improve build time, consider invoking parallel make with the "-j$(nproc)" flag.
@@ -116,4 +123,18 @@ Steps:
        ./examples/cifar10/create_cifar10.sh
        
        ./build/tools/caffe train --solver=examples/cifar10/cifar10_quick_solver.prototxt
-       
+
+### CaffeNet inference ###
+
+Steps:
+
+       ./data/ilsvrc12/get_ilsvrc_aux.sh
+
+       ./scripts/download_model_binary.py models/bvlc_reference_caffenet
+
+       ./build/examples/cpp_classification/classification.bin \
+            models/bvlc_reference_caffenet/deploy.prototxt \
+	    models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel \
+	    data/ilsvrc12/imagenet_mean.binaryproto \
+	    data/ilsvrc12/synset_words.txt \
+	    examples/images/cat.jpg
