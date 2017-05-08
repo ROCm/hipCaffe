@@ -233,10 +233,11 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     LOG(INFO) << "Before miopenConvolution*GetWorkSpaceSize\n";
 #ifdef USE_MIOPEN_FORWARD_CONV
     MIOPEN_CHECK(miopenConvolutionForwardGetWorkSpaceSize(
+        handle_[0],                     // handle
         filter_desc_,                   // wDesc
         bottom_descs_[i],               // xDesc
-        top_descs_[i],                  // yDesc
         conv_descs_[i],                 // convDesc
+        top_descs_[i],                  // yDesc
         &workspace_fwd_sizes_[i]        // workSpaceSize
     ));
 
@@ -245,6 +246,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 #ifdef USE_MIOPEN_BACKWARD_WEIGHT
     // get workspace for backwards filter algorithm
     MIOPEN_CHECK(miopenConvolutionBackwardWeightsGetWorkSpaceSize(
+        handle_[0],
         top_descs_[i],                  // dyDesc
         bottom_descs_[i],               // xDesc
         conv_descs_[i],                 // convDesc
