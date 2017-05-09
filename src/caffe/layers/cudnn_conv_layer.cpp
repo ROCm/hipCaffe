@@ -473,6 +473,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 #ifdef USE_MIOPEN_BACKWARD_DATA
     Dtype* bottom_diff = bottom[i]->mutable_gpu_diff();
 
+  if (this->param_propagate_down_[i]) {
     LOG(INFO) << "Before miopenFindConvolutionBackwardDataAlgorithm\n";
     // choose backward algo for data
     MIOPEN_CHECK(miopenFindConvolutionBackwardDataAlgorithm(
@@ -492,6 +493,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         false                     // exhaustiveSearch
     ));
     LOG(INFO) << "After miopenFindConvolutionBackwardDataAlgorithm\n";
+  }
 
     bwd_data_algo_[i] = perf.bwd_data_algo;
 #endif // USE_MIOPEN_BACKWARD_DATA
