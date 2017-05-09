@@ -27,9 +27,6 @@ void BatchReindexLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   }
   int threads = top[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-#ifdef DISABLE_HIP_LAUNCH_FIX
-  hipLaunchKernelGGL(BRForward, dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, top[0]->count(), bottom[0]->count() / bottom[0]->shape(0), bottom[0]->gpu_data(), bottom[1]->gpu_data(), top[0]->mutable_gpu_data());
-#else
   auto top0_count = top[0]->count();
   auto bot0_count = bottom[0]->count(); 
   auto bot0_shape = bottom[0]->shape(0);
@@ -37,7 +34,6 @@ void BatchReindexLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   auto bot1_gpu_data = bottom[1]->gpu_data(); 
   auto top0_mut_gpu_data = top[0]->mutable_gpu_data();
   hipLaunchKernelGGL(BRForward, dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, top0_count, bot0_count / bot0_shape, bot0_gpu_data, bot1_gpu_data, top0_mut_gpu_data);
-#endif
   //HIP_POST_KERNEL_CHECK;
 }
 
@@ -102,24 +98,17 @@ void BatchReindexLayer<Dtype>::Backward_gpu(
 
   int threads = bottom[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-#ifdef DISABLE_HIP_LAUNCH_FIX
-  hipLaunchKernelGGL(BRBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
-      bottom[0]->count(), bottom[0]->count() / bottom[0]->shape(0),
-      top[0]->gpu_diff(), top_indexes.gpu_data(), begins.gpu_data(),
-      counts.gpu_data(), bottom[0]->mutable_gpu_diff());
-#else
-      auto bot0_count = bottom[0]->count();
-      auto bot0_shape = bottom[0]->shape(0);
-      auto top0_gpu_diff = top[0]->gpu_diff();
-      auto top_idx_gpu_data = top_indexes.gpu_data();
-      auto begins_gpu_data= begins.gpu_data();
-      auto counts_gpu_data = counts.gpu_data();
-      auto bot0_mut_gpu_diff = bottom[0]->mutable_gpu_diff();
+  auto bot0_count = bottom[0]->count();
+  auto bot0_shape = bottom[0]->shape(0);
+  auto top0_gpu_diff = top[0]->gpu_diff();
+  auto top_idx_gpu_data = top_indexes.gpu_data();
+  auto begins_gpu_data= begins.gpu_data();
+  auto counts_gpu_data = counts.gpu_data();
+  auto bot0_mut_gpu_diff = bottom[0]->mutable_gpu_diff();
   hipLaunchKernelGGL(BRBackward<Dtype>, dim3(CAFFE_GET_BLOCKS(threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0, 
       bot0_count, bot0_count / bot0_shape,
       top0_gpu_diff, top_idx_gpu_data, begins_gpu_data,
       counts_gpu_data, bot0_mut_gpu_diff);
-#endif
   //HIP_POST_KERNEL_CHECK;
 }
 
