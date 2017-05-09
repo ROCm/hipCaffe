@@ -438,7 +438,6 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 #endif
 
     fwd_algo_[i] = perf.fwd_algo;
-    workspace_fwd_sizes_[i] = perf.memory; // TODO
 #if 0
     LOG(INFO) << "fwd_algo_[" << i << "]: " << fwd_algo_[i] << "\n";
     LOG(INFO) << "workspace_fwd_sizes_[" << i << "]:" << workspace_fwd_sizes_[i] << "\n";
@@ -468,7 +467,6 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     LOG(INFO) << "After miopenFindConvolutionBackwardWeightsAlgorithm\n";
 
     bwd_weight_algo_[i] = perf.bwd_weights_algo;
-    workspace_bwd_filter_sizes_[i] = perf.memory; // TODO-MIOpen perf
     LOG(INFO) << "  bwd_weight_algo_[" << i << "]: " << bwd_weight_algo_[i] << "\n";
 #endif
 
@@ -493,10 +491,9 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         max_workspace,            // workSpaceSize
         false                     // exhaustiveSearch
     ));
-    LOG(INFO) << "After miopenFindConvolutionBackwardDataAlgorithm perf.memory=" << perf.memory << "\n";
+    LOG(INFO) << "After miopenFindConvolutionBackwardDataAlgorithm\n";
 
     bwd_data_algo_[i] = perf.bwd_data_algo;
-    workspace_bwd_data_sizes_[i] = perf.memory;
 #endif // USE_MIOPEN_BACKWARD_DATA
     LOG(INFO) << "bwd_data_algo_[" << i << "]: " << bwd_data_algo_[i] << "\n";
     LOG(INFO) << "workspace_bwd_data_sizes_[" << i << "]: " << workspace_bwd_data_sizes_[i] << "\n";
