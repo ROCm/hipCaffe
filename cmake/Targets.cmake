@@ -82,7 +82,9 @@ function(caffe_pickup_caffe_sources root)
   # collect cuda files
   file(GLOB    test_cuda ${root}/src/caffe/test/test_*.cu)
   file(GLOB_RECURSE cuda ${root}/src/caffe/*.cu)
-  list(REMOVE_ITEM  cuda ${test_cuda})
+  if (${test_cuda})
+    list(REMOVE_ITEM cuda ${test_cuda})
+  endif()
 
   # add proto to make them editable in IDEs too
   file(GLOB_RECURSE proto_files ${root}/src/caffe/*.proto)
