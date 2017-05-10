@@ -12,6 +12,23 @@ namespace caffe {
 
 #define CUDNN_STREAMS_PER_GROUP 3
 
+
+bool shouldSkipFind(const char *envVarName, const std::string &layerParamName) 
+{
+    const char *e = getenv(envVarName);\
+    if (e) {
+        std::vector<std::string> layerNames;\
+        tokenize(e, ',', &layerNames);
+        for (auto o=layerNames.begin(); o!=layerNames.end(); o++) {
+            if ((*o == layerParamName)) {
+                return true;
+            }
+        }
+    };
+
+    return false;
+}
+
 /**
  * TODO(dox) explain cuDNN interface
  */
@@ -417,28 +434,42 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     int ret_algo_count;
     miopenConvAlgoPerf_t perf;
 
+
+
 #ifdef USE_MIOPEN_FORWARD_CONV
-    // choose forward and backward algorithms + workspace(s)
-    MIOPEN_CHECK(miopenFindConvolutionForwardAlgorithm(
-        handle_[0*this->group_ + g],               // handle
-        bottom_descs_[i],         // xDesc
-        bottom_data,              // *x
-        filter_desc_,             // wDesc
-        weight,                   // *w
-        conv_descs_[i],           // convDesc
-        top_descs_[i],            // yDesc
-        top_data,                 // *y
-        1,                        // requestAlgoCount
-        &ret_algo_count,          // returnedAlgoCount
-        &perf,                    // perfResults
-        NULL,                     // workSpace
-        0,                        // workSpaceSize
-        false                     // exhaustiveSearch
-    ));
+    // CAFFE_SKIP_FIND_FWD is a comma-separate list of layer param names (for example: CAFFE_SKIP_FIND_FWD=conv1,conv2)
+    // The specified layers will skip calls to miopenFindConvolutionForwardAlgorithm and instead use a more conservative 
+    // algorithm (miopenConvolutionFwdAlgoGEMM).
+    bool skipFindFwd = shouldSkipFind("CAFFE_SKIP_FIND_FWD", this->layer_param().name());
+
+    if (skipFindFwd) {
+        fwd_algo_[i] = miopenConvolutionFwdAlgoGEMM;
+    }  else {
+        LOG(INFO) << "Before miopenFindConvolutionBackwardWeightsAlgorithm\n";
+        // choose forward and backward algorithms + workspace(s)
+        MIOPEN_CHECK(miopenFindConvolutionForwardAlgorithm(
+            handle_[0*this->group_ + g],               // handle
+            bottom_descs_[i],         // xDesc
+            bottom_data,              // *x
+            filter_desc_,             // wDesc
+            weight,                   // *w
+            conv_descs_[i],           // convDesc
+            top_descs_[i],            // yDesc
+            top_data,                 // *y
+            1,                        // requestAlgoCount
+            &ret_algo_count,          // returnedAlgoCount
+            &perf,                    // perfResults
+            NULL,                     // workSpace
+            0,                        // workSpaceSize
+            false                     // exhaustiveSearch
+        ));
+        fwd_algo_[i] = perf.fwd_algo;
+   }
 #endif
 
-    fwd_algo_[i] = perf.fwd_algo;
-#if 0
+
+
+#if 1
     LOG(INFO) << "fwd_algo_[" << i << "]: " << fwd_algo_[i] << "\n";
     LOG(INFO) << "workspace_fwd_sizes_[" << i << "]:" << workspace_fwd_sizes_[i] << "\n";
 #endif
@@ -447,6 +478,8 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 #ifdef USE_MIOPEN_BACKWARD_WEIGHT
 
     LOG(INFO) << "Before miopenFindConvolutionBackwardWeightsAlgorithm\n";
+
+
     // choose backward algorithm for filter
     MIOPEN_CHECK(miopenFindConvolutionBackwardWeightsAlgorithm(
         handle_[1*this->group_ + g],               // handle
