@@ -3,7 +3,7 @@
 #ifdef USE_ACCMI
 
 #ifdef USE_MIOPEN
-#include <miopen.h>
+#include <miopen/miopen.h>
 
 #include "caffe/common.hpp"
 #include "caffe/proto/caffe.pb.h"
