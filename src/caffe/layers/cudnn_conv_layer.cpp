@@ -365,7 +365,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
                                (this->group_ * CUDNN_STREAMS_PER_GROUP);
 
 
-#if 1
+#if 0
   LOG(INFO) << "  total_workspace_fwd: " << total_workspace_fwd << "\n";
   LOG(INFO) << "  total_workspace_bwd_data: " << total_workspace_bwd_data << "\n";
   LOG(INFO) << "  total_workspace_bwd_filter: " << total_workspace_bwd_filter << "\n";
