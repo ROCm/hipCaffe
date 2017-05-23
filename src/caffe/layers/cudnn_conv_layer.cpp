@@ -37,6 +37,8 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   ConvolutionLayer<Dtype>::LayerSetUp(bottom, top);
 #ifdef USE_MIOPEN
+  assert((this->group_ == 1) && "Error: groups > 1 are not fully tested, and therefore disabled.");
+
   // Initalize HIP streams and MIOpen.
   stream_         = new hipStream_t[this->group_ * CUDNN_STREAMS_PER_GROUP];
   handle_         = new miopenHandle_t[this->group_ * CUDNN_STREAMS_PER_GROUP];
