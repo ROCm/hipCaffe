@@ -10,8 +10,11 @@ namespace caffe {
 // can use separate streams for calculating the gradient w.r.t.
 // bias, filter weights, and bottom data for each group independently
 
+#ifdef USE_MIOPEN_CONV_SINGLE_STREAM
+#define CUDNN_STREAMS_PER_GROUP 1
+#else
 #define CUDNN_STREAMS_PER_GROUP 3
-
+#endif
 
 bool shouldSkipFind(const char *envVarName, const std::string &layerParamName) 
 {
