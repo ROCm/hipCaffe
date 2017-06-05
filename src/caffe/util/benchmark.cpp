@@ -89,6 +89,7 @@ float Timer::MilliSeconds() {
   }
   if (Caffe::mode() == Caffe::GPU) {
 #ifndef CPU_ONLY
+    HIP_CHECK(hipEventSynchronize(stop_gpu_));
     HIP_CHECK(hipEventElapsedTime(&elapsed_milliseconds_, start_gpu_,
                                     stop_gpu_));
 #else
