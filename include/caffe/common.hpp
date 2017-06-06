@@ -23,7 +23,7 @@
 #define USE_MIOPEN_FORWARD_CONV
 #define USE_MIOPEN_FORWARD_BIAS
 
-#define USE_MIOPEN_LRN
+//#define USE_MIOPEN_LRN
 
 // Uncomment to enable use of MIOPEN backward prop
 #define USE_MIOPEN_BACKWARD_BIAS
