@@ -280,6 +280,19 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         &workspace_bwd_filter_sizes_[i] // workSpaceSize
     ));
 #endif // USE_MIOPEN_BACKWARD_WEIGHT
+
+#ifdef USE_MIOPEN_BACKWARD_DATA
+    // get workspace for backwards filter algorithm
+    MIOPEN_CHECK(miopenConvolutionBackwardDataGetWorkSpaceSize(
+        handle_[0],
+        top_descs_[i],                  // dyDesc
+        filter_desc_,                   // wDesc
+        conv_descs_[i],                 // convDesc
+        bottom_descs_[i],               // dxDesc
+        &workspace_bwd_data_sizes_[i] // workSpaceSize
+    ));
+
+#endif // USE_MIOPEN_BACKWARD_DATA
 #endif // USE_MIOPEN
     LOG(INFO) << "After miopenConvolution*GetWorkSpaceSize\n";
 
@@ -454,7 +467,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     if (skipFindFwd) {
         fwd_algo_[i] = miopenConvolutionFwdAlgoGEMM;
     }  else {
-        LOG(INFO) << "Before miopenFindConvolutionBackwardWeightsAlgorithm\n";
+        LOG(INFO) << "Before miopenFindConvolutionForwardAlgorithm\n";
         // choose forward and backward algorithms + workspace(s)
         MIOPEN_CHECK(miopenFindConvolutionForwardAlgorithm(
             handle_[0*this->group_ + g],               // handle
@@ -468,8 +481,8 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
             1,                        // requestAlgoCount
             &ret_algo_count,          // returnedAlgoCount
             &perf,                    // perfResults
-            NULL,                     // workSpace
-            0,                        // workSpaceSize
+            workspace[0],             // workSpace
+            max_workspace,            // workSpaceSize
             false                     // exhaustiveSearch
         ));
         fwd_algo_[i] = perf.fwd_algo;
