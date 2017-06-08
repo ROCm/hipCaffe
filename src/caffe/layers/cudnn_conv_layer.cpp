@@ -292,11 +292,9 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         &workspace_bwd_data_sizes_[i] // workSpaceSize
     ));
 
+    LOG(INFO) << "After miopenConvolution*GetWorkSpaceSize\n";
 #endif // USE_MIOPEN_BACKWARD_DATA
 #endif // USE_MIOPEN
-    LOG(INFO) << "After miopenConvolution*GetWorkSpaceSize\n";
-
-
 
 #ifdef USE_CUDNN
     cudnn::setTensor4dDesc<Dtype>(&bottom_descs_[i],
