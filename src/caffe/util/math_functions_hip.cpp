@@ -371,7 +371,13 @@ DEFINE_AND_INSTANTIATE_GPU_UNARY_FUNC(sgnbit, y[index] = signbit(x[index]));
 // Got to have hiprand equivalents for all these
 
 void caffe_gpu_rng_uniform(const int n, unsigned int* r) {
+#ifdef HIPRNG_ENABLE
   HIPRNG_CHECK(hiprngGenerate(Caffe::hiprng_generator(), r, n));
+#else
+  std::vector<unsigned int> random(n);
+  caffe_rng_uniform(n, &random[0]);
+  caffe_gpu_memcpy(sizeof(unsigned int) * n, &random[0], r);
+#endif
 }
 
 template <>
