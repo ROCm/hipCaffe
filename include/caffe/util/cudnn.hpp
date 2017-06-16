@@ -98,7 +98,7 @@ template <typename Dtype>
 inline void setConvolutionDesc(miopenConvolutionDescriptor_t* conv,
     miopenTensorDescriptor_t bottom, miopenTensorDescriptor_t filter,
     int pad_h, int pad_w, int stride_h, int stride_w) {
-  MIOPEN_CHECK(miopenInitConvolutionDescriptor(*conv, miopenCrossCorrelation,
+  MIOPEN_CHECK(miopenInitConvolutionDescriptor(*conv, miopenConvolution,
         pad_h, pad_w, stride_h, stride_w, 1, 1));
 }
 
