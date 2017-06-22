@@ -98,15 +98,16 @@ shared_ptr<Layer<Dtype> > GetPoolingLayer(const LayerParameter& param) {
     // cuDNN, use Caffe layer to max pooling, or don't use in place
     // layers after max pooling layers
 
-#if 0 // This check was disbaling MIOpen because cuDNN did not support something
+    // Allow experimenting with MIOpen max pooling
+#if defined(USE_MIOPEN) && defined(USE_MIOPEN_MAX_POOLING)
+    return shared_ptr<Layer<Dtype> >(new CuDNNPoolingLayer<Dtype>(param));
+#else
     if (param.pooling_param().pool() == PoolingParameter_PoolMethod_MAX) {
         return shared_ptr<Layer<Dtype> >(new PoolingLayer<Dtype>(param));
     } else {
-#endif // 0
         return shared_ptr<Layer<Dtype> >(new CuDNNPoolingLayer<Dtype>(param));
-#if 0
     }
-#endif // 0
+#endif
 #endif
   } else {
     LOG(FATAL) << "Layer " << param.name() << " has unknown engine.";
