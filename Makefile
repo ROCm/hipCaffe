@@ -354,7 +354,7 @@ endif
 
 # MIOpen acceleration cofiguration.
 ifeq ($(USE_MIOPEN), 1)
-        LIBRARIES += MIOpen tinygemm
+        LIBRARIES += MIOpen miopengemm
         COMMON_FLAGS += -DUSE_MIOPEN -DMIOPEN_BACKEND_HIP=1
 	COMMON_FLAGS += -DUSE_MIOPEN_DEVELOP
 	INCLUDE_DIRS += $(MIOPEN_PATH)/include
