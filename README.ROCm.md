@@ -72,7 +72,7 @@ Install Caffe dependencies:
 
 Install the necessary ROCm compute libraries:  
 
-    sudo apt-get install rocm-libs miopen
+    sudo apt-get install rocm-libs miopen-hip
 
       
 ### hipCaffe Build Steps ###
