@@ -29,7 +29,7 @@ Installing ROCm Debian packages:
      
       sudo apt-get update
       
-      sudo apt-get install rocm rocm-opencl rocm-opencl-dev
+      sudo apt-get install rocm rocm-utils rocm-opencl rocm-opencl-dev rocm-profiler cxlactivitylogger
 
       echo 'export PATH=/opt/rocm/bin:$PATH' >> $HOME/.bashrc && source $HOME/.bashrc
       
@@ -70,13 +70,7 @@ Install Caffe dependencies:
 
 Install the necessary ROCm compute libraries:  
 
-    sudo apt-get install rocm-libs
-
-Add a few symbolic links:
-
-    cd /opt/rocm/hcrng/lib  && sudo ln -s libhiprng_hcc.so  libhiprng.so
-
-    cd /opt/rocm/hcblas/lib && sudo ln -s libhipblas_hcc.so libhipblas.so
+    sudo apt-get install rocm-libs miopen
 
       
 ### hipCaffe Build Steps ###
@@ -90,6 +84,7 @@ Clone hipCaffe:
 You may need to modify the Makefile.config file for your own installation.  Then, build it:
 
     cp ./Makefile.config.example ./Makefile.config
+    
     make 
 
 To improve build time, consider invoking parallel make with the "-j$(nproc)" flag.
