@@ -451,12 +451,16 @@ ifneq (, $(findstring hcc, $(HIP_PLATFORM)))
 	HIPCCFLAGS += -fPIC $(COMMON_FLAGS) -std=c++11 
 else ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
 	HIPCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS) -std=c++11 -Wno-deprecated-gpu-targets
+	HIPCCFLAGS += $(HIP_ARCH)
 endif
 
 # mex may invoke an older gcc that is too liberal with -Wuninitalized
 MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
 LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS) $(shell hipconfig -C)
-ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
+# For hcc, HIP arch flags on linker
+ifneq (, $(findstring hcc, $(HIP_PLATFORM)))
+	LINKFLAGS += $(HIP_ARCH)
+else ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
        LINKFLAGS += -std=c++11
 endif
 
@@ -635,8 +639,8 @@ $(PROTO_BUILD_DIR)/%.pb.o: $(PROTO_BUILD_DIR)/%.pb.cc $(PROTO_GEN_HEADER) \
 
 $(BUILD_DIR)/hip/%.o: %.cpp | $(ALL_BUILD_DIRS)
 	@ echo HIPCC $<
-	$(Q)$(HIP_PATH)/bin/hipcc $(HIPCCFLAGS) $(HIP_ARCH) -M $< -o ${@:.o=.d} 
-	$(Q)$(HIP_PATH)/bin/hipcc $(HIPCCFLAGS) $(HIP_ARCH) -c $< -o $@ 2> $@.$(WARNS_EXT) \
+	$(Q)$(HIP_PATH)/bin/hipcc $(HIPCCFLAGS) -M $< -o ${@:.o=.d} 
+	$(Q)$(HIP_PATH)/bin/hipcc $(HIPCCFLAGS) -c $< -o $@ 2> $@.$(WARNS_EXT) \
 		|| (cat $@.$(WARNS_EXT); exit 1)
 	@ cat $@.$(WARNS_EXT)
 
