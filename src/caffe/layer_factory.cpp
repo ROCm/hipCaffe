@@ -97,11 +97,17 @@ shared_ptr<Layer<Dtype> > GetPoolingLayer(const LayerParameter& param) {
     // Until there is a workaround in Caffe (index management) or
     // cuDNN, use Caffe layer to max pooling, or don't use in place
     // layers after max pooling layers
+
+    // Allow experimenting with MIOpen max pooling
+#if defined(USE_MIOPEN) && defined(USE_MIOPEN_MAX_POOLING)
+    return shared_ptr<Layer<Dtype> >(new CuDNNPoolingLayer<Dtype>(param));
+#else
     if (param.pooling_param().pool() == PoolingParameter_PoolMethod_MAX) {
         return shared_ptr<Layer<Dtype> >(new PoolingLayer<Dtype>(param));
     } else {
         return shared_ptr<Layer<Dtype> >(new CuDNNPoolingLayer<Dtype>(param));
     }
+#endif
 #endif
   } else {
     LOG(FATAL) << "Layer " << param.name() << " has unknown engine.";

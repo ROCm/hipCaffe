@@ -19,9 +19,7 @@ void CuDNNTanHLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       bottom_data,                  // *x
       miopen::dataType<Dtype>::zero,// *beta
       this->top_desc_,              // yDesc
-      top_data,                     // *y
-      false,                        // do_backward
-      NULL                          // *workSpace
+      top_data                     // *y
   ));
 #endif
 
@@ -70,8 +68,7 @@ void CuDNNTanHLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
       bottom_data,                  // *x
       miopen::dataType<Dtype>::zero,// *beta
       this->bottom_desc_,           // dxDesc
-      bottom_diff,                  // *dx
-      NULL                          // *workSpace
+      bottom_diff                   // *dx
   ));
 #endif
 

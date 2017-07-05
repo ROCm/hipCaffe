@@ -89,6 +89,7 @@ Clone hipCaffe:
 
 You may need to modify the Makefile.config file for your own installation.  Then, build it:
 
+    cp ./Makefile.config.example ./Makefile.config
     make 
 
 To improve build time, consider invoking parallel make with the "-j$(nproc)" flag.

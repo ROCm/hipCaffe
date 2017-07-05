@@ -10,7 +10,27 @@ namespace caffe {
 // can use separate streams for calculating the gradient w.r.t.
 // bias, filter weights, and bottom data for each group independently
 
+#ifdef USE_MIOPEN_CONV_SINGLE_STREAM
+#define CUDNN_STREAMS_PER_GROUP 1
+#else
 #define CUDNN_STREAMS_PER_GROUP 3
+#endif
+
+bool shouldSkipFind(const char *envVarName, const std::string &layerParamName) 
+{
+    const char *e = getenv(envVarName);\
+    if (e) {
+        std::vector<std::string> layerNames;\
+        tokenize(e, ',', &layerNames);
+        for (auto o=layerNames.begin(); o!=layerNames.end(); o++) {
+            if ((*o == layerParamName)) {
+                return true;
+            }
+        }
+    };
+
+    return false;
+}
 
 /**
  * TODO(dox) explain cuDNN interface
@@ -20,6 +40,8 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   ConvolutionLayer<Dtype>::LayerSetUp(bottom, top);
 #ifdef USE_MIOPEN
+  assert((this->group_ == 1) && "Error: groups > 1 are not fully tested, and therefore disabled.");
+
   // Initalize HIP streams and MIOpen.
   stream_         = new hipStream_t[this->group_ * CUDNN_STREAMS_PER_GROUP];
   handle_         = new miopenHandle_t[this->group_ * CUDNN_STREAMS_PER_GROUP];
@@ -79,7 +101,11 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
 
   for (int g = 0; g < this->group_ * CUDNN_STREAMS_PER_GROUP; g++) {
 #ifdef USE_MIOPEN
+#ifdef HIP_NULL_STREAM
+    stream_[g] = NULL;
+#else
     HIP_CHECK(hipStreamCreate(&stream_[g]));
+#endif
 #ifdef USE_MIOPEN_DEVELOP
     MIOPEN_CHECK(miopenCreateWithStream(&handle_[g], stream_[g]));
 #else
@@ -230,23 +256,45 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         stride_h, stride_w);
 
 
+    LOG(INFO) << "Before miopenConvolution*GetWorkSpaceSize\n";
+#ifdef USE_MIOPEN_FORWARD_CONV
+    MIOPEN_CHECK(miopenConvolutionForwardGetWorkSpaceSize(
+        handle_[0],                     // handle
+        filter_desc_,                   // wDesc
+        bottom_descs_[i],               // xDesc
+        conv_descs_[i],                 // convDesc
+        top_descs_[i],                  // yDesc
+        &workspace_fwd_sizes_[i]        // workSpaceSize
+    ));
+
+#endif // USE_MIOPEN_FORWARD_CONV
 
 #ifdef USE_MIOPEN_BACKWARD_WEIGHT
-    LOG(INFO) << "Before miopenConvolutionBackwardWeightsGetWorkSpaceSize\n";
     // get workspace for backwards filter algorithm
     MIOPEN_CHECK(miopenConvolutionBackwardWeightsGetWorkSpaceSize(
+        handle_[0],
         top_descs_[i],                  // dyDesc
         bottom_descs_[i],               // xDesc
         conv_descs_[i],                 // convDesc
         filter_desc_,                   // dwDesc
         &workspace_bwd_filter_sizes_[i] // workSpaceSize
     ));
-    LOG(INFO) << "After miopenConvolutionBackwardWeightsGetWorkSpaceSize\n";
-    LOG(INFO) << "workspace_bwd_filter_sizes_[" << i << "]:" << workspace_bwd_filter_sizes_[i] << "\n";
 #endif // USE_MIOPEN_BACKWARD_WEIGHT
-#endif
 
+#ifdef USE_MIOPEN_BACKWARD_DATA
+    // get workspace for backwards filter algorithm
+    MIOPEN_CHECK(miopenConvolutionBackwardDataGetWorkSpaceSize(
+        handle_[0],
+        top_descs_[i],                  // dyDesc
+        filter_desc_,                   // wDesc
+        conv_descs_[i],                 // convDesc
+        bottom_descs_[i],               // dxDesc
+        &workspace_bwd_data_sizes_[i] // workSpaceSize
+    ));
 
+    LOG(INFO) << "After miopenConvolution*GetWorkSpaceSize\n";
+#endif // USE_MIOPEN_BACKWARD_DATA
+#endif // USE_MIOPEN
 
 #ifdef USE_CUDNN
     cudnn::setTensor4dDesc<Dtype>(&bottom_descs_[i],
@@ -322,24 +370,23 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     total_workspace_bwd_filter = std::max(total_workspace_bwd_filter,
                                      workspace_bwd_filter_sizes_[i]);
   }
-#if 0
-  LOG(INFO) << "total_workspace_fwd: " << total_workspace_fwd << "\n";
-  LOG(INFO) << "total_workspace_bwd_data: " << total_workspace_bwd_data << "\n";
-  LOG(INFO) << "total_workspace_bwd_filter: " << total_workspace_bwd_filter << "\n";
-#endif
 
   // get max over all operations
   size_t max_workspace = std::max(total_workspace_fwd,
                              total_workspace_bwd_data);
   max_workspace = std::max(max_workspace, total_workspace_bwd_filter);
-#if 0
-  LOG(INFO) << "max_workspace: " << max_workspace << "\n";
-#endif
+
   // ensure all groups have enough workspace
   size_t total_max_workspace = max_workspace *
                                (this->group_ * CUDNN_STREAMS_PER_GROUP);
+
+
 #if 0
-  LOG(INFO) << "total_max_workspace: " << total_max_workspace << "\n";
+  LOG(INFO) << "  total_workspace_fwd: " << total_workspace_fwd << "\n";
+  LOG(INFO) << "  total_workspace_bwd_data: " << total_workspace_bwd_data << "\n";
+  LOG(INFO) << "  total_workspace_bwd_filter: " << total_workspace_bwd_filter << "\n";
+  LOG(INFO) << "  max_workspace: " << max_workspace << "\n";
+  LOG(INFO) << "  total_max_workspace: " << total_max_workspace << "\n";
 #endif
 
   // this is the total amount of storage needed over all groups + streams
@@ -362,7 +409,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 #ifdef USE_MIOPEN
         fwd_algo_[i] = miopenConvolutionFwdAlgoDirect;
 #ifdef USE_MIOPEN_BACKWARD_CONV
-        assert(0); // Don't have any backward algs that work without workspace memory
+        assert(0); // TODO - Don't have any backward algs that work without workspace memory
         bwd_weight_algo_[i] = miopenConvolutionBwdWeightsAlgoDirect;
         bwd_data_algo_[i] = miopenConvolutionBwdDataAlgoDirect;
 #endif
@@ -407,33 +454,42 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     int ret_algo_count;
     miopenConvAlgoPerf_t perf;
 
+
+
 #ifdef USE_MIOPEN_FORWARD_CONV
-    // choose forward and backward algorithms + workspace(s)
-    MIOPEN_CHECK(miopenFindConvolutionForwardAlgorithm(
-        handle_[0*this->group_ + g],               // handle
-        bottom_descs_[i],         // xDesc
-        bottom_data,              // *x
-        filter_desc_,             // wDesc
-        weight,                   // *w
-        conv_descs_[i],           // convDesc
-        top_descs_[i],            // yDesc
-        top_data,                 // *y
-        1,                        // requestAlgoCount
-        &ret_algo_count,          // returnedAlgoCount
-        &perf,                    // perfResults
-        NULL,                     // workSpace
-        0,                        // workSpaceSize
-        false                     // exhaustiveSearch
-    ));
+    // CAFFE_SKIP_FIND_FWD is a comma-separate list of layer param names (for example: CAFFE_SKIP_FIND_FWD=conv1,conv2)
+    // The specified layers will skip calls to miopenFindConvolutionForwardAlgorithm and instead use a more conservative 
+    // algorithm (miopenConvolutionFwdAlgoGEMM).
+    bool skipFindFwd = shouldSkipFind("CAFFE_SKIP_FIND_FWD", this->layer_param().name());
+
+    if (skipFindFwd) {
+        fwd_algo_[i] = miopenConvolutionFwdAlgoGEMM;
+    }  else {
+        LOG(INFO) << "Before miopenFindConvolutionForwardAlgorithm\n";
+        // choose forward and backward algorithms + workspace(s)
+        MIOPEN_CHECK(miopenFindConvolutionForwardAlgorithm(
+            handle_[0*this->group_ + g],               // handle
+            bottom_descs_[i],         // xDesc
+            bottom_data,              // *x
+            filter_desc_,             // wDesc
+            weight,                   // *w
+            conv_descs_[i],           // convDesc
+            top_descs_[i],            // yDesc
+            top_data,                 // *y
+            1,                        // requestAlgoCount
+            &ret_algo_count,          // returnedAlgoCount
+            &perf,                    // perfResults
+            workspace[0],             // workSpace
+            max_workspace,            // workSpaceSize
+            false                     // exhaustiveSearch
+        ));
+        fwd_algo_[i] = perf.fwd_algo;
+   }
 #endif
 
-    // TODO - currently overriding MIOpen fwd_algo to work around bug, will re-enable when fwd_algo is valid
-    //fwd_algo_[i] = perf.fwd_algo;
-    fwd_algo_[i] = miopenConvolutionFwdAlgoDirect;
-#if 0
-    workspace_fwd_sizes_[i] = perf.memory; // TODO
-#endif
-#if 0
+
+
+#if 1
     LOG(INFO) << "fwd_algo_[" << i << "]: " << fwd_algo_[i] << "\n";
     LOG(INFO) << "workspace_fwd_sizes_[" << i << "]:" << workspace_fwd_sizes_[i] << "\n";
 #endif
@@ -442,6 +498,8 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 #ifdef USE_MIOPEN_BACKWARD_WEIGHT
 
     LOG(INFO) << "Before miopenFindConvolutionBackwardWeightsAlgorithm\n";
+
+
     // choose backward algorithm for filter
     MIOPEN_CHECK(miopenFindConvolutionBackwardWeightsAlgorithm(
         handle_[1*this->group_ + g],               // handle
@@ -463,12 +521,12 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 
     bwd_weight_algo_[i] = perf.bwd_weights_algo;
     LOG(INFO) << "  bwd_weight_algo_[" << i << "]: " << bwd_weight_algo_[i] << "\n";
-    //workspace_bwd_filter_sizes_[i] = perf.memory; // TODO-MIOpen perf
 #endif
 
 #ifdef USE_MIOPEN_BACKWARD_DATA
     Dtype* bottom_diff = bottom[i]->mutable_gpu_diff();
 
+  if (this->param_propagate_down_[i]) {
     LOG(INFO) << "Before miopenFindConvolutionBackwardDataAlgorithm\n";
     // choose backward algo for data
     MIOPEN_CHECK(miopenFindConvolutionBackwardDataAlgorithm(
@@ -487,12 +545,10 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         max_workspace,            // workSpaceSize
         false                     // exhaustiveSearch
     ));
-    LOG(INFO) << "After miopenFindConvolutionBackwardDataAlgorithm perf.memory=" << perf.memory << "\n";
+    LOG(INFO) << "After miopenFindConvolutionBackwardDataAlgorithm\n";
+  }
 
-    //bwd_data_algo_[i] = perf.bwd_data_algo; // TODO
-    bwd_data_algo_[i] = miopenConvolutionBwdDataAlgoDirect;
-
-    //workspace_bwd_data_sizes_[i] = perf.memory; // TODO
+    bwd_data_algo_[i] = perf.bwd_data_algo;
 #endif // USE_MIOPEN_BACKWARD_DATA
     LOG(INFO) << "bwd_data_algo_[" << i << "]: " << bwd_data_algo_[i] << "\n";
     LOG(INFO) << "workspace_bwd_data_sizes_[" << i << "]: " << workspace_bwd_data_sizes_[i] << "\n";

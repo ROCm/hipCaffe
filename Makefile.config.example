@@ -4,13 +4,13 @@
 # cuDNN acceleration switch (uncomment to build with cuDNN).
 # USE_CUDNN := 1
 # MIOpen acceleration switch (uncomment to build with MIOpen).
-# USE_MIOPEN := 1
+USE_MIOPEN := 1
 
 # CPU-only switch (uncomment to build without GPU support).
 # CPU_ONLY := 1
 
 # Use rocBLAS in place of hcBLAS
-# USE_ROCBLAS := 1
+USE_ROCBLAS := 1
 
 # Enable code common to both accelerated machine-learning libs
 ifeq ($(USE_CUDNN), 1)
@@ -63,7 +63,8 @@ endif
 # CUDA_DIR := /usr
 
 ifeq ($(USE_MIOPEN), 1)
-        MIOPEN_PATH ?= /opt/rocm/miopen
+        # MIOpen exists under /opt/rocm/include and /opt/rocm/lib
+        MIOPEN_PATH ?= /opt/rocm
 endif
 
 # BLAS choice:

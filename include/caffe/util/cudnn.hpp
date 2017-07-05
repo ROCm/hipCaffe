@@ -3,7 +3,7 @@
 #ifdef USE_ACCMI
 
 #ifdef USE_MIOPEN
-#include <miopen.h>
+#include <miopen/miopen.h>
 
 #include "caffe/common.hpp"
 #include "caffe/proto/caffe.pb.h"
@@ -50,7 +50,8 @@ template<> class dataType<float>  {
 };
 template<> class dataType<double> {
  public:
-  static const miopenDataType_t type = miopenDouble;
+  dataType<double>() { assert(0); };
+  static const miopenDataType_t type = miopenFloat; //TODO-miopenDouble;
   static double oneval, zeroval;
   static const void *one, *zero;
 };
@@ -97,7 +98,7 @@ template <typename Dtype>
 inline void setConvolutionDesc(miopenConvolutionDescriptor_t* conv,
     miopenTensorDescriptor_t bottom, miopenTensorDescriptor_t filter,
     int pad_h, int pad_w, int stride_h, int stride_w) {
-  MIOPEN_CHECK(miopenInitConvolutionDescriptor(*conv, miopenCrossCorrelation,
+  MIOPEN_CHECK(miopenInitConvolutionDescriptor(*conv, miopenConvolution,
         pad_h, pad_w, stride_h, stride_w, 1, 1));
 }
 

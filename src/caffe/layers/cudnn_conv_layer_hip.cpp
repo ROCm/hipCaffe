@@ -46,8 +46,19 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
       // Bias.
       if (this->bias_term_) {
         const Dtype* bias_data = this->blobs_[1]->gpu_data();
+#ifdef USE_MIOPEN_FORWARD_BIAS
+	MIOPEN_CHECK(miopenConvolutionForwardBias(handle_[g],
+		miopen::dataType<Dtype>::one,
+		bias_desc_,
+		bias_data + bias_offset_ * g,
+		miopen::dataType<Dtype>::one,
+		top_descs_[i],
+		top_data + top_offset_ * g
+	));
+#else
         this->forward_gpu_bias(top_data + top_offset_ * g,
                                bias_data + bias_offset_ * g);
+#endif
       }
     }
 
@@ -128,10 +139,18 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
       //
 
       if (this->bias_term_ && this->param_propagate_down_[1]) {
+#ifdef USE_MIOPEN_BACKWARD_BIAS
+	  MIOPEN_CHECK(miopenConvolutionBackwardBias(handle_[g],
+	      miopen::dataType<Dtype>::one,
+	      top_descs_[i],  top_diff + top_offset_ * g,
+	      miopen::dataType<Dtype>::one,
+	      bias_desc_, bias_diff + bias_offset_ * g));
+#else
           for (int n = 0; n < this->num_; ++n) {
             this->backward_gpu_bias(bias_diff + bias_offset_ * g,
                                 top_diff + top_offset_ * g + n * this->top_dim_);
           }
+#endif
       }
 
       // Gradient w.r.t. weights.
