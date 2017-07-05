@@ -23,9 +23,11 @@ For further background information on ROCm, refer [here](https://github.com/Rade
 
 Installing ROCm Debian packages:  
   
-      wget -qO - http://packages.amd.com/rocm/apt/debian/rocm.gpg.key | sudo apt-key add -
+      PKG_REPO="http://repo.radeon.com/rocm/apt/debian/"
       
-      sudo sh -c 'echo deb [arch=amd64] http://repo.radeon.com/rocm/apt/debian/ xenial main > /etc/apt/sources.list.d/rocm.list'
+      wget -qO - $PKG_REPO/rocm.gpg.key | sudo apt-key add -
+      
+      sudo sh -c "echo deb [arch=amd64] $PKG_REPO xenial main > /etc/apt/sources.list.d/rocm.list"
      
       sudo apt-get update
       
