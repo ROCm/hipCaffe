@@ -33,7 +33,11 @@ Installing ROCm Debian packages:
       
       sudo apt-get install rocm rocm-utils rocm-opencl rocm-opencl-dev rocm-profiler cxlactivitylogger
 
-      echo 'export PATH=/opt/rocm/bin:$PATH' >> $HOME/.bashrc && source $HOME/.bashrc
+      echo 'export PATH=/opt/rocm/bin:$PATH' >> $HOME/.bashrc
+      
+      echo 'export LD_LIBRARY_PATH=/opt/rocm/lib:$LD_LIBRARY_PATH' >> $HOME/.bashrc
+
+      source $HOME/.bashrc
       
       sudo reboot
 
