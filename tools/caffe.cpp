@@ -421,6 +421,83 @@ int time() {
 }
 RegisterBrewFunction(time);
 
+// Time_fwd: benchmark the execution time of a model.  (fwd passes only)
+int time_fwd() {
+  CHECK_GT(FLAGS_model.size(), 0) << "Need a model definition to time.";
+  caffe::Phase phase = get_phase_from_flags(caffe::TRAIN);
+  vector<string> stages = get_stages_from_flags();
+
+  // Set device id and mode
+  vector<int> gpus;
+  get_gpus(&gpus);
+  if (gpus.size() != 0) {
+    LOG(INFO) << "Use GPU with device ID " << gpus[0];
+    Caffe::SetDevice(gpus[0]);
+    Caffe::set_mode(Caffe::GPU);
+  } else {
+    LOG(INFO) << "Use CPU.";
+    Caffe::set_mode(Caffe::CPU);
+  }
+  // Instantiate the caffe net.
+  Net<float> caffe_net(FLAGS_model, phase, FLAGS_level, &stages);
+
+  // Do a clean forward and backward pass, so that memory allocation are done
+  // and future iterations will be more stable.
+  LOG(INFO) << "Performing Forward";
+  // Note that for the speed benchmark, we will assume that the network does
+  // not take any input blobs.
+  float initial_loss;
+  caffe_net.Forward(&initial_loss);
+  LOG(INFO) << "Initial loss: " << initial_loss;
+  LOG(INFO) << "Performing Backward";
+  caffe_net.Backward();
+
+  const vector<caffe::shared_ptr<Layer<float> > >& layers = caffe_net.layers();
+  const vector<vector<Blob<float>*> >& bottom_vecs = caffe_net.bottom_vecs();
+  const vector<vector<Blob<float>*> >& top_vecs = caffe_net.top_vecs();
+
+  // Pre-run before the timing to ensure no extra overhead in the 1st iteration.
+  for (int i = 0; i < layers.size(); ++i) {
+    layers[i]->Forward(bottom_vecs[i], top_vecs[i]);
+  }
+
+  LOG(INFO) << "*** Benchmark begins ***";
+  LOG(INFO) << "Testing for " << FLAGS_iterations << " iterations.";
+  Timer total_timer;
+  total_timer.Start();
+  Timer forward_timer;
+  Timer timer;
+  std::vector<double> forward_time_per_layer(layers.size(), 0.0);
+  double forward_time = 0.0;
+  for (int j = 0; j < FLAGS_iterations; ++j) {
+    Timer iter_timer;
+    iter_timer.Start();
+    forward_timer.Start();
+    for (int i = 0; i < layers.size(); ++i) {
+      timer.Start();
+      layers[i]->Forward(bottom_vecs[i], top_vecs[i]);
+      forward_time_per_layer[i] += timer.MicroSeconds();
+    }
+    forward_time += forward_timer.MicroSeconds();
+    LOG(INFO) << "Iteration: " << j + 1 << " forward time: "
+      << iter_timer.MilliSeconds() << " ms.";
+  }
+  LOG(INFO) << "Average time per layer: ";
+  for (int i = 0; i < layers.size(); ++i) {
+    const caffe::string& layername = layers[i]->layer_param().name();
+    LOG(INFO) << std::setfill(' ') << std::setw(10) << layername <<
+      "\tforward: " << forward_time_per_layer[i] / 1000 /
+      FLAGS_iterations << " ms.";
+  }
+  total_timer.Stop();
+  LOG(INFO) << "Average Forward pass: " << forward_time / 1000 /
+    FLAGS_iterations << " ms.";
+  LOG(INFO) << "Total Time: " << total_timer.MilliSeconds() << " ms.";
+  LOG(INFO) << "*** Benchmark ends ***";
+  return 0;
+}
+RegisterBrewFunction(time_fwd);
+
 int main(int argc, char** argv) {
   // Print output to stderr (while still logging).
   FLAGS_alsologtostderr = 1;
