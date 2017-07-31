@@ -140,3 +140,7 @@ Steps:
 	    data/ilsvrc12/imagenet_mean.binaryproto \
 	    data/ilsvrc12/synset_words.txt \
 	    examples/images/cat.jpg
+
+## Tutorials
+
+* [hipCaffe Quickstart Guide](https://rocm.github.io/ROCmHipCaffeQuickstart.html)
