@@ -141,6 +141,40 @@ Steps:
 	    data/ilsvrc12/synset_words.txt \
 	    examples/images/cat.jpg
 
+## Known Issues
+
+### Temp workaround for multi-GPU data transfer error
+
+Sometimes when training with multiple GPUs, we hit this type of error signature:  
+```
+*** SIGSEGV (@0x0) received by PID 57122 (TID 0x7fd841500b80) from PID 0; stack trace: ***
+    @     0x7fd8409a1390 (unknown)
+    @     0x7fd8400a71f7 (unknown)
+    @     0x7fd840515263 (unknown)
+    @     0x7fd81f5ef907 UnpinnedCopyEngine::CopyHostToDevice()
+    @     0x7fd81f5d3bb9 HSACopy::syncCopyExt()
+    @     0x7fd81f5d28bc Kalmar::HSAQueue::copy_ext()
+    @     0x7fd8410dba5b ihipStream_t::locked_copySync()
+    @     0x7fd8411030bf hipMemcpy
+    @           0x6cfd43 caffe::caffe_gpu_rng_uniform()
+    @           0x5a32ba caffe::DropoutLayer<>::Forward_gpu()
+    @           0x430bbf caffe::Layer<>::Forward()
+    @           0x6fefe7 caffe::Net<>::ForwardFromTo()
+    @           0x6feeff caffe::Net<>::Forward()
+    @           0x801e8c caffe::Solver<>::Step()
+    @           0x8015c3 caffe::Solver<>::Solve()
+    @           0x71a277 caffe::P2PSync<>::Run()
+    @           0x42dcbc train()
+```
+
+See this [comment](https://github.com/ROCmSoftwarePlatform/hipCaffe/issues/11#issuecomment-318518802).
+
+In short, here's the temporary workaround:  
+```
+export HCC_UNPINNED_COPY_MODE=2
+```
+
+
 ## Tutorials
 
 * [hipCaffe Quickstart Guide](https://rocm.github.io/ROCmHipCaffeQuickstart.html)
