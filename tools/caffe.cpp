@@ -469,18 +469,27 @@ int time_fwd() {
   Timer timer;
   std::vector<double> forward_time_per_layer(layers.size(), 0.0);
   double forward_time = 0.0;
-  for (int j = 0; j < FLAGS_iterations; ++j) {
+  for (int j = 0; j < FLAGS_iterations + 1; ++j) {
     Timer iter_timer;
     iter_timer.Start();
     forward_timer.Start();
     for (int i = 0; i < layers.size(); ++i) {
       timer.Start();
       layers[i]->Forward(bottom_vecs[i], top_vecs[i]);
-      forward_time_per_layer[i] += timer.MicroSeconds();
+    
+      // skip first iteration for calculating mean values,
+      // as it skews results (it can take up to 1000x median values)
+      // TBD: 95% confidence intervals, median values, kurtosis
+      if (j > 0) { 
+        forward_time_per_layer[i] += timer.MicroSeconds();
+      }
+      
+    // skip first iteration
+    if (j > 0) { 
+        forward_time += forward_timer.MicroSeconds();
+        LOG(INFO) << "Iteration: " << j << " forward time: "
+            << iter_timer.MilliSeconds() << " ms.";
     }
-    forward_time += forward_timer.MicroSeconds();
-    LOG(INFO) << "Iteration: " << j + 1 << " forward time: "
-      << iter_timer.MilliSeconds() << " ms.";
   }
   LOG(INFO) << "Average time per layer: ";
   for (int i = 0; i < layers.size(); ++i) {
