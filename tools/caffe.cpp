@@ -476,13 +476,14 @@ int time_fwd() {
     for (int i = 0; i < layers.size(); ++i) {
       timer.Start();
       layers[i]->Forward(bottom_vecs[i], top_vecs[i]);
-    
+        
       // skip first iteration for calculating mean values,
       // as it skews results (it can take up to 1000x median values)
       // TBD: 95% confidence intervals, median values, kurtosis
       if (j > 0) { 
         forward_time_per_layer[i] += timer.MicroSeconds();
       }
+    }
       
     // skip first iteration
     if (j > 0) { 
