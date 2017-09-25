@@ -175,7 +175,7 @@ endif
 HIP_LIB_DIR += /usr/local/cuda/lib64
 
 ifneq (, $(findstring hcc, $(HIP_PLATFORM)))
-	HIP_LIBS := hipblas hiprng_hcc
+	HIP_LIBS := hipblas hiprng
 else ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
 	HIP_LIBS := hipblas hiprng cudart cublas curand
 endif
