@@ -115,9 +115,9 @@ PYTHON_LIB := /usr/lib
 # WITH_PYTHON_LAYER := 1
 
 # Whatever else you find you need goes here.
-INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /opt/rocm/hip/include /opt/rocm/profiler/CXLActivityLogger/include /opt/rocm/hcrng/include /usr/include/hdf5/serial
+INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /opt/rocm/hip/include /opt/rocm/profiler/CXLActivityLogger/include /opt/rocm/hiprand/include /opt/rocm/rocrand/include /usr/include/hdf5/serial
 
-LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib /opt/rocm/hcrng/lib /opt/rocm/hcfft/lib /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu/hdf5/serial
+LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib /opt/rocm/hiprand/lib /opt/rocm/rocrand/lib /opt/rocm/hcfft/lib /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu/hdf5/serial
 
 ifeq ($(USE_ROCBLAS), 1)
      INCLUDE_DIRS += /opt/rocm/hipblas/include

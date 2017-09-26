@@ -43,7 +43,7 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 #endif
 
 #include <hipblas.h>
-#include <hiprng.h>
+#include <hiprand.h>
 #ifdef USE_ACCMI
 #include "caffe/util/cudnn.hpp"
 #endif
@@ -70,11 +70,11 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
       << caffe::hipblasGetErrorString(status); \
   } while (0)
 
-#define HIPRNG_CHECK(condition) \
+#define HIPRAND_CHECK(condition) \
   do { \
-    hiprngStatus_t status = condition; \
-    CHECK_EQ(status,HIPRNG_STATUS_SUCCESS) << " " \
-      << caffe::hiprngGetErrorString(status); \
+    hiprandStatus_t status = condition; \
+    CHECK_EQ(status,HIPRAND_STATUS_SUCCESS) << " " \
+      << caffe::hiprandGetErrorString(status); \
   } while (0)
 
 // HIP: grid stride looping
@@ -90,7 +90,7 @@ namespace caffe {
 
 // HIP: library error reporting.
 const char* hipblasGetErrorString(hipblasStatus_t error);
-const char* hiprngGetErrorString(hiprngStatus_t error);
+const char* hiprandGetErrorString(hiprandStatus_t error);
 // HIP: use 512 threads per block
 
 #ifdef __HIP_PLATFORM_NVCC__

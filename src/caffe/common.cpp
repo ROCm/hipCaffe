@@ -106,42 +106,42 @@ void* Caffe::RNG::generator() {
 
 Caffe::Caffe() 
   // TODO: HIP Equivalent
-   : hipblas_handle_(NULL), hiprng_generator_(NULL), random_generator_(),
+   : hipblas_handle_(NULL), hiprand_generator_(NULL), random_generator_(),
     mode_(Caffe::CPU), solver_count_(1), root_solver_(true) {
   // Try to create a hipblas handler, and report an error if failed (but we will
   // keep the program running as one might just want to run CPU code).
   if (hipblasCreate(&hipblas_handle_) != HIPBLAS_STATUS_SUCCESS) {
     LOG(ERROR) << "Cannot create Cublas handle. Cublas won't be available.";
   }
-  // Try to create a hiprng handler.
-  if (hiprngCreateGenerator(&hiprng_generator_, HIPRNG_RNG_PSEUDO_MRG32K3A)
-      != HIPRNG_STATUS_SUCCESS ||
-      hiprngSetPseudoRandomGeneratorSeed(hiprng_generator_, cluster_seedgen())
-      != HIPRNG_STATUS_SUCCESS) {
+  // Try to create a hiprand handler.
+  if (hiprandCreateGenerator(&hiprand_generator_, HIPRAND_RNG_PSEUDO_MRG32K3A)
+      != HIPRAND_STATUS_SUCCESS ||
+      hiprandSetPseudoRandomGeneratorSeed(hiprand_generator_, cluster_seedgen())
+      != HIPRAND_STATUS_SUCCESS) {
     LOG(ERROR) << "Cannot create Curand generator. Curand won't be available.";
   }
 }
 
 Caffe::~Caffe() {
   if (hipblas_handle_) HIPBLAS_CHECK(hipblasDestroy(hipblas_handle_));
-  if (hiprng_generator_) {
-    HIPRNG_CHECK(hiprngDestroyGenerator(hiprng_generator_));
+  if (hiprand_generator_) {
+    HIPRAND_CHECK(hiprandDestroyGenerator(hiprand_generator_));
   }
 }
 
 void Caffe::set_random_seed(const unsigned int seed) {
   // Curand seed
-  static bool g_hiprng_availability_logged = false;
-  if (Get().hiprng_generator_) {
-    HIPRNG_CHECK(hiprngSetPseudoRandomGeneratorSeed(hiprng_generator(),
+  static bool g_hiprand_availability_logged = false;
+  if (Get().hiprand_generator_) {
+    HIPRAND_CHECK(hiprandSetPseudoRandomGeneratorSeed(hiprand_generator(),
       seed));
     // TODO: support in HIP equivalent
-    //HIPRNG_CHECK(hiprngSetGeneratorOffset(hiprng_generator(), 0));
+    //HIPRAND_CHECK(hiprandSetGeneratorOffset(hiprand_generator(), 0));
   } else {
-    if (!g_hiprng_availability_logged) {
+    if (!g_hiprand_availability_logged) {
         LOG(ERROR) <<
-            "Curand not available. Skipping setting the hiprng seed.";
-        g_hiprng_availability_logged = true;
+            "Curand not available. Skipping setting the hiprand seed.";
+        g_hiprand_availability_logged = true;
     }
   }
   // RNG seed
@@ -158,13 +158,13 @@ void Caffe::SetDevice(const int device_id) {
   // may perform initialization using the GPU.
   HIP_CHECK(hipSetDevice(device_id));
   if (Get().hipblas_handle_) HIPBLAS_CHECK(hipblasDestroy(Get().hipblas_handle_));
-  if (Get().hiprng_generator_) {
-    HIPRNG_CHECK(hiprngDestroyGenerator(Get().hiprng_generator_));
+  if (Get().hiprand_generator_) {
+    HIPRAND_CHECK(hiprandDestroyGenerator(Get().hiprand_generator_));
   }
   HIPBLAS_CHECK(hipblasCreate(&Get().hipblas_handle_));
-  HIPRNG_CHECK(hiprngCreateGenerator(&Get().hiprng_generator_,
-      HIPRNG_RNG_PSEUDO_MRG32K3A));
-  HIPRNG_CHECK(hiprngSetPseudoRandomGeneratorSeed(Get().hiprng_generator_,
+  HIPRAND_CHECK(hiprandCreateGenerator(&Get().hiprand_generator_,
+      HIPRAND_RNG_PSEUDO_MRG32K3A));
+  HIPRAND_CHECK(hiprandSetPseudoRandomGeneratorSeed(Get().hiprand_generator_,
       cluster_seedgen()));
 }
 
@@ -286,44 +286,44 @@ const char* hipblasGetErrorString(hipblasStatus_t error) {
   return "Unknown hipblas status";
 }
 
-const char* hiprngGetErrorString(hiprngStatus_t error) {
+const char* hiprandGetErrorString(hiprandStatus_t error) {
   switch (error) {
-  case HIPRNG_STATUS_SUCCESS:
-    return "HIPRNG_STATUS_SUCCESS";
-  case HIPRNG_STATUS_ALLOCATION_FAILED:
-    return "HIPRNG_STATUS_ALLOCATION_FAILED";
-  case HIPRNG_INVALID_VALUE:
-    return "HIPRNG_INVALID_VALUE";
-  case HIPRNG_STATUS_TYPE_ERROR: 
-   return "HIPRNG_STATUS_TYPE_ERROR";
-  case HIPRNG_INVALID_STREAM_CREATOR:
-    return "HIPRNG_STATUS_INVALID_STREAM_CREATOR";
-  case HIPRNG_INVALID_SEED:
-    return "HIPRNG_INVALID_SEED";
-  case HIPRNG_FUNCTION_NOT_IMPLEMENTED:
-    return "HIPRNG_FUNCTION_NOT_IMPLEMENTED";
-  case HIPRNG_STATUS_INTERNAL_ERROR:
-    return "HIPRNG_STATUS_INTERNAL_ERROR";
-  case HIPRNG_STATUS_INITIALIZATION_FAILED:
-    return "HIPRNG_STATUS_INITIALIZATION_FAILED";
-  case HIPRNG_STATUS_VERSION_MISMATCH:
-    return "HIPRNG_STATUS_VERSION_MISMATCH";
-  case HIPRNG_STATUS_NOT_INITIALIZED:
-    return "HIPRNG_STATUS_NOT_INITIALIZED";
-  case HIPRNG_STATUS_OUT_OF_RANGE:
-    return "HIPRNG_STATUS_OUT_OF_RANGE";
-  case HIPRNG_STATUS_LENGTH_NOT_MULTIPLE:
-    return "HIPRNG_STATUS_LENGTH_NOT_MULTIPLE";
-  case HIPRNG_STATUS_LAUNCH_FAILURE:
-    return "HIPRNG_STATUS_LAUNCH_FAILURE";
-  case HIPRNG_STATUS_PREEXISTING_FAILURE:
-    return "HIPRNG_STATUS_PREEXISTING_FAILURE";
-  case HIPRNG_STATUS_ARCH_MISMATCH:
-    return "HIPRNG_STATUS_ARCH_MISMATCH";
-  //case HIPRNG_STATUS_DOUBLE_PRECISION_REQUIRED:
-    //return "HIPRNG_STATUS_DOUBLE_PRECISION_REQUIRED";
+  case HIPRAND_STATUS_SUCCESS:
+    return "HIPRAND_STATUS_SUCCESS";
+  case HIPRAND_STATUS_ALLOCATION_FAILED:
+    return "HIPRAND_STATUS_ALLOCATION_FAILED";
+  //case HIPRAND_INVALID_VALUE:
+    //return "HIPRAND_INVALID_VALUE";
+  case HIPRAND_STATUS_TYPE_ERROR: 
+   return "HIPRAND_STATUS_TYPE_ERROR";
+  //case HIPRAND_INVALID_STREAM_CREATOR:
+   //return "HIPRAND_STATUS_INVALID_STREAM_CREATOR";
+  //case HIPRAND_INVALID_SEED:
+    //return "HIPRAND_INVALID_SEED";
+  case HIPRAND_STATUS_NOT_IMPLEMENTED:
+    return "HIPRAND_STATUS_NOT_IMPLEMENTED";
+  case HIPRAND_STATUS_INTERNAL_ERROR:
+    return "HIPRAND_STATUS_INTERNAL_ERROR";
+  case HIPRAND_STATUS_INITIALIZATION_FAILED:
+    return "HIPRAND_STATUS_INITIALIZATION_FAILED";
+  case HIPRAND_STATUS_VERSION_MISMATCH:
+    return "HIPRAND_STATUS_VERSION_MISMATCH";
+  case HIPRAND_STATUS_NOT_INITIALIZED:
+    return "HIPRAND_STATUS_NOT_INITIALIZED";
+  case HIPRAND_STATUS_OUT_OF_RANGE:
+    return "HIPRAND_STATUS_OUT_OF_RANGE";
+  case HIPRAND_STATUS_LENGTH_NOT_MULTIPLE:
+    return "HIPRAND_STATUS_LENGTH_NOT_MULTIPLE";
+  case HIPRAND_STATUS_LAUNCH_FAILURE:
+    return "HIPRAND_STATUS_LAUNCH_FAILURE";
+  case HIPRAND_STATUS_PREEXISTING_FAILURE:
+    return "HIPRAND_STATUS_PREEXISTING_FAILURE";
+  case HIPRAND_STATUS_ARCH_MISMATCH:
+    return "HIPRAND_STATUS_ARCH_MISMATCH";
+  //case HIPRAND_STATUS_DOUBLE_PRECISION_REQUIRED:
+    //return "HIPRAND_STATUS_DOUBLE_PRECISION_REQUIRED";
   }
-  return "Unknown hiprng status";
+  return "Unknown hiprand status";
 }
 
 #endif  // CPU_ONLY

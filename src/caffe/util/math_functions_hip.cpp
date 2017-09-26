@@ -371,19 +371,13 @@ DEFINE_AND_INSTANTIATE_GPU_UNARY_FUNC(sgnbit, y[index] = signbit(x[index]));
 // Got to have hiprand equivalents for all these
 
 void caffe_gpu_rng_uniform(const int n, unsigned int* r) {
-#ifdef HIPRNG_ENABLE
-  HIPRNG_CHECK(hiprngGenerate(Caffe::hiprng_generator(), r, n));
-#else
-  std::vector<unsigned int> random(n);
-  caffe_rng_uniform(n, &random[0]);
-  caffe_gpu_memcpy(sizeof(unsigned int) * n, &random[0], r);
-#endif
+  HIPRAND_CHECK(hiprandGenerate(Caffe::hiprand_generator(), r, n));
 }
 
 template <>
 void caffe_gpu_rng_uniform<float>(const int n, const float a, const float b,
                                   float* r) {
-  HIPRNG_CHECK(hiprngGenerateUniform(Caffe::hiprng_generator(), r, n));
+  HIPRAND_CHECK(hiprandGenerateUniform(Caffe::hiprand_generator(), r, n));
   const float range = b - a;
   if (range != static_cast<float>(1)) {
     caffe_gpu_scal(n, range, r);
@@ -396,7 +390,7 @@ void caffe_gpu_rng_uniform<float>(const int n, const float a, const float b,
 template <>
 void caffe_gpu_rng_uniform<double>(const int n, const double a, const double b,
                                    double* r) {
-  HIPRNG_CHECK(hiprngGenerateUniformDouble(Caffe::hiprng_generator(), r, n));
+  HIPRAND_CHECK(hiprandGenerateUniformDouble(Caffe::hiprand_generator(), r, n));
   const double range = b - a;
   if (range != static_cast<double>(1)) {
     caffe_gpu_scal(n, range, r);
@@ -409,15 +403,15 @@ void caffe_gpu_rng_uniform<double>(const int n, const double a, const double b,
 template <>
 void caffe_gpu_rng_gaussian(const int n, const float mu, const float sigma,
                             float* r) {
-   HIPRNG_CHECK(
-      hiprngGenerateNormal(Caffe::hiprng_generator(), r, n, mu, sigma));
+   HIPRAND_CHECK(
+      hiprandGenerateNormal(Caffe::hiprand_generator(), r, n, mu, sigma));
 }
 
 template <>
 void caffe_gpu_rng_gaussian(const int n, const double mu, const double sigma,
                             double* r) {
-  HIPRNG_CHECK(
-      hiprngGenerateNormalDouble(Caffe::hiprng_generator(), r, n, mu, sigma));
+  HIPRAND_CHECK(
+      hiprandGenerateNormalDouble(Caffe::hiprand_generator(), r, n, mu, sigma));
 }
 
 }  // namespace caffe
