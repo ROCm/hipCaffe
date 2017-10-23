@@ -21,7 +21,7 @@ This repository hosts the HIP port of [Caffe](https://github.com/BVLC/caffe) (or
 
 For further background information on ROCm, refer [here](https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md)
 
-Installing ROCm Debian packages:  
+Install ROCm Debian packages:  
   
       PKG_REPO="http://repo.radeon.com/rocm/apt/debian/"
       
@@ -32,6 +32,8 @@ Installing ROCm Debian packages:
       sudo apt-get update
       
       sudo apt-get install rocm rocm-utils rocm-opencl rocm-opencl-dev rocm-profiler cxlactivitylogger
+
+Next, update your paths and reboot: 
 
       echo 'export PATH=/opt/rocm/bin:$PATH' >> $HOME/.bashrc
       
@@ -47,11 +49,13 @@ Then, verify the installation. Double-check your kernel (at a minimum, you shoul
 
 In addition, check that you can run the simple HSA vector_copy sample application:
 
-      cd /opt/rocm/hsa/sample
+      pushd /opt/rocm/hsa/sample
         
       make
        
       ./vector_copy
+      
+      popd
 
 ### Pre-requisites Installation ###
 
@@ -73,6 +77,10 @@ Install Caffe dependencies:
     	libopencv-dev \
     	libfftw3-dev \
     	libelf-dev
+	
+Install some misc development dependencies:  
+
+    sudo apt-get install git wget
 
 Install the necessary ROCm compute libraries:  
 
@@ -173,6 +181,8 @@ In short, here's the temporary workaround:
 ```
 export HCC_UNPINNED_COPY_MODE=2
 ```
+
+Please note that we have a long-term solution -- using a new RNG lib -- that we'll be pushing out soon.  
 
 
 ## Tutorials
