@@ -140,7 +140,12 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 
       if (this->bias_term_ && this->param_propagate_down_[1]) {
 #ifdef USE_MIOPEN_BACKWARD_BIAS
-	  MIOPEN_CHECK(miopenConvolutionBackwardBias(handle_[g],
+    // MD: Executing Bwd-Bias on stream #1 instead of stream #0 (out of the
+    // three convolution streams) improves the performance of VGG-A by ~18%.
+    // This change does not impact the performance of other networks from
+    // ConvNet Benchmarks
+      //MIOPEN_CHECK(miopenConvolutionBackwardBias(handle_[g],
+	  MIOPEN_CHECK(miopenConvolutionBackwardBias(handle_[1 * this->group_ + g],
 	      miopen::dataType<Dtype>::one,
 	      top_descs_[i],  top_diff + top_offset_ * g,
 	      miopen::dataType<Dtype>::zero,
