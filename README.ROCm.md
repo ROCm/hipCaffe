@@ -31,7 +31,7 @@ Install ROCm Debian packages:
      
       sudo apt-get update
       
-      sudo apt-get install rocm rocm-utils rocm-opencl rocm-opencl-dev rocm-profiler cxlactivitylogger
+      sudo apt-get install rocm-dkms rocm-utils rocm-opencl rocm-opencl-dev rocm-profiler cxlactivitylogger
 
 Next, update your paths and reboot: 
 
@@ -43,9 +43,11 @@ Next, update your paths and reboot:
       
       sudo reboot
 
-Then, verify the installation. Double-check your kernel (at a minimum, you should see "kfd" in the name):
+Then, verify the installation. Double-check your kernel and the installed kernel modules:
 
       uname -r
+      
+      lsmod | grep kfd
 
 In addition, check that you can run the simple HSA vector_copy sample application:
 
@@ -89,9 +91,9 @@ Install the necessary ROCm compute libraries:
       
 ### hipCaffe Build Steps ###
 
-Clone hipCaffe:
+Clone hipCaffe (1.7 update: choosing the rocrand implementation):
 
-    git clone https://github.com/ROCmSoftwarePlatform/hipCaffe.git
+    git clone -b rocrand https://github.com/ROCmSoftwarePlatform/hipCaffe.git
 
     cd hipCaffe
 
