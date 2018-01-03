@@ -94,7 +94,7 @@ void LRNLayer<Dtype>::CrossChannelForward_gpu(
   n_threads = bottom[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
   hipLaunchKernelGGL(LRNComputeOutput, dim3(CAFFE_GET_BLOCKS(n_threads)), dim3(CAFFE_HIP_NUM_THREADS), 0, 0,
-      n_threads, bottom_data, scale_data, -beta_, top_data);
+      n_threads, bottom_data, static_cast<const Dtype* const>(scale_data), -beta_, top_data);
   //HIP_POST_KERNEL_CHECK;
 }
 template void LRNLayer<float>::CrossChannelForward_gpu(
