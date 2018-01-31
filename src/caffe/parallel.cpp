@@ -270,6 +270,7 @@ P2PSync<Dtype>::~P2PSync() {
 
 template<typename Dtype>
 void P2PSync<Dtype>::InternalThreadEntry() {
+  DLOG(INFO) << "P2PSync<Dtype>::InternalThreadEntry()";
   Caffe::SetDevice(solver_->param().device_id());
   CHECK(Caffe::root_solver());
   Caffe::set_root_solver(false);
@@ -426,13 +427,17 @@ void P2PSync<Dtype>::Run(const vector<int>& gpus) {
 
   LOG(INFO)<< "Starting Optimization";
 
+  DLOG(INFO) << "Start " << (syncs.size() - 1) << " threads";
   for (int i = 1; i < syncs.size(); ++i) {
     syncs[i]->StartInternalThread();
   }
 
+  DLOG(INFO) << "Run root solver";
+
   // Run root solver on current thread
   solver_->Solve();
 
+  DLOG(INFO) << "Stop " << (syncs.size() - 1) << " threads";
   for (int i = 1; i < syncs.size(); ++i) {
     syncs[i]->StopInternalThread();
   }

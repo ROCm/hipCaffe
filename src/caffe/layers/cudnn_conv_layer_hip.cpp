@@ -28,7 +28,7 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
     for (int g = 0; g < this->group_; g++) {
       // Filters.
       MIOPEN_CHECK(miopenConvolutionForward(
-          handle_[g],                        // handle
+          handle_,                           // handle
           miopen::dataType<Dtype>::one,      // *alpha
           bottom_descs_[i],                  // xDesc
           bottom_data + bottom_offset_ * g,  // *x
@@ -47,7 +47,7 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
       if (this->bias_term_) {
         const Dtype* bias_data = this->blobs_[1]->gpu_data();
 #ifdef USE_MIOPEN_FORWARD_BIAS
-	MIOPEN_CHECK(miopenConvolutionForwardBias(handle_[g],
+	MIOPEN_CHECK(miopenConvolutionForwardBias(handle_,
 		miopen::dataType<Dtype>::one,
 		bias_desc_,
 		bias_data + bias_offset_ * g,
@@ -79,7 +79,7 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
     // Forward through cuDNN in parallel over groups.
     for (int g = 0; g < this->group_; g++) {
       // Filters.
-      CUDNN_CHECK(cudnnConvolutionForward(handle_[g],
+      CUDNN_CHECK(cudnnConvolutionForward(handle_,
             cudnn::dataType<Dtype>::one,
             bottom_descs_[i], bottom_data + bottom_offset_ * g,
             filter_desc_, weight + this->weight_offset_ * g,
@@ -91,7 +91,7 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
       // Bias.
       if (this->bias_term_) {
         const Dtype* bias_data = this->blobs_[1]->gpu_data();
-        CUDNN_CHECK(cudnnAddTensor(handle_[g],
+        CUDNN_CHECK(cudnnAddTensor(handle_,
               cudnn::dataType<Dtype>::one,
               bias_desc_, bias_data + bias_offset_ * g,
               cudnn::dataType<Dtype>::one,
@@ -140,7 +140,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 
       if (this->bias_term_ && this->param_propagate_down_[1]) {
 #ifdef USE_MIOPEN_BACKWARD_BIAS
-	  MIOPEN_CHECK(miopenConvolutionBackwardBias(handle_[g],
+	  MIOPEN_CHECK(miopenConvolutionBackwardBias(handle_,
 	      miopen::dataType<Dtype>::one,
 	      top_descs_[i],  top_diff + top_offset_ * g,
 	      miopen::dataType<Dtype>::zero,
@@ -158,7 +158,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 #ifdef USE_MIOPEN_BACKWARD_WEIGHT
         const Dtype* bottom_data = bottom[i]->gpu_data();
         MIOPEN_CHECK(miopenConvolutionBackwardWeights(
-            handle_[1 * this->group_ + g],          // handle
+            handle_,                                // handle
             miopen::dataType<Dtype>::one,           // *alpha
             top_descs_[i],                          // dyDesc
             top_diff + top_offset_ * g,             // *dy
@@ -192,7 +192,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         }
 #ifdef USE_MIOPEN_BACKWARD_DATA
         MIOPEN_CHECK(miopenConvolutionBackwardData(
-            handle_[2 * this->group_ + g],     // handle
+            handle_,                           // handle
             miopen::dataType<Dtype>::one,      // *alpha
             top_descs_[i],                     // dyDesc
             top_diff + top_offset_ * g,        // *dy
