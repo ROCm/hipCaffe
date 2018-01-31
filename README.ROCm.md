@@ -21,7 +21,7 @@ This repository hosts the HIP port of [Caffe](https://github.com/BVLC/caffe) (or
 
 For further background information on ROCm, refer [here](https://github.com/RadeonOpenCompute/ROCm/blob/master/README.md)
 
-Install ROCm Debian packages:  
+Install ROCm Debian packages:
   
       PKG_REPO="http://repo.radeon.com/rocm/apt/debian/"
       
@@ -80,11 +80,11 @@ Install Caffe dependencies:
     	libfftw3-dev \
     	libelf-dev
 	
-Install some misc development dependencies:  
+Install some misc development dependencies:
 
     sudo apt-get install git wget
 
-Install the necessary ROCm compute libraries:  
+Install the necessary ROCm compute libraries:
 
     sudo apt-get install rocm-libs miopen-hip miopengemm
 
@@ -128,7 +128,7 @@ Steps:
 
 ### CIFAR-10 training ###
 
-Steps:  
+Steps:
 
        ./data/cifar10/get_cifar10.sh
        
@@ -150,6 +150,24 @@ Steps:
 	    data/ilsvrc12/imagenet_mean.binaryproto \
 	    data/ilsvrc12/synset_words.txt \
 	    examples/images/cat.jpg
+
+### Soumith's Convnet benchmarks ###
+
+Steps:
+
+	git clone https://github.com/soumith/convnet-benchmarks.git
+
+	cd convnet-benchmarks/caffe
+
+OPTIONAL:  reduce the batch sizes to avoid running out of memory for GoogleNet and VGG.  For example, these configs work on Fiji:
+	sed -i 's|input_dim: 128|input_dim: 8|1' imagenet_winners/googlenet.prototxt
+
+	export CAFFE_ROOT=/path/to/your/caffe/installation
+
+	sed -i 's#./caffe/build/tools/caffe#$CAFFE_ROOT/build/tools/caffe#' ./run_imagenet.sh
+
+	./run_imagenet.sh
+
 
 ## Known Issues
 
