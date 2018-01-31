@@ -636,6 +636,7 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
   delete [] bwd_filter_algo_;
   delete [] bwd_data_algo_;
 #endif
+  delete [] workspace;
   delete [] workspace_fwd_sizes_;
   delete [] workspace_bwd_data_sizes_;
   delete [] workspace_bwd_filter_sizes_;
