@@ -47,9 +47,9 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   handle_         = new miopenHandle_t[this->group_ * CUDNN_STREAMS_PER_GROUP];
 
   // Initialize algorithm arrays
-  fwd_algo_       = new miopenConvFwdAlgorithm_t[bottom.size()];
-  bwd_weight_algo_= new miopenConvBwdWeightsAlgorithm_t[bottom.size()];
-  bwd_data_algo_  = new miopenConvBwdDataAlgorithm_t[bottom.size()];
+  //fwd_algo_       = new miopenConvFwdAlgorithm_t[bottom.size()];
+  //bwd_weight_algo_= new miopenConvBwdWeightsAlgorithm_t[bottom.size()];
+  //bwd_data_algo_  = new miopenConvBwdDataAlgorithm_t[bottom.size()];
 #endif
 #ifdef USE_CUDNN
   // Initialize CUDA streams and cuDNN.
@@ -75,9 +75,9 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
 #ifdef USE_MIOPEN
   for (size_t i = 0; i < bottom.size(); ++i) {
     // initialize all to default algorithms
-    fwd_algo_[i] = miopenConvolutionFwdAlgoDirect;
-    bwd_weight_algo_[i] = miopenConvolutionBwdWeightsAlgoDirect;
-    bwd_data_algo_[i] = miopenConvolutionBwdDataAlgoDirect;
+    fwd_algo_.push_back(miopenConvolutionFwdAlgoDirect);
+    bwd_weight_algo_.push_back(miopenConvolutionBwdWeightsAlgoDirect);
+    bwd_data_algo_.push_back(miopenConvolutionBwdDataAlgoDirect);
 
     // default algorithms don't require workspace
     workspace_fwd_sizes_[i] = 0;
@@ -625,9 +625,9 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
 #ifdef USE_MIOPEN
   delete [] stream_;
   delete [] handle_;
-  delete [] fwd_algo_;
-  delete [] bwd_weight_algo_;
-  delete [] bwd_data_algo_;
+  //delete [] fwd_algo_;
+  //delete [] bwd_weight_algo_;
+  //delete [] bwd_data_algo_;
 #endif
 #ifdef USE_CUDNN
   delete [] stream_;
