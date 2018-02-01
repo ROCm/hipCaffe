@@ -10,11 +10,13 @@ namespace caffe {
 template<typename Dtype>
 __global__ void BRForward(const int count, const int inner_dim, const Dtype* in,
                           const Dtype* permut, Dtype* out) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, count) {
     int n = index / (inner_dim);
     int in_n = static_cast<int>(permut[n]);
     out[index] = in[in_n * (inner_dim) + index % (inner_dim)];
   }
+#endif
 }
 
 template<typename Dtype>
@@ -42,6 +44,7 @@ __global__ void BRBackward(const int count, const int inner_dim,
                            const Dtype* in, const Dtype* top_indexes,
                            const Dtype* begins, const Dtype* counts,
                            Dtype* out) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, count) {
     int n = index / (inner_dim);
     out[index] = 0;
@@ -52,6 +55,7 @@ __global__ void BRBackward(const int count, const int inner_dim,
       out[index] += in[in_n * (inner_dim) + index % (inner_dim)];
     }
   }
+#endif
 }
 
 template<typename Dtype>

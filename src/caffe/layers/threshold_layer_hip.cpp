@@ -7,9 +7,11 @@ namespace caffe {
 template <typename Dtype>
 __global__ void ThresholdForward(const int n, const Dtype threshold,
     const Dtype* in, Dtype* out) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     out[index] = in[index] > threshold ? 1 : 0;
   }
+#endif
 }
 
 template <typename Dtype>

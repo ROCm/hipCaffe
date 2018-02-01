@@ -10,6 +10,7 @@ __global__ void Concat(const int nthreads, const Dtype* in_data,
     const bool forward, const int num_concats, const int concat_size,
     const int top_concat_axis, const int bottom_concat_axis,
     const int offset_concat_axis, Dtype* out_data) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int total_concat_size = concat_size * bottom_concat_axis;
     const int concat_num = index / total_concat_size;
@@ -22,6 +23,7 @@ __global__ void Concat(const int nthreads, const Dtype* in_data,
       out_data[index] = in_data[top_index];
     }
   }
+#endif
 }
 
 template <typename Dtype>

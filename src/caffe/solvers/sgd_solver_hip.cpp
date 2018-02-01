@@ -6,9 +6,11 @@ namespace caffe {
 template <typename Dtype>
 __global__ void SGDUpdate(int N, Dtype* g, Dtype* h,
     Dtype momentum, Dtype local_rate) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(i, N) {
     g[i] = h[i] = momentum*h[i] + local_rate*g[i];
   }
+#endif
 }
 template <typename Dtype>
 void sgd_update_gpu(int N, Dtype* g, Dtype* h, Dtype momentum,

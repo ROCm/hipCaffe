@@ -10,6 +10,7 @@ template <typename Dtype>
 __global__ void MaxForward(const int nthreads, const Dtype* bottom_data_a,
     const Dtype* bottom_data_b, const int blob_idx, Dtype* top_data,
     int* mask) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     Dtype maxval = -FLT_MAX;
     int maxidx = -1;
@@ -28,6 +29,7 @@ __global__ void MaxForward(const int nthreads, const Dtype* bottom_data_a,
       mask[index] = maxidx;
     }
   }
+#endif
 }
 
 template <typename Dtype>
@@ -75,6 +77,7 @@ void EltwiseLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 __global__ void MaxBackward(const int nthreads, const Dtype* top_diff,
     const int blob_idx, const int* mask, Dtype* bottom_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     Dtype gradient = 0;
     if (mask[index] == blob_idx) {
@@ -82,6 +85,7 @@ __global__ void MaxBackward(const int nthreads, const Dtype* top_diff,
     }
     bottom_diff[index] = gradient;
   }
+#endif
 }
 
 template <typename Dtype>

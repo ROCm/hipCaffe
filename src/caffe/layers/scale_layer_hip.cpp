@@ -10,20 +10,24 @@ template <typename Dtype>
 __global__ void ScaleForward(const int n, const Dtype* in,
     const Dtype* scale, const int scale_dim, const int inner_dim,
     Dtype* out) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     const int scale_index = (index / inner_dim) % scale_dim;
     out[index] = in[index] * scale[scale_index];
   }
+#endif
 }
 
 template <typename Dtype>
 __global__ void ScaleBiasForward(const int n, const Dtype* in,
     const Dtype* scale, const Dtype* bias,
     const int scale_dim, const int inner_dim, Dtype* out) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     const int scale_index = (index / inner_dim) % scale_dim;
     out[index] = in[index] * scale[scale_index] + bias[scale_index];
   }
+#endif
 }
 
 template <typename Dtype>

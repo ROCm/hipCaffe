@@ -14,6 +14,7 @@ __global__ void im2col_gpu_kernel(const int n, const Dtype* data_im,
     const int dilation_h, const int dilation_w,
     const int height_col, const int width_col,
     Dtype* data_col) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     const int h_index = index / width_col;
     const int h_col = h_index % height_col;
@@ -37,6 +38,7 @@ __global__ void im2col_gpu_kernel(const int n, const Dtype* data_im,
       }
     }
   }
+#endif
 }
 
 template <typename Dtype>
@@ -75,6 +77,7 @@ __global__ void im2col_nd_gpu_kernel(const int n, const Dtype* data_im,
     const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
     const int* dilation, Dtype* data_col) {
+#ifndef NULLIFY_KERNELS
   int d_temp[num_axes];  // NOLINT(runtime/arrays)
   int d_iter[num_axes];  // NOLINT(runtime/arrays)
 
@@ -153,6 +156,7 @@ __global__ void im2col_nd_gpu_kernel(const int n, const Dtype* data_im,
       }  // for (int i = num_axes - 1; i >= 0; --i)
     } while (incremented);  // do
   }  // HIP_KERNEL_LOOP(index, n)
+#endif
 }
 
 template <typename Dtype>
@@ -250,6 +254,7 @@ __global__ void col2im_gpu_kernel(const int n, const Dtype* data_col,
     const int dilation_h, const int dilation_w,
     const int height_col, const int width_col,
     Dtype* data_im) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     Dtype val = 0;
     const int w_im = index % width + pad_w;
@@ -280,6 +285,7 @@ __global__ void col2im_gpu_kernel(const int n, const Dtype* data_col,
     }
     data_im[index] = val;
   }
+#endif
 }
 
 template <typename Dtype>
@@ -319,6 +325,7 @@ __global__ void col2im_nd_gpu_kernel(const int n, const Dtype* data_col,
     const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
     const int* dilation, Dtype* data_im) {
+#ifndef NULLIFY_KERNELS
   int d_im[num_axes];  // NOLINT(runtime/arrays)
   int d_col_iter[num_axes];  // NOLINT(runtime/arrays)
   int d_col_start[num_axes];  // NOLINT(runtime/arrays)
@@ -416,6 +423,7 @@ __global__ void col2im_nd_gpu_kernel(const int n, const Dtype* data_col,
     }  while (incremented);
     data_im[index] = val;
   }  // HIP_KERNEL_LOOP(index, n)
+#endif
 }
 
 template <typename Dtype>

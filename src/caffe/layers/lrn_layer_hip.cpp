@@ -10,6 +10,7 @@ __global__ void LRNFillScale(const int nthreads, const Dtype* const in,
     const int num, const int channels, const int height,
     const int width, const int size, const Dtype alpha_over_size,
     const Dtype k, Dtype* const scale) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     // find out the local offset
     const int w = index % width;
@@ -49,6 +50,7 @@ __global__ void LRNFillScale(const int nthreads, const Dtype* const in,
       ++head;
     }
   }
+#endif
 }
 
 
@@ -71,9 +73,11 @@ void LRNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 __global__ void LRNComputeOutput(const int nthreads, const Dtype* const in,
     const Dtype* const scale, const Dtype negative_beta, Dtype* const out) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     out[index] = in[index] * pow(scale[index], negative_beta);
   }
+#endif
 }
 
 template <typename Dtype>
@@ -125,6 +129,7 @@ __global__ void LRNComputeDiff(const int nthreads,
     const int num, const int channels, const int height,
     const int width, const int size, const Dtype negative_beta,
     const Dtype cache_ratio, Dtype* const bottom_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     // find out the local offset
     const int w = index % width;
@@ -174,6 +179,7 @@ __global__ void LRNComputeDiff(const int nthreads,
       ++head;
     }
   }
+#endif
 }
 
 template <typename Dtype>

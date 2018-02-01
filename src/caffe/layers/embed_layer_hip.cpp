@@ -11,6 +11,7 @@ template <typename Dtype>
 __global__ void EmbedForward(const int nthreads, const Dtype* bottom_data,
     const Dtype* weight, const int M, const int N, const int K,
     Dtype* top_data) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(top_index, nthreads) {
     const int n = top_index / N;
     const int d = top_index % N;
@@ -18,6 +19,7 @@ __global__ void EmbedForward(const int nthreads, const Dtype* bottom_data,
     const int weight_index = index * N + d;
     top_data[top_index] = weight[weight_index];
   }
+#endif
 }
 
 
@@ -25,6 +27,7 @@ template <typename Dtype>
 __global__ void EmbedBackward(const int nthreads, const Dtype* bottom_data,
     const Dtype* top_diff, const int M, const int N, const int K,
     Dtype* weight_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(top_index, nthreads) {
     const int n = top_index / N;
     const int d = top_index % N;
@@ -32,6 +35,7 @@ __global__ void EmbedBackward(const int nthreads, const Dtype* bottom_data,
     const int weight_index = index * N + d;
     caffe_gpu_atomic_add(top_diff[top_index], weight_diff + weight_index);
   }
+#endif
 }
 
 template <typename Dtype>

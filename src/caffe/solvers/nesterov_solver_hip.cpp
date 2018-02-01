@@ -6,11 +6,13 @@ namespace caffe {
 template <typename Dtype>
 __global__ void NesterovUpdate(int N, Dtype* g, Dtype* h,
     Dtype momentum, Dtype local_rate) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(i, N) {
     float hi = h[i];
     float hi_new = h[i] = momentum * hi + local_rate * g[i];
     g[i] = (1+momentum) * hi_new - momentum * hi;
   }
+#endif
 }
 template <typename Dtype>
 void nesterov_update_gpu(int N, Dtype* g, Dtype* h, Dtype momentum,

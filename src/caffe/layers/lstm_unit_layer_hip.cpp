@@ -20,6 +20,7 @@ __device__ Dtype tanh(const Dtype x) {
 template <typename Dtype>
 __global__ void LSTMActsForward(const int nthreads, const int dim,
                                 const Dtype* X, Dtype* X_acts) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int x_dim = 4 * dim;
     const int d = index % x_dim;
@@ -29,12 +30,14 @@ __global__ void LSTMActsForward(const int nthreads, const int dim,
       X_acts[index] = tanh(X[index]);
     }
   }
+#endif
 }
 
 template <typename Dtype>
 __global__ void LSTMUnitForward(const int nthreads, const int dim,
     const Dtype* C_prev, const Dtype* X, const Dtype* cont,
     Dtype* C, Dtype* H) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int n = index / dim;
     const int d = index % dim;
@@ -49,6 +52,7 @@ __global__ void LSTMUnitForward(const int nthreads, const int dim,
     const Dtype tanh_c = tanh(c);
     H[index] = o * tanh_c;
   }
+#endif
 }
 
 template <typename Dtype>
@@ -77,6 +81,7 @@ __global__ void LSTMUnitBackward(const int nthreads, const int dim,
     const Dtype* C_prev, const Dtype* X, const Dtype* C, const Dtype* H,
     const Dtype* cont, const Dtype* C_diff, const Dtype* H_diff,
     Dtype* C_prev_diff, Dtype* X_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int n = index / dim;
     const int d = index % dim;
@@ -103,11 +108,13 @@ __global__ void LSTMUnitBackward(const int nthreads, const int dim,
     *o_diff = H_diff[index] * tanh_c;
     *g_diff = c_term_diff * i;
   }
+#endif
 }
 
 template <typename Dtype>
 __global__ void LSTMActsBackward(const int nthreads, const int dim,
     const Dtype* X_acts, const Dtype* X_acts_diff, Dtype* X_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int x_dim = 4 * dim;
     const int d = index % x_dim;
@@ -118,6 +125,7 @@ __global__ void LSTMActsBackward(const int nthreads, const int dim,
       X_diff[index] = X_acts_diff[index] * (Dtype(1) - X_act * X_act);
     }
   }
+#endif
 }
 
 template <typename Dtype>

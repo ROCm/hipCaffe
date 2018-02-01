@@ -10,6 +10,7 @@ __global__ void Slice(const int nthreads, const Dtype* in_data,
     const bool forward, const int num_slices, const int slice_size,
     const int bottom_slice_axis, const int top_slice_axis,
     const int offset_slice_axis, Dtype* out_data) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int total_slice_size = slice_size * top_slice_axis;
     const int slice_num = index / total_slice_size;
@@ -22,6 +23,7 @@ __global__ void Slice(const int nthreads, const Dtype* in_data,
       out_data[bottom_index] = in_data[index];
     }
   }
+#endif
 }
 
 template <typename Dtype>

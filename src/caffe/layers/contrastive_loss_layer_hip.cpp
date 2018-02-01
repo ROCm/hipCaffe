@@ -55,6 +55,7 @@ __global__ void CLLBackward(const int count, const int channels,
     const Dtype margin, const bool legacy_version, const Dtype alpha,
     const Dtype* y, const Dtype* diff, const Dtype* dist_sq,
     Dtype *bottom_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(i, count) {
     int n = i / channels;  // the num index, to access y and dist_sq
     if (static_cast<int>(y[n])) {  // similar pairs
@@ -77,6 +78,7 @@ __global__ void CLLBackward(const int count, const int channels,
       }
     }
   }
+#endif
 }
 
 template <typename Dtype>

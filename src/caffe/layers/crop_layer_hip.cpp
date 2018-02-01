@@ -11,6 +11,7 @@ __global__ void copy_kernel(const int n, const int height, const int width,
     const int src_outer_stride, const int src_inner_stride,
     const int dest_outer_stride, const int dest_inner_stride,
     const Dtype* src, Dtype* dest) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     int src_start = index / height * src_outer_stride
                   + index % height * src_inner_stride;
@@ -20,6 +21,7 @@ __global__ void copy_kernel(const int n, const int height, const int width,
       dest[dest_start + i] = src[src_start + i];
     }
   }
+#endif
 }
 
 template <typename Dtype>

@@ -444,6 +444,7 @@ CXXFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
 
 ifneq (, $(findstring hcc, $(HIP_PLATFORM)))
 	HIPCCFLAGS += -fPIC $(COMMON_FLAGS) -std=c++11 
+        HIPCCFLAGS += -DNULLIFY_KERNELS
 else ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
 	HIPCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS) -std=c++11 -Wno-deprecated-gpu-targets
 	HIPCCFLAGS += $(HIP_ARCH)

@@ -10,10 +10,12 @@ template <typename Dtype>
 __global__ void BiasForward(const int n, const Dtype* in,
     const Dtype* bias, const int bias_dim, const int inner_dim,
     Dtype* out) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     const int bias_index = (index / inner_dim) % bias_dim;
     out[index] = in[index] + bias[bias_index];
   }
+#endif
 }
 
 template <typename Dtype>

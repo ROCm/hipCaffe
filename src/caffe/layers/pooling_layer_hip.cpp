@@ -14,6 +14,7 @@ __global__ void MaxPoolForward(const int nthreads,
     const int pooled_width, const int kernel_h, const int kernel_w,
     const int stride_h, const int stride_w, const int pad_h, const int pad_w,
     Dtype* const top_data, int* mask, Dtype* top_mask) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int pw = index % pooled_width;
     const int ph = (index / pooled_width) % pooled_height;
@@ -44,6 +45,7 @@ __global__ void MaxPoolForward(const int nthreads,
       top_mask[index] = maxidx;
     }
   }
+#endif
 }
 
 template <typename Dtype>
@@ -53,6 +55,7 @@ __global__ void AvePoolForward(const int nthreads,
     const int pooled_width, const int kernel_h, const int kernel_w,
     const int stride_h, const int stride_w, const int pad_h, const int pad_w,
     Dtype* const top_data) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int pw = index % pooled_width;
     const int ph = (index / pooled_width) % pooled_height;
@@ -77,6 +80,7 @@ __global__ void AvePoolForward(const int nthreads,
     }
     top_data[index] = aveval / pool_size;
   }
+#endif
 }
 
 template <typename Dtype>
@@ -86,6 +90,7 @@ __global__ void StoPoolForwardTrain(const int nthreads,
     const int width, const int pooled_height, const int pooled_width,
     const int kernel_h, const int kernel_w, const int stride_h,
     const int stride_w, Dtype* const rand_idx, Dtype* const top_data) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int pw = index % pooled_width;
     const int ph = (index / pooled_width) % pooled_height;
@@ -118,6 +123,7 @@ __global__ void StoPoolForwardTrain(const int nthreads,
       }
     }
   }
+#endif
 }
 
 
@@ -128,6 +134,7 @@ __global__ void StoPoolForwardTest(const int nthreads,
     const int width, const int pooled_height, const int pooled_width,
     const int kernel_h, const int kernel_w, const int stride_h,
     const int stride_w, Dtype* const top_data) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int pw = index % pooled_width;
     const int ph = (index / pooled_width) % pooled_height;
@@ -151,6 +158,7 @@ __global__ void StoPoolForwardTest(const int nthreads,
     }
     top_data[index] = cumvalues / cumsum;
   }
+#endif
 }
 
 
@@ -227,6 +235,7 @@ __global__ void MaxPoolBackward(const int nthreads, const Dtype* const top_diff,
     const int pooled_height, const int pooled_width, const int kernel_h,
     const int kernel_w, const int stride_h, const int stride_w, const int pad_h,
     const int pad_w, Dtype* const bottom_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     // find out the local index
     // find out the local offset
@@ -264,6 +273,7 @@ __global__ void MaxPoolBackward(const int nthreads, const Dtype* const top_diff,
     }
     bottom_diff[index] = gradient;
   }
+#endif
 }
 
 template <typename Dtype>
@@ -273,6 +283,7 @@ __global__ void AvePoolBackward(const int nthreads, const Dtype* const top_diff,
     const int kernel_h, const int kernel_w, const int stride_h,
     const int stride_w, const int pad_h, const int pad_w,
     Dtype* const bottom_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     // find out the local index
     // find out the local offset
@@ -300,6 +311,7 @@ __global__ void AvePoolBackward(const int nthreads, const Dtype* const top_diff,
     }
     bottom_diff[index] = gradient;
   }
+#endif
 }
 
 
@@ -310,6 +322,7 @@ __global__ void StoPoolBackward(const int nthreads,
     const int width, const int pooled_height, const int pooled_width,
     const int kernel_h, const int kernel_w, const int stride_h,
     const int stride_w, Dtype* const bottom_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     // find out the local index
     // find out the local offset
@@ -334,6 +347,7 @@ __global__ void StoPoolBackward(const int nthreads,
     }
     bottom_diff[index] = gradient;
   }
+#endif
 }
 
 

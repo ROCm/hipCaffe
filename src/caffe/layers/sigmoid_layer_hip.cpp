@@ -7,9 +7,11 @@ namespace caffe {
 
 template <typename Dtype>
 __global__ void SigmoidForward(const int n, const Dtype* in, Dtype* out) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     out[index] = 1. / (1. + exp(-in[index]));
   }
+#endif
 }
 
 template <typename Dtype>
@@ -32,10 +34,12 @@ void SigmoidLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 __global__ void SigmoidBackward(const int n, const Dtype* in_diff,
     const Dtype* out_data, Dtype* out_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     const Dtype sigmoid_x = out_data[index];
     out_diff[index] = in_diff[index] * sigmoid_x * (1 - sigmoid_x);
   }
+#endif
 }
 
 template <typename Dtype>

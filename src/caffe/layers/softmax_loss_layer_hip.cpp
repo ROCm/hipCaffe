@@ -13,6 +13,7 @@ __global__ void SoftmaxLossForwardGPU(const int nthreads,
           const int num, const int dim, const int spatial_dim,
           const bool has_ignore_label_, const int ignore_label_,
           Dtype* counts) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int n = index / spatial_dim;
     const int s = index % spatial_dim;
@@ -26,6 +27,7 @@ __global__ void SoftmaxLossForwardGPU(const int nthreads,
       counts[index] = 1;
     }
   }
+#endif
 }
 
 template <typename Dtype>
@@ -68,6 +70,7 @@ __global__ void SoftmaxLossBackwardGPU(const int nthreads, const Dtype* top,
           const Dtype* label, Dtype* bottom_diff, const int num, const int dim,
           const int spatial_dim, const bool has_ignore_label_,
           const int ignore_label_, Dtype* counts) {
+#ifndef NULLIFY_KERNELS
   const int channels = dim / spatial_dim;
 
   HIP_KERNEL_LOOP(index, nthreads) {
@@ -85,6 +88,7 @@ __global__ void SoftmaxLossBackwardGPU(const int nthreads, const Dtype* top,
       counts[index] = 1;
     }
   }
+#endif
 }
 
 template <typename Dtype>

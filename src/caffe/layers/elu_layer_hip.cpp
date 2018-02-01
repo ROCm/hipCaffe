@@ -8,10 +8,12 @@ namespace caffe {
 template <typename Dtype>
 __global__ void ELUForward(const int n, const Dtype* in, Dtype* out,
     Dtype alpha) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     out[index] = in[index] > 0 ? in[index] :
         alpha * (exp(in[index]) - 1);
   }
+#endif
 }
 
 template <typename Dtype>
@@ -31,10 +33,12 @@ template <typename Dtype>
 __global__ void ELUBackward(const int n, const Dtype* in_diff,
     const Dtype* out_data, const Dtype* in_data,
     Dtype* out_diff, Dtype alpha) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     out_diff[index] = in_data[index] > 0 ? in_diff[index] :
         in_diff[index] * (out_data[index] + alpha);
   }
+#endif
 }
 
 template <typename Dtype>

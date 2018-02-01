@@ -10,6 +10,7 @@ __global__ void SigmoidCrossEntropyLossForwardGPU(const int nthreads,
           const Dtype* input_data, const Dtype* target, Dtype* loss,
           const bool has_ignore_label_, const int ignore_label_,
           Dtype* counts) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(i, nthreads) {
     const int target_value = static_cast<int>(target[i]);
     if (has_ignore_label_ && target_value == ignore_label_) {
@@ -22,17 +23,20 @@ __global__ void SigmoidCrossEntropyLossForwardGPU(const int nthreads,
       counts[i] = 1;
     }
   }
+#endif
 }
 
 template <typename Dtype>
 __global__ void SigmoidCrossEntropyLossIgnoreDiffGPU(const int count,
     const int ignore_label, const Dtype* target, Dtype* diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(i, count) {
     const int target_value = static_cast<int>(target[i]);
     if (target_value == ignore_label) {
       diff[i] = 0;
     }
   }
+#endif
 }
 
 

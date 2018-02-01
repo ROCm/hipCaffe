@@ -9,6 +9,7 @@ template <typename Dtype>
 __global__ void Tile(const int nthreads, const Dtype* bottom_data,
     const int tile_size, const int num_tiles, const int bottom_tile_axis,
     Dtype* top_data) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int d = index % tile_size;
     const int b = (index / tile_size / num_tiles) % bottom_tile_axis;
@@ -16,6 +17,7 @@ __global__ void Tile(const int nthreads, const Dtype* bottom_data,
     const int bottom_index = (n * bottom_tile_axis + b) * tile_size + d;
     top_data[index] = bottom_data[bottom_index];
   }
+#endif
 }
 
 template <typename Dtype>
@@ -34,6 +36,7 @@ template <typename Dtype>
 __global__ void TileBackward(const int nthreads, const Dtype* top_diff,
     const int tile_size, const int num_tiles, const int bottom_tile_axis,
     Dtype* bottom_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, nthreads) {
     const int d = index % tile_size;
     const int b = (index / tile_size) % bottom_tile_axis;
@@ -45,6 +48,7 @@ __global__ void TileBackward(const int nthreads, const Dtype* top_diff,
       top_index += bottom_tile_axis * tile_size;
     }
   }
+#endif
 }
 
 template <typename Dtype>

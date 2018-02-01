@@ -10,6 +10,7 @@ namespace caffe {
 template <typename Dtype>
 __global__ void kernel_channel_max(const int num, const int channels,
     const int spatial_dim, const Dtype* data, Dtype* out) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, num * spatial_dim) {
     int n = index / spatial_dim;
     int s = index % spatial_dim;
@@ -19,29 +20,35 @@ __global__ void kernel_channel_max(const int num, const int channels,
     }
     out[index] = maxval;
   }
+#endif
 }
 
 template <typename Dtype>
 __global__ void kernel_channel_subtract(const int count,
     const int num, const int channels,
     const int spatial_dim, const Dtype* channel_max, Dtype* data) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, count) {
     int n = index / channels / spatial_dim;
     int s = index % spatial_dim;
     data[index] -= channel_max[n * spatial_dim + s];
   }
+#endif
 }
 
 template <typename Dtype>
 __global__ void kernel_exp(const int count, const Dtype* data, Dtype* out) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, count) {
     out[index] = exp(data[index]);
   }
+#endif
 }
 
 template <typename Dtype>
 __global__ void kernel_channel_sum(const int num, const int channels,
     const int spatial_dim, const Dtype* data, Dtype* channel_sum) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, num * spatial_dim) {
     int n = index / spatial_dim;
     int s = index % spatial_dim;
@@ -51,23 +58,27 @@ __global__ void kernel_channel_sum(const int num, const int channels,
     }
     channel_sum[index] = sum;
   }
+#endif
 }
 
 template <typename Dtype>
 __global__ void kernel_channel_div(const int count,
     const int num, const int channels,
     const int spatial_dim, const Dtype* channel_sum, Dtype* data) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, count) {
     int n = index / channels / spatial_dim;
     int s = index % spatial_dim;
     data[index] /= channel_sum[n * spatial_dim + s];
   }
+#endif
 }
 
 template <typename Dtype>
 __global__ void kernel_channel_dot(const int num, const int channels,
     const int spatial_dim, const Dtype* data_1, const Dtype* data_2,
     Dtype* channel_dot) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, num * spatial_dim) {
     int n = index / spatial_dim;
     int s = index % spatial_dim;
@@ -78,6 +89,7 @@ __global__ void kernel_channel_dot(const int num, const int channels,
     }
     channel_dot[index] = dot;
   }
+#endif
 }
 
 template <typename Dtype>

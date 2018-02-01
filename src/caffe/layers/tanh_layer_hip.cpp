@@ -9,9 +9,11 @@ namespace caffe {
 
 template <typename Dtype>
 __global__ void TanHForward(const int n, const Dtype* in, Dtype* out) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     out[index] = tanh(in[index]);
   }
+#endif
 }
 
 template <typename Dtype>
@@ -29,10 +31,12 @@ void TanHLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 __global__ void TanHBackward(const int n, const Dtype* in_diff,
     const Dtype* out_data, Dtype* out_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     Dtype tanhx = out_data[index];
     out_diff[index] = in_diff[index] * (1 - tanhx * tanhx);
   }
+#endif
 }
 
 template <typename Dtype>

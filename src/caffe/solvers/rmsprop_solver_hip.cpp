@@ -6,11 +6,13 @@ namespace caffe {
 template <typename Dtype>
 __global__ void RMSPropUpdate(int N, Dtype* g, Dtype* h,
     Dtype rms_decay, Dtype delta, Dtype local_rate) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(i, N) {
     float gi = g[i];
     float hi = h[i] = rms_decay*h[i] + (1-rms_decay)*gi*gi;
     g[i] = local_rate * g[i] / (sqrt(hi) + delta);
   }
+#endif
 }
 template <typename Dtype>
 void rmsprop_update_gpu(int N, Dtype* g, Dtype* h, Dtype rms_decay,

@@ -6,12 +6,14 @@ namespace caffe {
 template <typename Dtype>
 __global__ void AdamUpdate(int N, Dtype* g, Dtype* m, Dtype* v,
     Dtype beta1, Dtype beta2, Dtype eps_hat, Dtype corrected_local_rate) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(i, N) {
     float gi = g[i];
     float mi = m[i] = m[i]*beta1 + gi*(1-beta1);
     float vi = v[i] = v[i]*beta2 + gi*gi*(1-beta2);
     g[i] = corrected_local_rate * mi / (sqrt(vi) + eps_hat);
   }
+#endif
 }
 template <typename Dtype>
 void adam_update_gpu(int N, Dtype* g, Dtype* m, Dtype* v, Dtype beta1,

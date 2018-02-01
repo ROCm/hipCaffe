@@ -11,10 +11,12 @@ template <typename Dtype>
 __global__ void PReLUForward(const int n, const int channels, const int dim,
     const Dtype* in, Dtype* out, const Dtype* slope_data,
     const int div_factor) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     int c = (index / dim) % channels / div_factor;
     out[index] = in[index] > 0 ? in[index] : in[index] * slope_data[c];
   }
+#endif
 }
 
 // HIP kernel for bottom backward
@@ -22,11 +24,13 @@ template <typename Dtype>
 __global__ void PReLUBackward(const int n, const int channels, const int dim,
     const Dtype* in_diff, const Dtype* in_data, Dtype* out_diff,
     const Dtype* slope_data, const int div_factor) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     int c = (index / dim) % channels / div_factor;
     out_diff[index] = in_diff[index] * ((in_data[index] > 0)
         + (in_data[index] <= 0) * slope_data[c]);
   }
+#endif
 }
 
 // HIP kernel for element-wise parameter backward
@@ -34,6 +38,7 @@ template <typename Dtype>
 __global__ void PReLUParamBackward(const int n,
     const int rows, const int rowPitch, const Dtype* in_diff,
     const Dtype* in_data, Dtype* out_diff) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(index, n) {
     out_diff[index] = in_diff[index] * in_data[index] * (in_data[index] <= 0);
     for ( int k = 1; k < rows; k++ ) {
@@ -41,6 +46,7 @@ __global__ void PReLUParamBackward(const int n,
            * in_data[index + k*rowPitch] * (in_data[index + k*rowPitch] <= 0);
     }
   }
+#endif
 }
 
 template <typename Dtype>

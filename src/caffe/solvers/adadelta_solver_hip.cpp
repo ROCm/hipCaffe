@@ -6,6 +6,7 @@ namespace caffe {
 template <typename Dtype>
 __global__ void AdaDeltaUpdate(int N, Dtype* g, Dtype* h, Dtype* h2,
     Dtype momentum, Dtype delta, Dtype local_rate) {
+#ifndef NULLIFY_KERNELS
   HIP_KERNEL_LOOP(i, N) {
     float gi = g[i];
     float hi = h[i] = momentum * h[i] + (1-momentum) * gi * gi;
@@ -13,6 +14,7 @@ __global__ void AdaDeltaUpdate(int N, Dtype* g, Dtype* h, Dtype* h2,
     h2[i] = momentum * h2[i] + (1-momentum) * gi * gi;
     g[i] = local_rate * gi;
   }
+#endif
 }
 template <typename Dtype>
 void adadelta_update_gpu(int N, Dtype* g, Dtype* h, Dtype* h2, Dtype momentum,
