@@ -72,12 +72,10 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 #ifdef USE_MIOPEN
 
 #ifndef USE_MIOPEN_BACKWARD_CONV
-  // TBD
   // Fall back to standard Caffe
   ConvolutionLayer<Dtype>::Backward_gpu(top, propagate_down, bottom);
 #else
 
-  //LOG(INFO) << "CuDNNConvolutionLayer<Dtype>::Backward_gpu()\n";
   const Dtype* weight = NULL;
   Dtype* weight_diff = NULL;
   if (this->param_propagate_down_[0]) {
@@ -131,7 +129,6 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         ));
 #else
         assert (g==0); // these equations do not account for g: - do we need another loop?
-        //LOG(INFO) << "CuDNNConvolutionLayer<Dtype>::Backward_gpu_weight fallback()\n";
         const Dtype* bottom_data = bottom[i]->gpu_data();
         for (int n = 0; n < this->num_; ++n) {
           // gradient w.r.t. weight. Note that we will accumulate diffs.
@@ -163,8 +160,6 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
             workspace[2 * this->group_ + g],  // workSpace
             workspace_bwd_data_sizes_[i]      // workSpaceSize
         ));
-        //printf ("miopenConvolutionBackwardData\n");
-
 #else
         assert (g==0); // these equations do not account for g: - do we need another loop?
         // gradient w.r.t. bottom data, if necessary.
