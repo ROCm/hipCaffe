@@ -18,7 +18,10 @@ int CuDNNConvolutionLayer<double>::count{0};
 
 template <typename Dtype>
 CuDNNConvolutionLayer<Dtype>::CuDNNConvolutionLayer(const LayerParameter& param)
-    : ConvolutionLayer<Dtype>(param), handles_setup_(false) {
+    : ConvolutionLayer<Dtype>(param), handles_setup_(false),
+      fwd_algo_(), bwd_weight_algo_(), bwd_data_algo_(),
+      workspace_fwd_sizes_(), workspace_bwd_filter_sizes_(), workspace_bwd_data_sizes_(),
+      workspace() {
 #ifdef CONV_LAYER_COUNT
   ++CuDNNConvolutionLayer<Dtype>::count;
   DLOG(INFO) << "CuDNNConvolutionLayer<Dtype>::count: " << CuDNNConvolutionLayer<Dtype>::count;
@@ -36,20 +39,20 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
   assert((this->group_ == 1) && "Error: groups > 1 are not fully tested, and therefore disabled.");
 
   // Initialize algorithm arrays
-  fwd_algo_       = new miopenConvFwdAlgorithm_t[bottom.size()];
-  bwd_weight_algo_= new miopenConvBwdWeightsAlgorithm_t[bottom.size()];
-  bwd_data_algo_  = new miopenConvBwdDataAlgorithm_t[bottom.size()];
+  fwd_algo_.resize(bottom.size());
+  bwd_weight_algo_.resize(bottom.size());
+  bwd_data_algo_.resize(bottom.size());
 #endif
 
   // initialize size arrays
-  workspace_fwd_sizes_ = new size_t[bottom.size()];
-  workspace_bwd_filter_sizes_ = new size_t[bottom.size()];
-  workspace_bwd_data_sizes_ = new size_t[bottom.size()];
+  workspace_fwd_sizes_.resize(bottom.size());
+  workspace_bwd_filter_sizes_.resize(bottom.size());
+  workspace_bwd_data_sizes_.resize(bottom.size());
 
   // workspace data
   workspaceSizeInBytes = 0;
   workspaceData = NULL;
-  workspace = new void*[this->group_ * WORKSPACE_PER_GROUP];
+  workspace.resize(this->group_ * WORKSPACE_PER_GROUP);
 
 #ifdef USE_MIOPEN
   for (size_t i = 0; i < bottom.size(); ++i) {
@@ -457,15 +460,6 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
 #endif
 
   hipFree(workspaceData);
-#ifdef USE_MIOPEN
-  delete [] fwd_algo_;
-  delete [] bwd_weight_algo_;
-  delete [] bwd_data_algo_;
-#endif
-  delete [] workspace;
-  delete [] workspace_fwd_sizes_;
-  delete [] workspace_bwd_data_sizes_;
-  delete [] workspace_bwd_filter_sizes_;
 
 #ifdef CONV_LAYER_COUNT
   --CuDNNConvolutionLayer<Dtype>::count;

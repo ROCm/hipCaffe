@@ -53,9 +53,9 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
 #ifdef USE_MIOPEN
 
   // algorithms for forward and backwards convolutions
-  miopenConvFwdAlgorithm_t*        fwd_algo_;
-  miopenConvBwdWeightsAlgorithm_t* bwd_weight_algo_;
-  miopenConvBwdDataAlgorithm_t*    bwd_data_algo_;
+  vector<miopenConvFwdAlgorithm_t>        fwd_algo_;
+  vector<miopenConvBwdWeightsAlgorithm_t> bwd_weight_algo_;
+  vector<miopenConvBwdDataAlgorithm_t>    bwd_data_algo_;
 
   vector<miopenTensorDescriptor_t>      bottom_descs_, top_descs_;
   miopenTensorDescriptor_t              bias_desc_;
@@ -63,17 +63,17 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   vector<miopenConvolutionDescriptor_t> conv_descs_;
 
   int N_, C_, W_, H_;
+  miopenHandle_t handle_;
 #endif
 
   int bottom_offset_, top_offset_, bias_offset_;
 
-  size_t *workspace_fwd_sizes_;
-  size_t *workspace_bwd_data_sizes_;
-  size_t *workspace_bwd_filter_sizes_;
+  vector<size_t> workspace_fwd_sizes_;
+  vector<size_t> workspace_bwd_data_sizes_;
+  vector<size_t> workspace_bwd_filter_sizes_;
   size_t workspaceSizeInBytes;  // size of underlying storage
   void *workspaceData;  // underlying storage
-  void **workspace;  // aliases into workspaceData
-  miopenHandle_t handle_;
+  vector<void*>  workspace;  // aliases into workspaceData
 };
 #endif
 
