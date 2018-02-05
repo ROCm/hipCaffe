@@ -18,8 +18,10 @@ void caffe_gpu_gemm<float>(const CBLAS_TRANSPOSE TransA,
       (TransA == CblasNoTrans) ? HIPBLAS_OP_N : HIPBLAS_OP_T;
   hipblasOperation_t hipTransB =
       (TransB == CblasNoTrans) ? HIPBLAS_OP_N : HIPBLAS_OP_T;
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasSgemm(Caffe::hipblas_handle(), hipTransB, hipTransA,
       N, M, K, &alpha, const_cast<float*>(B), ldb, const_cast<float*>(A), lda, &beta, C, N));
+#endif
 }
 
 template <>
@@ -34,8 +36,10 @@ void caffe_gpu_gemm<double>(const CBLAS_TRANSPOSE TransA,
       (TransA == CblasNoTrans) ? HIPBLAS_OP_N : HIPBLAS_OP_T;
   hipblasOperation_t hipTransB =
       (TransB == CblasNoTrans) ? HIPBLAS_OP_N : HIPBLAS_OP_T;
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasDgemm(Caffe::hipblas_handle(), hipTransB, hipTransA,
       N, M, K, &alpha, const_cast<double*>(B), ldb, const_cast<double*>(A), lda, &beta, C, N));
+#endif
 }
 
 template <>
@@ -44,8 +48,10 @@ void caffe_gpu_gemv<float>(const CBLAS_TRANSPOSE TransA, const int M,
     const float beta, float* y) {
   hipblasOperation_t hipTransA =
       (TransA == CblasNoTrans) ? HIPBLAS_OP_T : HIPBLAS_OP_N;
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasSgemv(Caffe::hipblas_handle(), hipTransA, N, M, &alpha,
      const_cast<float*>(A), N, const_cast<float*>(x), 1, &beta, y, 1));
+#endif
 }
 
 template <>
@@ -54,20 +60,26 @@ void caffe_gpu_gemv<double>(const CBLAS_TRANSPOSE TransA, const int M,
     const double beta, double* y) {
   hipblasOperation_t hipTransA =
       (TransA == CblasNoTrans) ? HIPBLAS_OP_T : HIPBLAS_OP_N;
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasDgemv(Caffe::hipblas_handle(), hipTransA, N, M, &alpha,
       const_cast<double*>(A), N, const_cast<double*>(x), 1, &beta, y, 1));
+#endif
 }
 
 template <>
 void caffe_gpu_axpy<float>(const int N, const float alpha, const float* X,
     float* Y) {
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasSaxpy(Caffe::hipblas_handle(), N, &alpha, X, 1, Y, 1));
+#endif
 }
 
 template <>
 void caffe_gpu_axpy<double>(const int N, const double alpha, const double* X,
     double* Y) {
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasDaxpy(Caffe::hipblas_handle(), N, &alpha, X, 1, Y, 1));
+#endif
 }
 
 void caffe_gpu_memcpy(const size_t N, const void* X, void* Y) {
@@ -78,12 +90,16 @@ void caffe_gpu_memcpy(const size_t N, const void* X, void* Y) {
 
 template <>
 void caffe_gpu_scal<float>(const int N, const float alpha, float *X) {
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasSscal(Caffe::hipblas_handle(), N, &alpha, X, 1));
+#endif
 }
 
 template <>
 void caffe_gpu_scal<double>(const int N, const double alpha, double *X) {
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasDscal(Caffe::hipblas_handle(), N, &alpha, X, 1));
+#endif
 }
 
 template <>
@@ -103,37 +119,49 @@ void caffe_gpu_axpby<double>(const int N, const double alpha, const double* X,
 template <>
 void caffe_gpu_dot<float>(const int n, const float* x, const float* y,
     float* out) {
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasSdot(Caffe::hipblas_handle(), n, x, 1, y, 1, out));
+#endif
 }
 
 template <>
 void caffe_gpu_dot<double>(const int n, const double* x, const double* y,
     double * out) {
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasDdot(Caffe::hipblas_handle(), n, x, 1, y, 1, out));
+#endif
 }
 
 template <>
 void caffe_gpu_asum<float>(const int n, const float* x, float* y) {
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasSasum(Caffe::hipblas_handle(), n, const_cast<float*>(x), 1, y));
+#endif
 }
 
 template <>
 void caffe_gpu_asum<double>(const int n, const double* x, double* y) {
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasDasum(Caffe::hipblas_handle(), n, const_cast<double*>(x), 1, y));
+#endif
 }
 
 template <>
 void caffe_gpu_scale<float>(const int n, const float alpha, const float *x,
                             float* y) {
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasScopy(Caffe::hipblas_handle(), n, x, 1, y, 1));
   HIPBLAS_CHECK(hipblasSscal(Caffe::hipblas_handle(), n, &alpha, y, 1));
+#endif
 }
 
 template <>
 void caffe_gpu_scale<double>(const int n, const double alpha, const double *x,
                              double* y) {
+#ifndef DISABLE_HIPBLAS_KERNELS
   HIPBLAS_CHECK(hipblasDcopy(Caffe::hipblas_handle(), n, x, 1, y, 1));
   HIPBLAS_CHECK(hipblasDscal(Caffe::hipblas_handle(), n, &alpha, y, 1));
+#endif
 }
 
 template <typename Dtype>
