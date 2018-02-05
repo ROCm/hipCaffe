@@ -69,8 +69,8 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   int bottom_offset_, top_offset_, bias_offset_;
 
   vector<size_t> workspace_fwd_sizes_;
-  vector<size_t> workspace_bwd_data_sizes_;
   vector<size_t> workspace_bwd_filter_sizes_;
+  vector<size_t> workspace_bwd_data_sizes_;
   size_t workspaceSizeInBytes;  // size of underlying storage
   void *workspaceData;  // underlying storage
   vector<void*>  workspace;  // aliases into workspaceData
