@@ -39,6 +39,7 @@ void InternalThread::entry(int device, Caffe::Brew mode, int rand_seed,
     int solver_count, bool root_solver) {
   LOG(INFO) << "Started internal thread on device " << device;
 #ifndef CPU_ONLY
+  LOG(INFO) << "Call hipSetDevice(" << device << ")";
   HIP_CHECK(hipSetDevice(device));
 #endif
   Caffe::set_mode(mode);

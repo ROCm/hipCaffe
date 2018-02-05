@@ -348,7 +348,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     ));
 
     fwd_algo_[i] = perf.fwd_algo;
-    DLOG(INFO) << "fwd_algo_[" << i << "]: " << fwd_algo_[i] << "\n";
+    LOG(INFO) << " - fwd_algo_[" << i << "]:        " << fwd_algo_[i];
     DLOG(INFO) << "workspace_fwd_sizes_[" << i << "]:" << workspace_fwd_sizes_[i] << "\n";
 #endif
 
@@ -375,7 +375,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     ));
 
     bwd_weight_algo_[i] = perf.bwd_weights_algo;
-    DLOG(INFO) << "bwd_weight_algo_[" << i << "]: " << bwd_weight_algo_[i] << "\n";
+    LOG(INFO) << " - bwd_weight_algo_[" << i << "]: " << bwd_weight_algo_[i];
     DLOG(INFO) << "workspace_bwd_filter_sizes_[" << i << "]: " << workspace_bwd_filter_sizes_[i] << "\n";
 #endif
 
@@ -403,7 +403,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
       ));
   
       bwd_data_algo_[i] = perf.bwd_data_algo;
-      DLOG(INFO) << "bwd_data_algo_[" << i << "]: " << bwd_data_algo_[i] << "\n";
+      LOG(INFO) << " - bwd_data_algo_[" << i << "]:   " << bwd_data_algo_[i];
       DLOG(INFO) << "workspace_bwd_data_sizes_[" << i << "]: " << workspace_bwd_data_sizes_[i] << "\n";
     }
 #endif // USE_MIOPEN_BACKWARD_DATA

@@ -47,7 +47,7 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
-
+public:
   bool handles_setup_;
 
 #ifdef USE_MIOPEN

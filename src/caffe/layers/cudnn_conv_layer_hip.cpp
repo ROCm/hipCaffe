@@ -145,6 +145,11 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
           weight = this->blobs_[0]->gpu_data();
         }
 #ifdef USE_MIOPEN_BACKWARD_DATA
+        LOG(INFO) << "miopenConvolutionBackwardData(): i=" << i;
+        LOG(INFO) << " - fwd_algo_[" << i << "]:        " << fwd_algo_[i];
+        LOG(INFO) << " - bwd_weight_algo_[" << i << "]: " << bwd_weight_algo_[i];
+        LOG(INFO) << " - bwd_data_algo_[" << i << "]:   " << bwd_data_algo_[i];
+
         MIOPEN_CHECK(miopenConvolutionBackwardData(
             handle_,                           // handle
             miopen::dataType<Dtype>::one,      // *alpha
