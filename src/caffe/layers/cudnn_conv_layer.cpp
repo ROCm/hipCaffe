@@ -348,6 +348,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     ));
 
     fwd_algo_[i] = perf.fwd_algo;
+    LOG(INFO) << "(N, C, H, W): (" << N_ << ", " << C_ << ", " << H_ << ", " << W_ << ")";
     LOG(INFO) << " - fwd_algo_[" << i << "]:        " << fwd_algo_[i];
     DLOG(INFO) << "workspace_fwd_sizes_[" << i << "]:" << workspace_fwd_sizes_[i] << "\n";
 #endif
