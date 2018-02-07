@@ -326,9 +326,6 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     perf.bwd_weights_algo = miopenConvolutionBwdWeightsAlgoDirect;
     perf.bwd_data_algo = miopenConvolutionBwdDataAlgoDirect;
 
-#ifdef USE_MIOPEN_FORWARD_CONV
-    DLOG(INFO) << "miopenFindConvolutionForwardAlgorithm\n";
-
     // choose forward and backward algorithms + workspace(s)
     MIOPEN_CHECK(miopenFindConvolutionForwardAlgorithm(
         handle_,                  // handle
@@ -343,7 +340,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         &ret_algo_count,          // returnedAlgoCount
         &perf,                    // perfResults
         workspace[0*this->group_ + g],             // workSpace
-        max_workspace,            // workSpaceSize
+        total_workspace_fwd,            // workSpaceSize
         false                     // exhaustiveSearch
     ));
 
@@ -371,7 +368,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         &ret_algo_count,          // returnedAlgoCount
         &perf,                    // perfResults
         workspace[1*this->group_ + g],             // workSpace
-        max_workspace,            // workSpaceSize
+        total_workspace_bwd_filter,            // workSpaceSize
         false                     // exhaustiveSearch
     ));
 
@@ -399,7 +396,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
           &ret_algo_count,          // returnedAlgoCount
           &perf,                    // perfResults
           workspace[2*this->group_ + g],             // workSpace
-          max_workspace,            // workSpaceSize
+          total_workspace_bwd_data,            // workSpaceSize
           false                     // exhaustiveSearch
       ));
   
