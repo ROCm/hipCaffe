@@ -326,6 +326,9 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     perf.bwd_weights_algo = miopenConvolutionBwdWeightsAlgoDirect;
     perf.bwd_data_algo = miopenConvolutionBwdDataAlgoDirect;
 
+#ifdef USE_MIOPEN_FORWARD_CONV
+    DLOG(INFO) << "miopenFindConvolutionForwardAlgorithm\n";
+
     // choose forward and backward algorithms + workspace(s)
     MIOPEN_CHECK(miopenFindConvolutionForwardAlgorithm(
         handle_,                  // handle
