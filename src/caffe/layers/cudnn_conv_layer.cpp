@@ -480,7 +480,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
             &ret_algo_count,          // returnedAlgoCount
             &perf,                    // perfResults
             workspace[0],             // workSpace
-            max_workspace,            // workSpaceSize
+            total_workspace_fwd,            // workSpaceSize
             false                     // exhaustiveSearch
         ));
         fwd_algo_[i] = perf.fwd_algo;
@@ -514,7 +514,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         &ret_algo_count,          // returnedAlgoCount
         &perf,                    // perfResults
         workspace[0],             // workSpace
-        max_workspace,            // workSpaceSize
+        total_workspace_bwd_filter,            // workSpaceSize
         false                     // exhaustiveSearch
     ));
     LOG(INFO) << "After miopenFindConvolutionBackwardWeightsAlgorithm\n";
@@ -542,7 +542,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
         &ret_algo_count,          // returnedAlgoCount
         &perf,                    // perfResults
         workspace[0],             // workSpace
-        max_workspace,            // workSpaceSize
+        total_workspace_bwd_data,            // workSpaceSize
         false                     // exhaustiveSearch
     ));
     LOG(INFO) << "After miopenFindConvolutionBackwardDataAlgorithm\n";
