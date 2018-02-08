@@ -12,8 +12,6 @@
 #include "caffe/caffe.hpp"
 #include "caffe/parallel.hpp"
 
-#include "caffe/layers/cudnn_conv_layer.hpp"
-
 namespace caffe {
 
 enum Op {
@@ -272,9 +270,6 @@ P2PSync<Dtype>::~P2PSync() {
 
 template<typename Dtype>
 void P2PSync<Dtype>::InternalThreadEntry() {
-  LOG(INFO) << "P2PSync<Dtype>::InternalThreadEntry() for device" << solver_->param().device_id();
-
-  LOG(INFO) << "Call Caffe::SetDevice(" << solver_->param().device_id() << ")";
   Caffe::SetDevice(solver_->param().device_id());
   CHECK(Caffe::root_solver());
   Caffe::set_root_solver(false);
@@ -286,25 +281,6 @@ void P2PSync<Dtype>::InternalThreadEntry() {
     Caffe::set_random_seed(
         solver_->param().random_seed() + solver_->param().device_id());
   }
-
-  LOG(INFO) << "# of layers: " << solver_->net()->layers().size() << " on device " << solver_->param().device_id();
-  size_t cudnn_conv_layer_count = 0;
-  for (size_t i = 0; i < solver_->net()->layers().size(); ++i) {
-    shared_ptr<Layer<Dtype> > layer = solver_->net()->layers().at(i);
-    Layer<Dtype>* raw_layer = layer.get();
-    if (CuDNNConvolutionLayer<Dtype>* raw_cudnn_layer = dynamic_cast<CuDNNConvolutionLayer<Dtype>*>(raw_layer)) {
-      ++cudnn_conv_layer_count;
-      
-      for (size_t j = 0; j < raw_cudnn_layer->fwd_algo_.size(); j++) {
-        LOG(INFO) << " - fwd_algo_[" << j << "]:        " << raw_cudnn_layer->fwd_algo_[j];
-        LOG(INFO) << " - bwd_weight_algo_[" << j << "]: " << raw_cudnn_layer->bwd_weight_algo_[j];
-        LOG(INFO) << " - bwd_data_algo_[" << j << "]:   " << raw_cudnn_layer->bwd_data_algo_[j];
-      }
-
-    }
-  }
-  LOG(INFO) << "# of CuDNNConvolutionLayer: " << cudnn_conv_layer_count << " on device " << solver_->param().device_id();
-
   solver_->Step(solver_->param().max_iter() - initial_iter_);
 }
 

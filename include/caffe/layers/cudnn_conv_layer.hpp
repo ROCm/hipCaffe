@@ -29,10 +29,6 @@ namespace caffe {
 template <typename Dtype>
 class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
  public:
-#ifdef CONV_LAYER_COUNT
-  static int count;
-#endif
-
   explicit CuDNNConvolutionLayer(const LayerParameter& param);
 
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
@@ -47,7 +43,6 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
-public:
   bool handles_setup_;
 
 #ifdef USE_MIOPEN
