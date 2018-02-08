@@ -29,8 +29,12 @@ namespace caffe {
 template <typename Dtype>
 class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
  public:
-  explicit CuDNNConvolutionLayer(const LayerParameter& param)
-      : ConvolutionLayer<Dtype>(param), handles_setup_(false) {}
+#ifdef CONV_LAYER_COUNT
+  static int count;
+#endif
+
+  explicit CuDNNConvolutionLayer(const LayerParameter& param);
+
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
   virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
@@ -47,8 +51,6 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   bool handles_setup_;
 
 #ifdef USE_MIOPEN
-  miopenHandle_t* handle_;
-  hipStream_t*    stream_;
 
   // algorithms for forward and backwards convolutions
   miopenConvFwdAlgorithm_t*        fwd_algo_;
@@ -63,21 +65,6 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   int N_, C_, W_, H_;
 #endif
 
-#ifdef USE_CUDNN
-  cudnnHandle_t* handle_;
-  cudaStream_t*  stream_;
-
-  // algorithms for forward and backwards convolutions
-  cudnnConvolutionFwdAlgo_t *fwd_algo_;
-  cudnnConvolutionBwdFilterAlgo_t *bwd_filter_algo_;
-  cudnnConvolutionBwdDataAlgo_t *bwd_data_algo_;
-
-  vector<cudnnTensorDescriptor_t> bottom_descs_, top_descs_;
-  cudnnTensorDescriptor_t    bias_desc_;
-  cudnnFilterDescriptor_t      filter_desc_;
-  vector<cudnnConvolutionDescriptor_t> conv_descs_;
-#endif
-
   int bottom_offset_, top_offset_, bias_offset_;
 
   size_t *workspace_fwd_sizes_;
@@ -86,6 +73,7 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   size_t workspaceSizeInBytes;  // size of underlying storage
   void *workspaceData;  // underlying storage
   void **workspace;  // aliases into workspaceData
+  miopenHandle_t handle_;
 };
 #endif
 
