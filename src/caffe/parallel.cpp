@@ -12,6 +12,8 @@
 #include "caffe/caffe.hpp"
 #include "caffe/parallel.hpp"
 
+#include "caffe/layers/cudnn_conv_layer.hpp"
+
 namespace caffe {
 
 enum Op {
@@ -211,8 +213,8 @@ P2PSync<Dtype>::P2PSync(shared_ptr<Solver<Dtype> > root_solver,
 #ifndef CPU_ONLY
   int initial_device;
   HIP_CHECK(hipGetDevice(&initial_device));
-  const int self = param.device_id();
-  HIP_CHECK(hipSetDevice(self));
+  this->device_ = param.device_id();
+  HIP_CHECK(hipSetDevice(device_));
 
   if (parent == NULL) {
     solver_ = root_solver;
@@ -228,16 +230,16 @@ P2PSync<Dtype>::P2PSync(shared_ptr<Solver<Dtype> > root_solver,
     // Enable p2p access between devices
     const int peer = parent->solver_->param().device_id();
     int access;
-    HIP_CHECK(hipDeviceCanAccessPeer(&access, self, peer));
+    HIP_CHECK(hipDeviceCanAccessPeer(&access, device_, peer));
     if (access) {
       HIP_CHECK(hipDeviceEnablePeerAccess(peer, 0));
     } else {
-      LOG(INFO)<< "GPU " << self << " does not have p2p access to GPU " << peer;
+      LOG(INFO)<< "GPU " << device_ << " does not have p2p access to GPU " << peer;
     }
     // Allocate receiving buffer on parent
     HIP_CHECK(hipSetDevice(peer));
     HIP_CHECK(hipMalloc(&parent_grads_, size_ * sizeof(Dtype)));
-    HIP_CHECK(hipSetDevice(self));
+    HIP_CHECK(hipSetDevice(device_));
   }
 
   HIP_CHECK(hipSetDevice(initial_device));
@@ -270,6 +272,9 @@ P2PSync<Dtype>::~P2PSync() {
 
 template<typename Dtype>
 void P2PSync<Dtype>::InternalThreadEntry() {
+  LOG(INFO) << "P2PSync<Dtype>::InternalThreadEntry() for device" << solver_->param().device_id();
+
+  LOG(INFO) << "Call Caffe::SetDevice(" << solver_->param().device_id() << ")";
   Caffe::SetDevice(solver_->param().device_id());
   CHECK(Caffe::root_solver());
   Caffe::set_root_solver(false);
@@ -281,6 +286,25 @@ void P2PSync<Dtype>::InternalThreadEntry() {
     Caffe::set_random_seed(
         solver_->param().random_seed() + solver_->param().device_id());
   }
+
+  LOG(INFO) << "# of layers: " << solver_->net()->layers().size() << " on device " << solver_->param().device_id();
+  size_t cudnn_conv_layer_count = 0;
+  for (size_t i = 0; i < solver_->net()->layers().size(); ++i) {
+    shared_ptr<Layer<Dtype> > layer = solver_->net()->layers().at(i);
+    Layer<Dtype>* raw_layer = layer.get();
+    if (CuDNNConvolutionLayer<Dtype>* raw_cudnn_layer = dynamic_cast<CuDNNConvolutionLayer<Dtype>*>(raw_layer)) {
+      ++cudnn_conv_layer_count;
+      
+      for (size_t j = 0; j < raw_cudnn_layer->fwd_algo_.size(); j++) {
+        LOG(INFO) << " - fwd_algo_[" << j << "]:        " << raw_cudnn_layer->fwd_algo_[j];
+        LOG(INFO) << " - bwd_weight_algo_[" << j << "]: " << raw_cudnn_layer->bwd_weight_algo_[j];
+        LOG(INFO) << " - bwd_data_algo_[" << j << "]:   " << raw_cudnn_layer->bwd_data_algo_[j];
+      }
+
+    }
+  }
+  LOG(INFO) << "# of CuDNNConvolutionLayer: " << cudnn_conv_layer_count << " on device " << solver_->param().device_id();
+
   solver_->Step(solver_->param().max_iter() - initial_iter_);
 }
 
@@ -426,13 +450,17 @@ void P2PSync<Dtype>::Run(const vector<int>& gpus) {
 
   LOG(INFO)<< "Starting Optimization";
 
+  DLOG(INFO) << "Start " << (syncs.size() - 1) << " threads";
   for (int i = 1; i < syncs.size(); ++i) {
     syncs[i]->StartInternalThread();
   }
 
+  DLOG(INFO) << "Run root solver";
+
   // Run root solver on current thread
   solver_->Solve();
 
+  DLOG(INFO) << "Stop " << (syncs.size() - 1) << " threads";
   for (int i = 1; i < syncs.size(); ++i) {
     syncs[i]->StopInternalThread();
   }
