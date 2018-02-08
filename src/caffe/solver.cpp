@@ -263,7 +263,7 @@ void Solver<Dtype>::Step(int iters) {
          && iter_ % param_.snapshot() == 0
          && Caffe::root_solver()) ||
          (request == SolverAction::SNAPSHOT)) {
-      //Snapshot();
+      Snapshot();
     }
     if (SolverAction::STOP == request) {
       requested_early_exit_ = true;
@@ -295,7 +295,7 @@ void Solver<Dtype>::Solve(const char* resume_file) {
   // overridden by setting snapshot_after_train := false
   if (param_.snapshot_after_train()
       && (!param_.snapshot() || iter_ % param_.snapshot() != 0)) {
-    //Snapshot();
+    Snapshot();
   }
   if (requested_early_exit_) {
     LOG(INFO) << "Optimization stopped early.";
@@ -347,7 +347,7 @@ void Solver<Dtype>::Test(const int test_net_id) {
     // Check to see if stoppage of testing/training has been requested.
     while (request != SolverAction::NONE) {
         if (SolverAction::SNAPSHOT == request) {
-          //Snapshot();
+          Snapshot();
         } else if (SolverAction::STOP == request) {
           requested_early_exit_ = true;
         }

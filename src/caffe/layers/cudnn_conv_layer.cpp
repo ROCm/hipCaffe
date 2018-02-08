@@ -8,25 +8,12 @@ namespace caffe {
 
 #define WORKSPACE_PER_GROUP 3
 
-#ifdef CONV_LAYER_COUNT
-template<>
-int CuDNNConvolutionLayer<float>::count{0};
-
-template<>
-int CuDNNConvolutionLayer<double>::count{0};
-#endif
-
 template <typename Dtype>
 CuDNNConvolutionLayer<Dtype>::CuDNNConvolutionLayer(const LayerParameter& param)
     : ConvolutionLayer<Dtype>(param), handles_setup_(false),
       fwd_algo_(), bwd_weight_algo_(), bwd_data_algo_(),
       workspace_fwd_sizes_(), workspace_bwd_filter_sizes_(), workspace_bwd_data_sizes_(),
-      workspace() {
-#ifdef CONV_LAYER_COUNT
-  ++CuDNNConvolutionLayer<Dtype>::count;
-  DLOG(INFO) << "CuDNNConvolutionLayer<Dtype>::count: " << CuDNNConvolutionLayer<Dtype>::count;
-#endif
-}
+      workspace() { }
 
 /**
  * TODO(dox) explain cuDNN interface
@@ -348,8 +335,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     ));
 
     fwd_algo_[i] = perf.fwd_algo;
-    LOG(INFO) << "(N, C, H, W): (" << N_ << ", " << C_ << ", " << H_ << ", " << W_ << ")";
-    LOG(INFO) << " - fwd_algo_[" << i << "]:        " << fwd_algo_[i];
+    DLOG(INFO) << " - fwd_algo_[" << i << "]:        " << fwd_algo_[i];
     DLOG(INFO) << "workspace_fwd_sizes_[" << i << "]:" << workspace_fwd_sizes_[i] << "\n";
 #endif
 
@@ -376,7 +362,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     ));
 
     bwd_weight_algo_[i] = perf.bwd_weights_algo;
-    LOG(INFO) << " - bwd_weight_algo_[" << i << "]: " << bwd_weight_algo_[i];
+    DLOG(INFO) << " - bwd_weight_algo_[" << i << "]: " << bwd_weight_algo_[i];
     DLOG(INFO) << "workspace_bwd_filter_sizes_[" << i << "]: " << workspace_bwd_filter_sizes_[i] << "\n";
 #endif
 
@@ -404,7 +390,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
       ));
   
       bwd_data_algo_[i] = perf.bwd_data_algo;
-      LOG(INFO) << " - bwd_data_algo_[" << i << "]:   " << bwd_data_algo_[i];
+      DLOG(INFO) << " - bwd_data_algo_[" << i << "]:   " << bwd_data_algo_[i];
       DLOG(INFO) << "workspace_bwd_data_sizes_[" << i << "]: " << workspace_bwd_data_sizes_[i] << "\n";
     }
 #endif // USE_MIOPEN_BACKWARD_DATA
@@ -425,15 +411,8 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 
 template <typename Dtype>
 CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
-#ifdef CONV_LAYER_COUNT
-  DLOG(INFO) << "CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer()";
-#endif
   // Check that handles have been setup before destroying.
   if (!handles_setup_) { 
-#ifdef CONV_LAYER_COUNT
-    --CuDNNConvolutionLayer<Dtype>::count;
-    DLOG(INFO) << "CuDNNConvolutionLayer<Dtype>::count: " << CuDNNConvolutionLayer<Dtype>::count;
-#endif
     return;
   }
 
@@ -461,11 +440,6 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
 #endif
 
   hipFree(workspaceData);
-
-#ifdef CONV_LAYER_COUNT
-  --CuDNNConvolutionLayer<Dtype>::count;
-  DLOG(INFO) << "CuDNNConvolutionLayer<Dtype>::count: " << CuDNNConvolutionLayer<Dtype>::count;
-#endif
 }
 
 INSTANTIATE_CLASS(CuDNNConvolutionLayer);

@@ -74,7 +74,6 @@ void BasePrefetchingDataLayer<Dtype>::LayerSetUp(
 
 template <typename Dtype>
 void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
-  LOG(INFO) << "BasePrefetchingDataLayer<Dtype>::InternalThreadEntry()";
 #ifndef CPU_ONLY
   hipStream_t stream = nullptr;
 #endif
