@@ -75,10 +75,7 @@ void BasePrefetchingDataLayer<Dtype>::LayerSetUp(
 template <typename Dtype>
 void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
 #ifndef CPU_ONLY
-  hipStream_t stream;
-  if (Caffe::mode() == Caffe::GPU) {
-    HIP_CHECK(hipStreamCreateWithFlags(&stream, hipStreamNonBlocking));
-  }
+  hipStream_t stream = nullptr;
 #endif
 
   try {
@@ -98,7 +95,8 @@ void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
   }
 #ifndef CPU_ONLY
   if (Caffe::mode() == Caffe::GPU) {
-    HIP_CHECK(hipStreamDestroy(stream));
+    if (stream != nullptr)
+      HIP_CHECK(hipStreamDestroy(stream));
   }
 #endif
 }
