@@ -3,6 +3,9 @@
 #ifdef USE_ACCMI
 
 #ifdef USE_MIOPEN
+#include <mutex>
+#include <unordered_map>
+
 #include <miopen/miopen.h>
 
 #include "caffe/common.hpp"
@@ -40,6 +43,48 @@ inline const char* miopenGetErrorString(miopenStatus_t status) {
 namespace caffe {
 
 namespace miopen {
+
+class miopenHandleMap {
+private:
+  miopenHandleMap() : map_(), lock_() {}
+public:
+  static miopenHandleMap& getInstance() {
+    static miopenHandleMap instance_{};
+    return instance_;
+  }
+
+  ~miopenHandleMap() {
+    for (auto iter : map_) {
+      miopenDestroy(iter.second);
+    }
+    map_.clear();
+  }
+
+  miopenHandle_t getHandle(int device) {
+    miopenHandle_t ret = nullptr;
+    std::lock_guard<std::mutex> l(lock_);
+    if (map_.find(device) != map_.end()) {
+      ret = map_[device];
+    }
+    return ret;
+  }
+
+  bool setHandle(int device, miopenHandle_t handle) {
+    bool ret = false;
+    std::lock_guard<std::mutex> l(lock_);
+    if (map_.find(device) != map_.end()) {
+      LOG(FATAL) << "Duplicated MIOpen handle for device: " << device;
+    } else {
+      map_[device] = handle;
+      ret = true;
+    }
+    return ret;
+  }
+
+private:
+  std::unordered_map<int, miopenHandle_t> map_;
+  std::mutex lock_;
+};
 
 template <typename Dtype> class dataType;
 template<> class dataType<float>  {
