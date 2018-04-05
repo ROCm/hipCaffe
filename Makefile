@@ -356,6 +356,9 @@ ifeq ($(USE_MIOPEN), 1)
 	LIBRARY_DIRS += $(MIOPEN_PATH)/lib
 endif
 
+# Disable HIP profiling (removing cxlactivitylogger dependency)
+COMMON_FLAGS += -DDISABLE_HIP_PROFILE
+
 # rocBLAS cofiguration.
 ifeq ($(USE_ROCBLAS), 1)
 	COMMON_FLAGS += -DUSE_ROCBLAS

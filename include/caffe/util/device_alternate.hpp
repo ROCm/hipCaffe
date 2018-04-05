@@ -40,6 +40,7 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 #else
 #define HIP_BEGIN_MARKER(u,g)
 #define HIP_END_MARKER()
+#define HIP_SCOPED_MARKER(u,g)
 #endif
 
 #include <hipblas.h>
