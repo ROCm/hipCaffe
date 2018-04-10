@@ -354,6 +354,7 @@ ifeq ($(USE_MIOPEN), 1)
 	COMMON_FLAGS += -DUSE_MIOPEN_DEVELOP
 	INCLUDE_DIRS += $(MIOPEN_PATH)/include
 	LIBRARY_DIRS += $(MIOPEN_PATH)/lib
+	COMMON_FLAGS += -DDISABLE_HIP_PROFILE  
 endif
 
 # rocBLAS cofiguration.
@@ -408,7 +409,8 @@ else
 	ifeq ($(LINUX), 1)
 		ifeq ($(BLAS), atlas)
 			# Linux simply has cblas and atlas
-			LIBRARIES += cblas atlas
+			LIBRARIES += satlas tatlas
+			#cblas atlas
 		endif
 	else ifeq ($(OSX), 1)
 		# OS X packages atlas as the vecLib framework
