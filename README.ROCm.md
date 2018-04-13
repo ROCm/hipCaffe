@@ -207,4 +207,4 @@ Please note that we have a long-term solution -- using a new RNG lib -- that we'
 
 ## Tutorials
 
-* [hipCaffe Quickstart Guide](https://rocm.github.io/ROCmHipCaffeQuickstart.html)
+* [hipCaffe Quickstart Guide](http://rocm-documentation.readthedocs.io/en/latest/Tutorial/hipCaffe%20.html#hipcaffe)
