@@ -91,9 +91,9 @@ Install the necessary ROCm compute libraries:
       
 ### hipCaffe Build Steps ###
 
-Clone hipCaffe (1.7 update: choosing the rocrand implementation):
+Clone hipCaffe (1.7.1 update: choosing the hip implementation):
 
-    git clone -b rocrand https://github.com/ROCmSoftwarePlatform/hipCaffe.git
+    git clone -b hip https://github.com/ROCmSoftwarePlatform/hipCaffe.git
 
     cd hipCaffe
 
