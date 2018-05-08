@@ -410,6 +410,8 @@ else
 		ifeq ($(BLAS), atlas)
 			# Linux simply has cblas and atlas
 			LIBRARIES += satlas tatlas
+			ATLASROOT ?= /usr/lib64/atlas
+			BLAS_LIB ?= $(ATLASROOT)
 			#cblas atlas
 		endif
 	else ifeq ($(OSX), 1)
