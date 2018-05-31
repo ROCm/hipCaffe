@@ -645,7 +645,7 @@ $(BUILD_DIR)/hip/%.o: %.cpp | $(ALL_BUILD_DIRS)
 $(TEST_ALL_BIN): $(TEST_MAIN_SRC) $(TEST_OBJS) $(GTEST_OBJ) \
 		| $(DYNAMIC_NAME) $(TEST_BIN_DIR)
 	@ echo CXX/LD -o $@ $<
-	$(Q)$(CXX) $(TEST_MAIN_SRC) $(TEST_OBJS) $(GTEST_OBJ) \
+	$(Q)$(CXX) $(TEST_OBJS) $(GTEST_OBJ) $(TEST_MAIN_SRC) \
 		-o $@ $(LINKFLAGS) $(LDFLAGS) -l$(LIBRARY_NAME) -Wl,-rpath,$(ORIGIN)/../lib
 
 $(TEST_HIP_BINS): $(TEST_BIN_DIR)/%.testbin: $(TEST_HIP_BUILD_DIR)/%.o \
