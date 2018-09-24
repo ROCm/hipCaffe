@@ -42,7 +42,7 @@ HIP_PATH ?= /opt/rocm/hip
 # N.B. the default for Linux is g++ and the default for OSX is clang++
 ifneq (, $(findstring hcc, $(HIP_PLATFORM)))
 	CUSTOM_CXX := hipcc
-	HIP_ARCH := --amdgpu-target=gfx803 --amdgpu-target=gfx900
+	HIP_ARCH := --amdgpu-target=gfx803 --amdgpu-target=gfx900 --amdgpu-target=gfx906
 else ifneq (, $(findstring nvcc, $(HIP_PLATFORM)))
 	CUSTOM_CXX := g++
 	# CUDA architecture setting: going with all of them.
