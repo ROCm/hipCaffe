@@ -13,7 +13,7 @@ CuDNNConvolutionLayer<Dtype>::CuDNNConvolutionLayer(const LayerParameter& param)
     : ConvolutionLayer<Dtype>(param), handles_setup_(false),
       fwd_algo_(), bwd_weight_algo_(), bwd_data_algo_(),
       workspace_fwd_sizes_(), workspace_bwd_filter_sizes_(), workspace_bwd_data_sizes_(),
-      workspace() { }
+      workspace(), handle_(nullptr) { }
 
 /**
  * TODO(dox) explain cuDNN interface
@@ -57,7 +57,18 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
 
   for (int g = 0; g < this->group_ * WORKSPACE_PER_GROUP; g++) {
 #ifdef USE_MIOPEN
-    MIOPEN_CHECK(miopenCreateWithStream(&handle_, nullptr));
+    int device;
+    HIP_CHECK(hipGetDevice(&device));
+
+    auto& hmap = caffe::miopen::miopenHandleMap::getInstance();
+    handle_ = hmap.getHandle(device);
+    if (handle_ == nullptr) {
+      DLOG(INFO) << "Creating MIOpen handle on device: " << device;
+      MIOPEN_CHECK(miopenCreateWithStream(&handle_, nullptr));
+      hmap.setHandle(device, handle_);
+    } else {
+      DLOG(INFO) << "Get MIOpen handle from cache on device: " << device;
+    }
 #endif
 
     workspace[g] = NULL;
@@ -433,10 +444,6 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
 #ifdef USE_MIOPEN_FORWARD_CONV
   miopenDestroyTensorDescriptor(filter_desc_);
 #endif
-#endif
-
-#ifdef USE_MIOPEN
-    miopenDestroy(handle_);
 #endif
 
   hipFree(workspaceData);
