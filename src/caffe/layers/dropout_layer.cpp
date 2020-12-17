@@ -15,7 +15,7 @@ void DropoutLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   DCHECK(threshold_ > 0.);
   DCHECK(threshold_ < 1.);
   scale_ = 1. / (1. - threshold_);
-  uint_thres_ = UINT_MAX * static_cast<unsigned int>(threshold_);
+  uint_thres_ = static_cast<unsigned int>(UINT_MAX * threshold_);
 }
 
 template <typename Dtype>
