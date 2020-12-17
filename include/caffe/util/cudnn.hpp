@@ -33,6 +33,8 @@ inline const char* miopenGetErrorString(miopenStatus_t status) {
     return "miopenStatusNotImplemented";
   case miopenStatusUnknownError:
     return "miopenStatusUnknownError";
+  case miopenStatusUnsupportedOp:
+    return "miopenStatusUnsupportedOp";
   }
   return "Unknown MIOpen status";
 }
